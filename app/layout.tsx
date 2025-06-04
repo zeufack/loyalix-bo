@@ -1,6 +1,7 @@
 import './globals.css';
 
 import { Analytics } from '@vercel/analytics/react';
+import { QueryProvider } from './providers';
 
 export const metadata = {
     title: 'Loyalix Back Office',
@@ -14,7 +15,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className="flex min-h-screen w-full flex-col">{children}</body>
+            <body className="flex min-h-screen w-full flex-col">
+                <QueryProvider> {children}</QueryProvider>
+            </body>
             <Analytics />
         </html>
     );
