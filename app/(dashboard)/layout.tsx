@@ -31,6 +31,7 @@ import { VercelLogo } from '@/components/icons';
 import Providers from './providers';
 import { NavItem } from './nav-item';
 import { SearchInput } from './search';
+import { DashboardBreadcrumbs } from './dashboard-breadcrumbs';
 
 export default function DashboardLayout({
     children
@@ -44,8 +45,11 @@ export default function DashboardLayout({
                 <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
                     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
                         <MobileNav />
-                        <DashboardBreadcrumb />
-                        <SearchInput />
+                        <DashboardBreadcrumbs items={[
+                            { label: 'Home', href: '/' },
+                            { label: 'Dashboard', href: '/dashboard' },
+                            { label: 'Products' },
+                        ]} />
                         <User />
                     </header>
                     <main className="grid flex-1 items-start gap-2 p-4 sm:px-6 sm:py-0 md:gap-4 bg-muted/40">
@@ -167,26 +171,3 @@ function MobileNav() {
     );
 }
 
-function DashboardBreadcrumb() {
-    return (
-        <Breadcrumb className="hidden md:flex">
-            <BreadcrumbList>
-                <BreadcrumbItem>
-                    <BreadcrumbLink asChild>
-                        <Link href="#">Dashboard</Link>
-                    </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                    <BreadcrumbLink asChild>
-                        <Link href="#">Products</Link>
-                    </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                    <BreadcrumbPage>All Products</BreadcrumbPage>
-                </BreadcrumbItem>
-            </BreadcrumbList>
-        </Breadcrumb>
-    );
-}
