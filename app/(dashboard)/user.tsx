@@ -21,7 +21,7 @@ export async function User() {
                 <Button
                     variant="outline"
                     size="icon"
-                    className="overflow-hidden rounded-full"
+                    className="overflow-hidden rounded-full relative ml-auto"
                 >
                     <Image
                         src={user?.image ?? '/placeholder-user.jpg'}
