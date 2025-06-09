@@ -7,10 +7,14 @@ import {
   useReactTable,
   type ColumnDef,
   type PaginationState,
-  type SortingState,
+  // type SortingState,
   type ColumnFiltersState
 } from '@tanstack/react-table';
 import { Customer } from '../types/customer';
+export interface SortingState {
+  id: string;
+  desc: boolean;
+}
 
 interface UseCustomerTableProps {
   data: Customer[];
@@ -47,15 +51,15 @@ export function useCustomerTable({
     columns,
     pageCount,
     state: {
-      //   sorting,
+      sorting,
       columnFilters,
       pagination
     },
     onSortingChange: (updater) => {
-      //   const newSorting =
-      //     typeof updater === 'function' ? updater(sorting) : updater;
-      //   setSorting(newSorting);
-      //   onSortingChange?.(newSorting);
+      const newSorting =
+        typeof updater === 'function' ? updater(sorting) : updater;
+      setSorting(newSorting);
+      onSortingChange?.(newSorting);
     },
     onColumnFiltersChange: (updater) => {
       const newFilters =
