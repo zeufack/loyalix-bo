@@ -1,26 +1,23 @@
 import Link from 'next/link';
 import {
   Building2,
+  Columns3Icon,
   Home,
   LineChart,
+  Medal,
   Package,
   Package2,
   PanelLeft,
+  Ruler,
   Settings,
   ShoppingCart,
-  Stamp,
+  Sprout,
   UserIcon,
-  Users2
+  Users2,
+  TrendingUp,
+  ScrollText,
+  Tag
 } from 'lucide-react';
-
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator
-} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
@@ -34,6 +31,22 @@ import { VercelLogo } from '@/components/icons';
 import Providers from './providers';
 import { NavItem } from './nav-item';
 import { DashboardBreadcrumbs } from './dashboard-breadcrumbs';
+
+const mainNavItems = [
+  { href: '/', label: 'Dashboard', icon: Home },
+  { href: '/business', label: 'Business', icon: Building2 },
+  { href: '/loyalty-program', label: 'Loyalty Program', icon: Sprout },
+  { href: '/loyalty-program-type', label: 'Loyalty Program Type', icon: Tag }, // Using Tag icon
+  {
+    href: '/loyalty-program-rules',
+    label: 'Loyalty Program Rules',
+    icon: ScrollText
+  }, // Using ScrollText icon
+  { href: '/customers', label: 'Customers', icon: Users2 },
+  { href: '/rewards', label: 'Rewards', icon: Medal },
+  { href: '/users', label: 'Users', icon: UserIcon },
+  { href: 'customers-progress', label: 'Customer Progress', icon: TrendingUp } // Using TrendingUp icon
+];
 
 export default function DashboardLayout({
   children
@@ -70,41 +83,11 @@ function DesktopNav() {
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
-        <Link
-          href=""
-          className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
-        >
-          <VercelLogo className="h-3 w-3 transition-all group-hover:scale-110" />
-          <span className="sr-only">Acme Inc</span>
-        </Link>
-
-        <NavItem href="#" label="Dashboard">
-          <Home className="h-5 w-5" />
-        </NavItem>
-
-        <NavItem href="#" label="Business">
-          <Building2 className="h-5 w-5" />
-        </NavItem>
-
-        <NavItem href="/" label="Products">
-          <Package className="h-5 w-5" />
-        </NavItem>
-
-        <NavItem href="/customers" label="Customers">
-          <Users2 className="h-5 w-5" />
-        </NavItem>
-
-        <NavItem href="#" label="User">
-          <UserIcon className="h-5 w-5"></UserIcon>
-        </NavItem>
-
-        <NavItem href="#" label="Loyality programm">
-          <Stamp className="h-5 w-5"></Stamp>
-        </NavItem>
-
-        <NavItem href="#" label="Analytics">
-          <LineChart className="h-5 w-5" />
-        </NavItem>
+        {mainNavItems.map((item) => (
+          <NavItem key={item.label} href={item.href} label={item.label}>
+            <item.icon className="h-5 w-5" />
+          </NavItem>
+        ))}
       </nav>
       <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
         <Tooltip>

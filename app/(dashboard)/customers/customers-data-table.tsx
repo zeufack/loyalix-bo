@@ -12,7 +12,6 @@ import {
 import { fetchCustomers } from 'app/api/customer';
 import type {
   PaginationState,
-  SortingState,
   ColumnFiltersState
 } from '@tanstack/react-table';
 import { Customer } from '../../../types/customer';
@@ -21,6 +20,7 @@ import { DataTable } from '../../../components/data-table/data-table';
 import { useCustomerTable } from '../../../hooks/useCustomerTable';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
 import { DataTableToolbar } from '../../../components/data-table/data-table-toolbar';
+import { SortingState } from '../../../types/table';
 
 interface CustomersDataTableProps {
   initialData?: Customer[];
