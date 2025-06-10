@@ -1,18 +1,20 @@
 import Link from 'next/link';
 import {
   Building2,
+  Columns3Icon,
   Home,
   LineChart,
+  Medal,
   Package,
   Package2,
   PanelLeft,
+  Ruler,
   Settings,
   ShoppingCart,
-  Stamp,
+  Sprout,
   UserIcon,
   Users2
 } from 'lucide-react';
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -86,23 +88,29 @@ function DesktopNav() {
           <Building2 className="h-5 w-5" />
         </NavItem>
 
-        <NavItem href="/" label="Products">
-          <Package className="h-5 w-5" />
+        <NavItem href="#" label="Loyalty program">
+          <Sprout className="h-5 w-5"></Sprout>
+        </NavItem>
+
+        <NavItem href="/" label="Loyalty program type">
+          <Columns3Icon className="h-5 w-5" />
+        </NavItem>
+        <NavItem href="#" label="Loyalty program rules">
+          <Ruler className="h-5 w-5" />
         </NavItem>
 
         <NavItem href="/customers" label="Customers">
           <Users2 className="h-5 w-5" />
         </NavItem>
 
+        <NavItem href="#" label="Rewards">
+          <Medal className="h-5 w-5"></Medal>
+        </NavItem>
         <NavItem href="#" label="User">
           <UserIcon className="h-5 w-5"></UserIcon>
         </NavItem>
 
-        <NavItem href="#" label="Loyality programm">
-          <Stamp className="h-5 w-5"></Stamp>
-        </NavItem>
-
-        <NavItem href="#" label="Analytics">
+        <NavItem href="#" label="Costumers pogress">
           <LineChart className="h-5 w-5" />
         </NavItem>
       </nav>
