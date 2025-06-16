@@ -1,34 +1,31 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { DataTableToolbar } from '../../../components/data-table/data-table-toolbar';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle
-} from '@/components/ui/card';
-import { fetchCustomers } from 'app/api/customer';
-import type {
-  PaginationState,
-  ColumnFiltersState
-} from '@tanstack/react-table';
-import { Customer } from '../../../types/customer';
-import { customerColumns } from '../../../lib/columns/customer-columns';
+} from '../../../components/ui/card';
+import { SortingState, useTable } from '../../../hooks/useCustomerTable';
+import { userColumns } from '../../../lib/columns/user-columns';
+import { User } from '../../../types/user';
+import { PaginationState } from '../../../types/table';
+import { ColumnFiltersState } from '@tanstack/react-table';
+import { useQuery } from '@tanstack/react-query';
+import { fetchUsers } from '../../api/user';
 import { DataTable } from '../../../components/data-table/data-table';
-import { useTable } from '../../../hooks/useCustomerTable';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
-import { DataTableToolbar } from '../../../components/data-table/data-table-toolbar';
-import { SortingState } from '../../../types/table';
 
-interface CustomersDataTableProps {
-  initialData?: Customer[];
+interface UserDataTableProps {
+  initialData?: User[];
 }
 
-export function CustomersDataTable({
+export default function UserDataTable({
   initialData = []
-}: CustomersDataTableProps) {
+}: UserDataTableProps) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10
@@ -38,12 +35,12 @@ export function CustomersDataTable({
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['customers'],
-    queryFn: () => fetchCustomers()
+    queryFn: () => fetchUsers()
   });
 
   const table = useTable({
-    data: data?.customers || [],
-    columns: customerColumns,
+    data: data?.users || [],
+    columns: userColumns,
     pageCount: Math.ceil((data?.total || 0) / pagination.pageSize),
     onPaginationChange: setPagination,
     onSortingChange: setSorting,

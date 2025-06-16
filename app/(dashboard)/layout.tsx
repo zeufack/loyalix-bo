@@ -1,14 +1,12 @@
 import Link from 'next/link';
 import {
   Building2,
-  Columns3Icon,
   Home,
   LineChart,
   Medal,
   Package,
   Package2,
   PanelLeft,
-  Ruler,
   Settings,
   ShoppingCart,
   Sprout,
@@ -27,7 +25,6 @@ import {
 } from '@/components/ui/tooltip';
 import { Analytics } from '@vercel/analytics/react';
 import { User } from './user';
-import { VercelLogo } from '@/components/icons';
 import Providers from './providers';
 import { NavItem } from './nav-item';
 import { DashboardBreadcrumbs } from './dashboard-breadcrumbs';
@@ -41,7 +38,7 @@ const mainNavItems = [
     href: '/loyalty-program-rules',
     label: 'Loyalty Program Rules',
     icon: ScrollText
-  }, // Using ScrollText icon
+  },
   { href: '/customers', label: 'Customers', icon: Users2 },
   { href: '/rewards', label: 'Rewards', icon: Medal },
   { href: '/users', label: 'Users', icon: UserIcon },

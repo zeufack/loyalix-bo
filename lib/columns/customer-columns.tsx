@@ -1,17 +1,9 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Customer } from '../../types/customer';
 import { Badge } from '../../components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '../../components/ui/dropdown-menu';
-import { Button } from '../../components/ui/button';
-import { MoreHorizontal } from 'lucide-react';
 import { DataTableColumnHeader } from '../../components/data-table/data-table-column-header';
+import { createActionsColumn } from '../../components/data-table/actions-column';
+import { copyToClipboard } from '../utils';
 
 export const customerColumns: ColumnDef<Customer>[] = [
   {
@@ -121,35 +113,22 @@ export const customerColumns: ColumnDef<Customer>[] = [
       );
     }
   },
-  {
-    id: 'actions',
-    header: () => <span className="sr-only">Actions</span>,
-    cell: ({ row }) => {
-      const customer = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(customer.id)}
-            >
-              Copy customer ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>Edit customer</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-    enableSorting: false,
-    enableHiding: false
-  }
+  createActionsColumn<Customer>(
+    [
+      {
+        label: 'Copy customer ID',
+        action: (customer: Customer) => copyToClipboard(customer.id)
+      },
+      {
+        label: 'View customer',
+        action: (customer: Customer) => console.log('View', customer.id),
+        separatorBefore: true
+      },
+      {
+        label: 'Edit customer',
+        action: (customer: Customer) => console.log('Edit', customer.id)
+      }
+    ],
+    { enableSorting: false, enableHiding: false }
+  )
 ];
