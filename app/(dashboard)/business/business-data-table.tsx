@@ -1,34 +1,31 @@
 'use client';
 
 import { useState } from 'react';
+import { Business } from '../../../types/business';
+import { PaginationState, SortingState } from '../../../types/table';
+import { ColumnFiltersState } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
+import { fetchBusiness } from '../../api/business';
+import { useTable } from '../../../hooks/useCustomerTable';
+import { businessColumns } from '../../../lib/columns/business-columns';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle
-} from '@/components/ui/card';
-import { fetchCustomers } from 'app/api/customer';
-import type {
-  PaginationState,
-  ColumnFiltersState
-} from '@tanstack/react-table';
-import { Customer } from '../../../types/customer';
-import { customerColumns } from '../../../lib/columns/customer-columns';
-import { DataTable } from '../../../components/data-table/data-table';
-import { useTable } from '../../../hooks/useCustomerTable';
-import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
+} from '../../../components/ui/card';
 import { DataTableToolbar } from '../../../components/data-table/data-table-toolbar';
-import { SortingState } from '../../../types/table';
+import { DataTable } from '../../../components/data-table/data-table';
+import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
 
-interface CustomersDataTableProps {
-  initialData?: Customer[];
+interface BusinessDataTableProps {
+  initialData?: Business[];
 }
 
-export function CustomersDataTable({
+export default function BusinessDataTable({
   initialData = []
-}: CustomersDataTableProps) {
+}: BusinessDataTableProps) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10
@@ -37,13 +34,13 @@ export function CustomersDataTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['customers'],
-    queryFn: () => fetchCustomers()
+    queryKey: ['business'],
+    queryFn: () => fetchBusiness()
   });
 
   const table = useTable({
-    data: data?.customers || [],
-    columns: customerColumns,
+    data: data?.business || [],
+    columns: businessColumns,
     pageCount: Math.ceil((data?.total || 0) / pagination.pageSize),
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
@@ -52,7 +49,6 @@ export function CustomersDataTable({
     manualSorting: true,
     manualFiltering: true
   });
-
   if (error) {
     return (
       <Card>
@@ -68,9 +64,9 @@ export function CustomersDataTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Customers</CardTitle>
+        <CardTitle>Business</CardTitle>
         <CardDescription>
-          Manage your customers and view their activity.
+          Manage your business and view their activity.
         </CardDescription>
       </CardHeader>
       <CardContent>

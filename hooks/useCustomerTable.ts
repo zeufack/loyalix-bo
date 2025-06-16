@@ -16,9 +16,9 @@ export interface SortingState {
   desc: boolean;
 }
 
-interface UseCustomerTableProps {
-  data: Customer[];
-  columns: ColumnDef<Customer>[];
+interface UseTableProps<TData> {
+  data: TData[];
+  columns: ColumnDef<TData>[];
   pageCount?: number;
   onPaginationChange?: (pagination: PaginationState) => void;
   onSortingChange?: (sorting: SortingState[]) => void;
@@ -28,7 +28,7 @@ interface UseCustomerTableProps {
   manualFiltering?: boolean;
 }
 
-export function useCustomerTable({
+export function useTable<TData>({
   data,
   columns,
   pageCount,
@@ -38,7 +38,7 @@ export function useCustomerTable({
   manualPagination = false,
   manualSorting = false,
   manualFiltering = false
-}: UseCustomerTableProps) {
+}: UseTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState[]>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
