@@ -4,9 +4,11 @@ import { Input } from '@/components/ui/input';
 import { X } from 'lucide-react';
 import { DataTableViewOptions } from './data-table-view-options';
 import { DataTableFacetedFilter } from './data-table-faceted-filter';
+import { DataTableToolbarConfig } from '../../types/table';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
+  config: DataTableToolbarConfig;
 }
 
 const statusOptions = [
@@ -21,29 +23,56 @@ const statusOptions = [
 ];
 
 export function DataTableToolbar<TData>({
-  table
+  table,
+  config
 }: Readonly<DataTableToolbarProps<TData>>) {
   const isFiltered = table.getState().columnFilters.length > 0;
+  const {
+    search,
+    facetedFilters = [],
+    showViewOptions = true,
+    showResetButton = true,
+    customActions
+  } = config;
 
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
-        {/* <Input
-          placeholder="Filter customers..."
-          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('name')?.setFilterValue(event.target.value)
-          }
-          className="h-8 w-[150px] lg:w-[250px]"
-        /> */}
-        {/* {table.getColumn('status') && (
-          <DataTableFacetedFilter
-            column={table.getColumn('status')}
-            title="Status"
-            options={statusOptions}
+        {/* Search Input */}
+        {search && table.getColumn(search.columnId) && (
+          <Input
+            placeholder={search.placeholder}
+            value={
+              (table.getColumn(search.columnId)?.getFilterValue() as string) ??
+              ''
+            }
+            onChange={(event) =>
+              table
+                .getColumn(search.columnId)
+                ?.setFilterValue(event.target.value)
+            }
+            className={search.className ?? 'h-8 w-[150px] lg:w-[250px]'}
           />
-        )} */}
-        {isFiltered && (
+        )}
+
+        {/* Faceted Filters */}
+        {facetedFilters.map((filter) => {
+          const column = table.getColumn(filter.columnId);
+          return column ? (
+            <DataTableFacetedFilter
+              key={filter.columnId}
+              column={column}
+              title={filter.title}
+              options={filter.options}
+            />
+          ) : null;
+        })}
+
+        {/* Custom Actions */}
+        {customActions}
+
+        {/* Reset Button */}
+        {showResetButton && isFiltered && (
           <Button
             variant="ghost"
             onClick={() => table.resetColumnFilters()}
@@ -54,7 +83,9 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <DataTableViewOptions table={table} />
+
+      {/* View Options */}
+      {showViewOptions && <DataTableViewOptions table={table} />}
     </div>
   );
 }

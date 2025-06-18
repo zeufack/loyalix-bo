@@ -17,10 +17,11 @@ import type {
 import { Customer } from '../../../types/customer';
 import { customerColumns } from '../../../lib/columns/customer-columns';
 import { DataTable } from '../../../components/data-table/data-table';
-import { useTable } from '../../../hooks/useCustomerTable';
+import { useTable } from '../../../hooks/use-table';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
 import { DataTableToolbar } from '../../../components/data-table/data-table-toolbar';
 import { SortingState } from '../../../types/table';
+import { useToolbarConfig } from '../../../hooks/use-toolbar-config';
 
 interface CustomersDataTableProps {
   initialData?: Customer[];
@@ -52,6 +53,7 @@ export function CustomersDataTable({
     manualSorting: true,
     manualFiltering: true
   });
+  const toolbarConfig = useToolbarConfig('customer');
 
   if (error) {
     return (
@@ -75,7 +77,7 @@ export function CustomersDataTable({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <DataTableToolbar table={table} />
+          <DataTableToolbar table={table} config={toolbarConfig} />
           <DataTable table={table} />
           <DataTablePagination table={table} />
         </div>

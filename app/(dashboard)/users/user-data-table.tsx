@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle
 } from '../../../components/ui/card';
-import { SortingState, useTable } from '../../../hooks/useCustomerTable';
+import { SortingState, useTable } from '../../../hooks/use-table';
 import { userColumns } from '../../../lib/columns/user-columns';
 import { User } from '../../../types/user';
 import { PaginationState } from '../../../types/table';
@@ -18,6 +18,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchUsers } from '../../api/user';
 import { DataTable } from '../../../components/data-table/data-table';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
+import { useToolbarConfig } from '../../../hooks/use-toolbar-config';
 
 interface UserDataTableProps {
   initialData?: User[];
@@ -50,6 +51,8 @@ export default function UserDataTable({
     manualFiltering: true
   });
 
+  const toolbarConfig = useToolbarConfig('user');
+
   if (error) {
     return (
       <Card>
@@ -72,7 +75,7 @@ export default function UserDataTable({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <DataTableToolbar table={table} />
+          <DataTableToolbar table={table} config={toolbarConfig} />
           <DataTable table={table} />
           <DataTablePagination table={table} />
         </div>

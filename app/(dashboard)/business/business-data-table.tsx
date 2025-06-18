@@ -6,7 +6,7 @@ import { PaginationState, SortingState } from '../../../types/table';
 import { ColumnFiltersState } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { fetchBusiness } from '../../api/business';
-import { useTable } from '../../../hooks/useCustomerTable';
+import { useTable } from '../../../hooks/use-table';
 import { businessColumns } from '../../../lib/columns/business-columns';
 import {
   Card,
@@ -18,6 +18,7 @@ import {
 import { DataTableToolbar } from '../../../components/data-table/data-table-toolbar';
 import { DataTable } from '../../../components/data-table/data-table';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
+import { useToolbarConfig } from '../../../hooks/use-toolbar-config';
 
 interface BusinessDataTableProps {
   initialData?: Business[];
@@ -61,6 +62,8 @@ export default function BusinessDataTable({
     );
   }
 
+  const toolbarConfig = useToolbarConfig('business');
+
   return (
     <Card>
       <CardHeader>
@@ -71,7 +74,7 @@ export default function BusinessDataTable({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <DataTableToolbar table={table} />
+          <DataTableToolbar table={table} config={toolbarConfig} />
           <DataTable table={table} />
           <DataTablePagination table={table} />
         </div>
