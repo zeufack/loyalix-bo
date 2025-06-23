@@ -1,35 +1,33 @@
 'use client';
 
 import { useState } from 'react';
+import { PaginationState, SortingState } from '../../../types/table';
+import { ColumnFiltersState } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
+import { useTable } from '../../../hooks/useTable';
+import { businessColumns } from '../../../lib/columns/business-columns';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle
-} from '@/components/ui/card';
-import { fetchCustomers } from 'app/api/customer';
-import type {
-  PaginationState,
-  ColumnFiltersState
-} from '@tanstack/react-table';
-import { Customer } from '../../../types/customer';
-import { customerColumns } from '../../../lib/columns/customer-columns';
-import { DataTable } from '../../../components/data-table/data-table';
-import { useTable } from '../../../hooks/useTable';
-import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
+} from '../../../components/ui/card';
 import { DataTableToolbar } from '../../../components/data-table/data-table-toolbar';
-import { SortingState } from '../../../types/table';
+import { DataTable } from '../../../components/data-table/data-table';
+import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
 import { useToolbarConfig } from '../../../hooks/useToolBareConfig';
+import { LoyaltyProgram } from '../../../types/loyalty-programm';
+import { fetchLoyaltyPrograms } from '../../api/loyalty-program';
+import { loyaltyProgramColumns } from '../../../lib/columns/loyalty-program-columns';
 
-interface CustomersDataTableProps {
-  initialData?: Customer[];
+interface LoyaltyProgrammDataTableProps {
+  initialData?: LoyaltyProgram[];
 }
 
-export function CustomersDataTable({
+export default function LoyaltyProgramDataTable({
   initialData = []
-}: CustomersDataTableProps) {
+}: LoyaltyProgrammDataTableProps) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10
@@ -38,13 +36,13 @@ export function CustomersDataTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['customers'],
-    queryFn: () => fetchCustomers()
+    queryKey: ['loyaltyProgram'],
+    queryFn: () => fetchLoyaltyPrograms()
   });
 
   const table = useTable({
-    data: data?.customers || [],
-    columns: customerColumns,
+    data: data?.programs || [],
+    columns: loyaltyProgramColumns,
     pageCount: Math.ceil((data?.total || 0) / pagination.pageSize),
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
@@ -53,26 +51,26 @@ export function CustomersDataTable({
     manualSorting: true,
     manualFiltering: true
   });
-  const toolbarConfig = useToolbarConfig('customer');
-
   if (error) {
     return (
       <Card>
         <CardContent className="p-6">
           <div className="text-center text-red-500">
-            Error loading customers: {error.message}
+            Error loading Loyalties programs: {error.message}
           </div>
         </CardContent>
       </Card>
     );
   }
 
+  const toolbarConfig = useToolbarConfig('programs');
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Customers</CardTitle>
+        <CardTitle>Loyality Programs</CardTitle>
         <CardDescription>
-          Manage your customers and view their activity.
+          Manage your Loyality program and view their activity.
         </CardDescription>
       </CardHeader>
       <CardContent>

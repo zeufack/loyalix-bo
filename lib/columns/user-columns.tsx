@@ -136,15 +136,6 @@ export const userColumns: ColumnDef<User>[] = [
         label: 'Edit user',
         action: (user: User) => console.log('Edit', user.id)
       }
-      //   {
-      //     label: (user) => (user.isActive ? 'Deactivate' : 'Activate'),
-      //     action: (user: User) => console.log('Toggle Active', user.id),
-      //     separatorBefore: true
-      //   },
-      //   {
-      //     label: 'Reset password',
-      //     action: (user: User) => console.log('Reset password', user.id)
-      //   }
     ],
     { enableSorting: false, enableHiding: false }
   )

@@ -18,6 +18,23 @@ export const getCustomerToolbarConfig = (): DataTableToolbarConfig => ({
   ]
 });
 
+export const getLoyaltyProgramToolbarConfig = (): DataTableToolbarConfig => ({
+  search: {
+    columnId: 'name',
+    placeholder: 'Filter loyalty programs...'
+  },
+  facetedFilters: [
+    {
+      columnId: 'isActive',
+      title: 'Status',
+      options: [
+        { label: 'Active', value: 'active' },
+        { label: 'Inactive', value: 'inactive' }
+      ]
+    }
+  ]
+});
+
 export const getBusinessToolbarConfig = (): DataTableToolbarConfig => ({
   search: {
     columnId: 'name',
@@ -89,7 +106,7 @@ export const getUserToolbarConfig = (): DataTableToolbarConfig => ({
 
 // Hook for creating custom toolbar configurations
 export const useToolbarConfig = (
-  entityType: 'customer' | 'user' | 'custom' | 'business',
+  entityType: 'customer' | 'user' | 'custom' | 'business' | 'programs',
   customConfig?: DataTableToolbarConfig
 ): DataTableToolbarConfig => {
   if (entityType === 'custom' && customConfig) {
@@ -103,6 +120,8 @@ export const useToolbarConfig = (
       return getBusinessToolbarConfig();
     case 'user':
       return getUserToolbarConfig();
+    case 'programs':
+      return getLoyaltyProgramToolbarConfig();
     default:
       return customConfig || { showViewOptions: true };
   }

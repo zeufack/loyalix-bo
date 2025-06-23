@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle
 } from '../../../components/ui/card';
-import { SortingState, useTable } from '../../../hooks/use-table';
+import { SortingState, useTable } from '../../../hooks/useTable';
 import { userColumns } from '../../../lib/columns/user-columns';
 import { User } from '../../../types/user';
 import { PaginationState } from '../../../types/table';
@@ -18,7 +18,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchUsers } from '../../api/user';
 import { DataTable } from '../../../components/data-table/data-table';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
-import { useToolbarConfig } from '../../../hooks/use-toolbar-config';
+import { useToolbarConfig } from '../../../hooks/useToolBareConfig';
 
 interface UserDataTableProps {
   initialData?: User[];

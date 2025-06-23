@@ -6,7 +6,7 @@ import { PaginationState, SortingState } from '../../../types/table';
 import { ColumnFiltersState } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { fetchBusiness } from '../../api/business';
-import { useTable } from '../../../hooks/use-table';
+import { useTable } from '../../../hooks/useTable';
 import { businessColumns } from '../../../lib/columns/business-columns';
 import {
   Card,
@@ -18,7 +18,7 @@ import {
 import { DataTableToolbar } from '../../../components/data-table/data-table-toolbar';
 import { DataTable } from '../../../components/data-table/data-table';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
-import { useToolbarConfig } from '../../../hooks/use-toolbar-config';
+import { useToolbarConfig } from '../../../hooks/useToolBareConfig';
 
 interface BusinessDataTableProps {
   initialData?: Business[];
