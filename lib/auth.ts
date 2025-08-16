@@ -77,6 +77,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: '/login',
     error: '/error'
-  }
-  //Todo add secret
+  },
+  secret: process.env.NEXTAUTH_SECRET,
 });
