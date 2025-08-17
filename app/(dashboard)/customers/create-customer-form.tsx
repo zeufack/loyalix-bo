@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -31,7 +33,7 @@ export function CreateCustomerForm() {
     setLoading(true);
     setError(null);
     try {
-      await createCustomer({ user: formData });
+      await createCustomer(formData);
       // Optionally, you can close the dialog and refresh the customer list here.
     } catch (error) {
       setError('Failed to create customer.');

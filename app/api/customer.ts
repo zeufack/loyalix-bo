@@ -16,6 +16,15 @@ export const createCustomer = async (data: Partial<Customer>): Promise<Customer>
   return response.data;
 };
 
+export const updateCustomer = async (id: string, data: Partial<Customer>): Promise<Customer> => {
+  const response = await http.put(`/customer/${id}`, data);
+  return response.data;
+};
+
+export const deleteCustomer = async (id: string): Promise<void> => {
+  await http.delete(`/customer/${id}`);
+};
+
 export const getTotalCustomers = async (): Promise<number> => {
   const response = await http.get('/customer/count');
   return response.data;

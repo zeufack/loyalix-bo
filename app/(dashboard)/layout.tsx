@@ -16,7 +16,8 @@ import {
   Users2,
   TrendingUp,
   ScrollText,
-  Tag
+  Tag,
+  Bell
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -31,6 +32,8 @@ import { VercelLogo } from '@/components/icons';
 import Providers from './providers';
 import { NavItem } from './nav-item';
 import { DashboardBreadcrumbs } from './dashboard-breadcrumbs';
+import { Notifications } from './notification';
+import { MobileNav } from './mobile-nav';
 
 const mainNavItems = [
   { href: '/', label: 'Dashboard', icon: Home },
@@ -45,7 +48,11 @@ const mainNavItems = [
   { href: '/customers', label: 'Customers', icon: Users2 },
   { href: '/rewards', label: 'Rewards', icon: Medal },
   { href: '/users', label: 'Users', icon: UserIcon },
-  { href: 'customers-progress', label: 'Customer Progress', icon: TrendingUp } // Using TrendingUp icon
+  { href: 'customers-progress', label: 'Customer Progress', icon: TrendingUp }, // Using TrendingUp icon
+  { href: '/promotions', label: 'Promotions', icon: Tag },
+  { href: '/rule-types', label: 'Rule Types', icon: Ruler },
+  { href: '/event-types', label: 'Event Types', icon: Bell },
+  { href: '/activities', label: 'Activities', icon: LineChart }
 ];
 
 export default function DashboardLayout({
@@ -67,7 +74,10 @@ export default function DashboardLayout({
                 { label: 'Products' }
               ]}
             />
-            <User />
+            <div className="ml-auto flex items-center gap-4">
+              <Notifications />
+              <User />
+            </div>
           </header>
           <main className="grid flex-1 items-start gap-2 p-4 sm:px-6 sm:py-0 md:gap-4 bg-muted/40">
             {children}
@@ -104,64 +114,5 @@ function DesktopNav() {
         </Tooltip>
       </nav>
     </aside>
-  );
-}
-
-function MobileNav() {
-  return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button size="icon" variant="outline" className="sm:hidden">
-          <PanelLeft className="h-5 w-5" />
-          <span className="sr-only">Toggle Menu</span>
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="sm:max-w-xs">
-        <nav className="grid gap-6 text-lg font-medium">
-          <Link
-            href="#"
-            className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
-          >
-            <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
-            <span className="sr-only">Vercel</span>
-          </Link>
-          <Link
-            href="#"
-            className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-          >
-            <Home className="h-5 w-5" />
-            Dashboard
-          </Link>
-          <Link
-            href="#"
-            className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-          >
-            <ShoppingCart className="h-5 w-5" />
-            Orders
-          </Link>
-          <Link
-            href="#"
-            className="flex items-center gap-4 px-2.5 text-foreground"
-          >
-            <Package className="h-5 w-5" />
-            Products
-          </Link>
-          <Link
-            href="#"
-            className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-          >
-            <Users2 className="h-5 w-5" />
-            Customers
-          </Link>
-          <Link
-            href="#"
-            className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-          >
-            <LineChart className="h-5 w-5" />
-            Settings
-          </Link>
-        </nav>
-      </SheetContent>
-    </Sheet>
   );
 }

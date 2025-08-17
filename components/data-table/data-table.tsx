@@ -1,4 +1,11 @@
-import { flexRender, Table as TanStackTable } from '@tanstack/react-table';
+import * as React from 'react';
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable
+} from '@tanstack/react-table';
+
 import {
   Table,
   TableBody,
@@ -8,11 +15,21 @@ import {
   TableRow
 } from '@/components/ui/table';
 
-interface DataTableProps<TData> {
-  table: TanStackTable<TData>;
+interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
 }
 
-export function DataTable<TData>({ table }: Readonly<DataTableProps<TData>>) {
+export function DataTable<TData, TValue>({
+  columns,
+  data
+}: DataTableProps<TData, TValue>) {
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel()
+  });
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -51,7 +68,7 @@ export function DataTable<TData>({ table }: Readonly<DataTableProps<TData>>) {
           ) : (
             <TableRow>
               <TableCell
-                colSpan={table.getAllColumns().length}
+                colSpan={columns.length}
                 className="h-24 text-center"
               >
                 No results.
