@@ -15,6 +15,7 @@ import {
   TrendingUp,
   ScrollText,
   Tag,
+  Ruler,
   Bell
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
