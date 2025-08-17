@@ -1,30 +1,9 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Customer } from '@/types/customer';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { MoreHorizontal } from 'lucide-react';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { EditCustomerForm } from '@/app/(dashboard)/customers/edit-customer-form';
-import { deleteCustomer } from '@/app/api/customer';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from '@/components/ui/alert-dialog';
+import { createActionsColumn } from '@/components/data-table/actions-column';
+import { copyToClipboard } from '@/lib/utils';
 
 export const customerColumns: ColumnDef<Customer>[] = [
   {
@@ -98,56 +77,24 @@ export const customerColumns: ColumnDef<Customer>[] = [
       );
     }
   },
-  {
-    id: 'actions',
-    cell: ({ row }) => {
-      const customer = row.original;
-
-      return (
-        <AlertDialog>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem asChild>
-                <EditCustomerForm customer={customer} />
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem>Delete</DropdownMenuItem>
-              </AlertDialogTrigger>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the
-                customer and all their data.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={async () => {
-                  await deleteCustomer(customer.id);
-                  // Optionally, you can refresh the customer list here.
-                }}
-              >
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      );
-    },
-    enableSorting: false,
-    enableHiding: false
-  }
+  createActionsColumn<Customer>(
+    [
+      {
+        label: 'Copy customer ID',
+        action: (customer: Customer) => copyToClipboard(customer.id)
+      },
+      {
+        label: 'View customer',
+        action: (customer: Customer) => console.log('View', customer.id),
+        separatorBefore: true
+      },
+      {
+        label: 'Edit customer',
+        action: (customer: Customer) => console.log('Edit', customer.id)
+      }
+    ],
+    { enableSorting: false, enableHiding: false }
+  )
 ];
+
 

@@ -1,96 +1,130 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { Business } from '@/types/business';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { EditBusinessForm } from '@/app/(dashboard)/business/edit-business-form';
-import { deleteBusiness } from '@/app/api/business';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from '@/components/ui/alert-dialog';
+import { Badge } from '../../components/ui/badge';
+import { DataTableColumnHeader } from '../../components/data-table/data-table-column-header';
+import { Business } from '../../types/business';
+import { createActionsColumn } from '../../components/data-table/actions-column';
+import { copyToClipboard } from '../utils';
 
 export const businessColumns: ColumnDef<Business>[] = [
   {
-    accessorKey: 'id',
-    header: 'ID'
-  },
-  {
     accessorKey: 'name',
-    header: 'Name'
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Business Name" />
+    ),
+    cell: ({ row }) => (
+      <div className="font-medium">{row.getValue('name')}</div>
+    ),
+    filterFn: (row, id, value) => {
+      return String(row.getValue(id))
+        .toLowerCase()
+        .includes(String(value).toLowerCase());
+    }
   },
   {
     accessorKey: 'email',
-    header: 'Email'
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Email" />
+    ),
+    cell: ({ row }) => (
+      <a
+        href={`mailto:${row.getValue('email')}`}
+        className="text-primary hover:underline"
+      >
+        {row.getValue('email')}
+      </a>
+    )
   },
   {
-    accessorKey: 'phoneNumber',
-    header: 'Phone Number'
+    accessorKey: 'phone',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Phone" />
+    ),
+    cell: ({ row }) => (
+      <a
+        href={`tel:${row.getValue('phone')}`}
+        className="text-primary hover:underline"
+      >
+        {row.getValue('phone')}
+      }
+      </a>
+    )
   },
   {
-    accessorKey: 'ownerId',
-    header: 'Owner ID'
-  },
-  {
-    id: 'actions',
-    cell: ({ row }) => {
-      const business = row.original;
-
-      return (
-        <AlertDialog>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dots-horizontal"><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/></svg>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem asChild>
-                <EditBusinessForm business={business} />
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem>Delete</DropdownMenuItem>
-              </AlertDialogTrigger>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the
-                business and all its data.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={async () => {
-                  await deleteBusiness(business.id);
-                  // Optionally, you can refresh the business list here.
-                }}
-              >
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      );
+    accessorKey: 'businessType',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Type" />
+    ),
+    cell: ({ row }) => (
+      <Badge variant="outline" className="capitalize">
+        {row.getValue('businessType')}
+      </Badge>
+    ),
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
     }
-  }
+  },
+  {
+    accessorKey: 'address',
+    header: ({ column }) => (
+      <DataTableColumnHeader
+        column={column}
+        title="Address"
+        className="hidden lg:table-cell"
+      />
+    ),
+    cell: ({ row }) => (
+      <div className="hidden lg:table-cell max-w-[200px] truncate">
+        {row.getValue('address') || 'N/A'}
+      </div>
+    )
+  },
+  {
+    accessorKey: 'createdAt',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Created" />
+    ),
+    cell: ({ row }) => (
+      <div className="whitespace-nowrap">{row.getValue('createdAt')}</div>
+    ),
+    sortingFn: 'datetime'
+  },
+  {
+    accessorKey: 'staff',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Staff" />
+    ),
+    cell: ({ row }) => (
+      <div className="text-right">{row.original.staff?.length || 0}</div>
+    ),
+    enableSorting: false
+  },
+  {
+    accessorKey: 'programs',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Programs" />
+    ),
+    cell: ({ row }) => (
+      <div className="text-right">{row.original.programs?.length || 0}</div>
+    ),
+    enableSorting: false
+  },
+  createActionsColumn<Business>(
+    [
+      {
+        label: 'Copy customer ID',
+        action: (customer: Business) => copyToClipboard(customer.id)
+      },
+      {
+        label: 'View customer',
+        action: (customer: Business) => console.log('View', customer.id),
+        separatorBefore: true
+      },
+      {
+        label: 'Edit customer',
+        action: (customer: Business) => console.log('Edit', customer.id)
+      }
+    ],
+    { enableSorting: false, enableHiding: false }
+  )
 ];
+

@@ -13,7 +13,6 @@ import { fetchCustomers } from '@/app/api/customer';
 import {
   PaginationState,
   ColumnFiltersState,
-  useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
@@ -22,6 +21,7 @@ import {
 import { Customer } from '@/types/customer';
 import { customerColumns } from '@/lib/columns/customer-columns';
 import { DataTable } from '@/components/data-table/data-table';
+import { useTable } from '@/hooks/useCustomerTable';
 import { DataTablePagination } from '@/components/data-table/data-table-pagination';
 import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
 import { SortingState } from '@/types/table';
@@ -45,7 +45,7 @@ export function CustomersDataTable({
     queryFn: () => fetchCustomers()
   });
 
-  const table = useReactTable({
+  const table = useTable({
     data: data?.customers || [],
     columns: customerColumns,
     getCoreRowModel: getCoreRowModel(),
@@ -92,3 +92,4 @@ export function CustomersDataTable({
     </Card>
   );
 }
+

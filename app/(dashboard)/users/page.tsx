@@ -1,17 +1,40 @@
-import { RoleGate } from '@/components/auth/role-gate';
-import { UserRole } from '@/types/user';
-import { getUsers } from '@/app/api/user';
-import { UsersDataTable } from './user-data-table';
-import { CreateUserForm } from './create-user-form';
+import { redirect } from 'next/navigation';
+import { auth } from '../../../lib/auth';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '../../../components/ui/tabs';
+import ExportButton from '../../../components/ui/export-btn';
+import AddItemButton from '../../../components/ui/add-item-btn';
+import UserDataTable from './user-data-table';
 
 export default async function UserPage() {
-  const users = await getUsers();
+  const session = await auth();
+
+  if (!session) {
+    redirect('/login');
+  }
   return (
-    <RoleGate allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN]}>
-      <div className="flex justify-end">
-        <CreateUserForm />
+    <Tabs defaultValue="all">
+      <div className="flex items-center">
+        <TabsList>
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="draft">Draft</TabsTrigger>
+          <TabsTrigger value="archived" className="hidden sm:flex">
+            Archived
+          </TabsTrigger>
+        </TabsList>
+        <div className="ml-auto flex items-center gap-2">
+          <ExportButton />
+          <AddItemButton />
+        </div>
       </div>
-      <UsersDataTable users={users} />
-    </RoleGate>
+      <TabsContent value="all">
+        <UserDataTable />
+      </TabsContent>
+    </Tabs>
   );
 }
