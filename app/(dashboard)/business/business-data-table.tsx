@@ -30,7 +30,7 @@ export default function BusinessDataTable({
     pageIndex: 0,
     pageSize: 10
   });
-  const [sorting, setSorting] = useState<SortingState[]>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const { data, isLoading, error } = useQuery({
@@ -79,3 +79,4 @@ export default function BusinessDataTable({
     </Card>
   );
 }
+

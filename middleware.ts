@@ -1,4 +1,3 @@
-// middleware.ts
 import { auth } from './lib/auth'; // import your NextAuth config
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
@@ -21,6 +20,10 @@ export async function middleware(request: NextRequest) {
     loginUrl.searchParams.set('callbackUrl', request.url); // redirect after login
     return NextResponse.redirect(loginUrl);
   }
+
+  // if (isProtected && session && !session.user.roles.includes('admin')) {
+  //   return NextResponse.redirect(new URL('/not-authorized', request.url));
+  // }
 
   return NextResponse.next();
 }

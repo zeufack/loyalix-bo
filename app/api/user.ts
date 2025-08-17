@@ -1,12 +1,17 @@
-import { User } from 'types/user';
-import http from './http';
+import { http } from './http';
+import { User } from '@/types/user';
 
-export const fetchUsers = async (
-  page: number = 1,
-  limit: number = 10
-): Promise<{ users: User[]; total: number }> => {
-  const response = await http.get('http://localhost:3000/users', {
-    params: { page, limit }
-  });
+export const getUsers = async (): Promise<User[]> => {
+  const response = await http.get('/users');
+  return response.data;
+};
+
+export const createUser = async (data: Partial<User>): Promise<User> => {
+  const response = await http.post('/users', data);
+  return response.data;
+};
+
+export const getTotalUsers = async (): Promise<number> => {
+  const response = await http.get('/users/count');
   return response.data;
 };

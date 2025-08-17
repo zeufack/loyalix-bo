@@ -1,9 +1,9 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { Customer } from '../../types/customer';
-import { Badge } from '../../components/ui/badge';
-import { DataTableColumnHeader } from '../../components/data-table/data-table-column-header';
-import { createActionsColumn } from '../../components/data-table/actions-column';
-import { copyToClipboard } from '../utils';
+import { Customer } from '@/types/customer';
+import { Badge } from '@/components/ui/badge';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { createActionsColumn } from '@/components/data-table/actions-column';
+import { copyToClipboard } from '@/lib/utils';
 
 export const customerColumns: ColumnDef<Customer>[] = [
   {
@@ -60,42 +60,6 @@ export const customerColumns: ColumnDef<Customer>[] = [
     }
   },
   {
-    accessorKey: 'price',
-    header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title="Price"
-        className="hidden md:table-cell"
-      />
-    ),
-    cell: ({ row }) => {
-      const price = row.getValue('price') as number;
-      return (
-        <div className="hidden md:table-cell">
-          {price ? `$${price.toFixed(2)}` : '-'}
-        </div>
-      );
-    }
-  },
-  {
-    accessorKey: 'totalSales',
-    header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title="Total Sales"
-        className="hidden md:table-cell"
-      />
-    ),
-    cell: ({ row }) => {
-      const sales = row.getValue('totalSales') as number;
-      return (
-        <div className="hidden md:table-cell">
-          {sales ? `$${sales.toFixed(2)}` : '-'}
-        </div>
-      );
-    }
-  },
-  {
     accessorKey: 'createdAt',
     header: ({ column }) => (
       <DataTableColumnHeader
@@ -132,3 +96,5 @@ export const customerColumns: ColumnDef<Customer>[] = [
     { enableSorting: false, enableHiding: false }
   )
 ];
+
+

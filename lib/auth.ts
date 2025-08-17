@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { useAuthStore } from './stores/use-auth-store';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -28,17 +29,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             throw new Error(error.message || 'Authentication failed');
           }
 
-          if (response.ok) {
-            const { accessToken, refreshToken, user } = await response.json();
-            return {
-              id: user.id,
-              email: user.email,
-              name: user.name,
-              accessToken,
-              refreshToken,
-              ...user
-            };
-          }
+          const { accessToken, refreshToken, user } = await response.json();
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            accessToken,
+            refreshToken,
+            ...user
+          };
         } catch (error) {
           console.error('Auth error:', error);
         }
@@ -48,6 +47,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async jwt({ token, user, trigger, session }) {
+      console.log(`token in callback ${token}`);
       if (user) {
         token.user = {
           id: user.id,
@@ -71,12 +71,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     }
   },
+  events: {
+    async signOut() {
+      useAuthStore.getState().logout();
+    }
+  },
   session: {
-    strategy: 'jwt'
+    strategy: 'jwt',
+    maxAge: 24 * 60 * 60
   },
   pages: {
     signIn: '/login',
     error: '/error'
-  }
-  //Todo add secret
+  },
+  secret: process.env.NEXTAUTH_SECRET
 });

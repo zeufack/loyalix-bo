@@ -9,18 +9,22 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { fetchCustomers } from 'app/api/customer';
-import type {
+import { fetchCustomers } from '@/app/api/customer';
+import {
   PaginationState,
-  ColumnFiltersState
+  ColumnFiltersState,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel
 } from '@tanstack/react-table';
-import { Customer } from '../../../types/customer';
-import { customerColumns } from '../../../lib/columns/customer-columns';
-import { DataTable } from '../../../components/data-table/data-table';
-import { useTable } from '../../../hooks/useCustomerTable';
-import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
-import { DataTableToolbar } from '../../../components/data-table/data-table-toolbar';
-import { SortingState } from '../../../types/table';
+import { Customer } from '@/types/customer';
+import { customerColumns } from '@/lib/columns/customer-columns';
+import { DataTable } from '@/components/data-table/data-table';
+import { useTable } from '@/hooks/useCustomerTable';
+import { DataTablePagination } from '@/components/data-table/data-table-pagination';
+import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
+import { SortingState } from '@/types/table';
 
 interface CustomersDataTableProps {
   initialData?: Customer[];
@@ -44,13 +48,18 @@ export function CustomersDataTable({
   const table = useTable({
     data: data?.customers || [],
     columns: customerColumns,
-    pageCount: Math.ceil((data?.total || 0) / pagination.pageSize),
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    manualPagination: true,
-    manualSorting: true,
-    manualFiltering: true
+    state: {
+      pagination,
+      sorting,
+      columnFilters
+    }
   });
 
   if (error) {
@@ -76,10 +85,11 @@ export function CustomersDataTable({
       <CardContent>
         <div className="space-y-4">
           <DataTableToolbar table={table} />
-          <DataTable table={table} />
+          <DataTable columns={customerColumns} data={data?.customers || []} />
           <DataTablePagination table={table} />
         </div>
       </CardContent>
     </Card>
   );
 }
+

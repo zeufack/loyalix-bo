@@ -45,6 +45,7 @@ export const businessColumns: ColumnDef<Business>[] = [
         className="text-primary hover:underline"
       >
         {row.getValue('phone')}
+      }
       </a>
     )
   },
@@ -126,3 +127,4 @@ export const businessColumns: ColumnDef<Business>[] = [
     { enableSorting: false, enableHiding: false }
   )
 ];
+
