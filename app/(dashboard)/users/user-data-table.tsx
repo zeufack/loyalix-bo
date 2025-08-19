@@ -39,9 +39,9 @@ export default function UserDataTable({
   });
 
   const table = useTable({
-    data: data?.users || [],
+    data: data || [],
     columns: userColumns,
-    pageCount: Math.ceil((data?.total || 0) / pagination.pageSize),
+    pageCount: Math.ceil((data?.length || 0) / pagination.pageSize),
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

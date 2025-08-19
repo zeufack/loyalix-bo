@@ -37,9 +37,9 @@ export default function PermissionsDataTable({
   });
 
   const table = useTable({
-    data: data?.permissions || [],
+    data: data || [],
     columns: permissionColumns,
-    pageCount: data?.total ? Math.ceil(data.total / pagination.pageSize) : 0,
+    pageCount: data?.length ? Math.ceil(data.length / pagination.pageSize) : 0,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
     manualPagination: true,

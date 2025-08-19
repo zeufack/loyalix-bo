@@ -1,7 +1,7 @@
 import { http } from './http';
 import { Permission } from '@/types/permission';
 
-export const getPermissions = async (): Promise<any> => {
+export const getPermissions = async (): Promise<{ permissions: Permission[]; total: number }> => {
   const response = await http.get('/permissions');
   console.log(response);
   return response.data;

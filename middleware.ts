@@ -1,35 +1,49 @@
-import { auth } from './lib/auth'; // import your NextAuth config
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import NextAuth from 'next-auth';
+import { authConfig } from './auth.config';
+import {
+  DEFAULT_LOGIN_REDIRECT,
+  apiAuthPrefix,
+  authRoutes,
+  publicRoutes
+} from './routes';
 
-// Define routes to protect
-const protectedRoutes = ['/', '/dashboard', '/account'];
+const { auth } = NextAuth(authConfig);
 
-export async function middleware(request: NextRequest) {
-  console.log('middleware is loaded');
-  const session = await auth(); // pulls session via NextAuth using JWT strategy
+export default auth((req) => {
+  const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
 
-  const { pathname } = request.nextUrl;
+  const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+  const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
-  // Check if current path needs protection
-  const isProtected = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
-
-  if (isProtected && !session) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('callbackUrl', request.url); // redirect after login
-    return NextResponse.redirect(loginUrl);
+  if (isApiAuthRoute) {
+    return;
   }
 
-  // if (isProtected && session && !session.user.roles.includes('admin')) {
-  //   return NextResponse.redirect(new URL('/not-authorized', request.url));
-  // }
+  if (isAuthRoute) {
+    if (isLoggedIn) {
+      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+    }
+    return;
+  }
 
-  return NextResponse.next();
-}
+  if (!isLoggedIn && !isPublicRoute) {
+    let callbackUrl = nextUrl.pathname;
+    if (nextUrl.search) {
+      callbackUrl += nextUrl.search;
+    }
 
-// Apply to routes you want to protect
+    const encodedCallbackUrl = encodeURIComponent(callbackUrl);
+
+    return Response.redirect(
+      new URL(`/login?callbackUrl=${encodedCallbackUrl}`, nextUrl)
+    );
+  }
+});
+
+// Optionally, don't invoke Middleware on some paths
 export const config = {
-  matcher: ['/', '/dashboard/:path*', '/account/:path*']
+  matcher: ['/((?!.+\.[\w]+$|_next).*)', '/', '/(api|trpc)(.*)']
 };
+
