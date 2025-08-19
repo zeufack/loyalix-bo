@@ -6,6 +6,7 @@ import type { NextRequest } from 'next/server';
 const protectedRoutes = ['/', '/dashboard', '/account'];
 
 export async function middleware(request: NextRequest) {
+  console.log('middleware is loaded');
   const session = await auth(); // pulls session via NextAuth using JWT strategy
 
   const { pathname } = request.nextUrl;

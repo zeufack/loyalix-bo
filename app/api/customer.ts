@@ -1,7 +1,7 @@
 import { Customer } from '@/types/customer';
 import { http } from './http';
 
-export const fetchCustomers = async (
+export const getCustomers = async (
   page: number = 1,
   limit: number = 10
 ): Promise<{ customers: Customer[]; total: number }> => {
@@ -11,12 +11,17 @@ export const fetchCustomers = async (
   return response.data;
 };
 
-export const createCustomer = async (data: Partial<Customer>): Promise<Customer> => {
+export const createCustomer = async (
+  data: Partial<Customer>
+): Promise<Customer> => {
   const response = await http.post('/customer', data);
   return response.data;
 };
 
-export const updateCustomer = async (id: string, data: Partial<Customer>): Promise<Customer> => {
+export const updateCustomer = async (
+  id: string,
+  data: Partial<Customer>
+): Promise<Customer> => {
   const response = await http.put(`/customer/${id}`, data);
   return response.data;
 };

@@ -9,45 +9,41 @@ import {
   CardHeader,
   CardTitle
 } from '../../../components/ui/card';
-import { SortingState, useTable } from '../../../hooks/useCustomerTable';
-import { userColumns } from '../../../lib/columns/user-columns';
-import { User } from '../../../types/user';
-import { PaginationState } from '../../../types/table';
-import { ColumnFiltersState } from '@tanstack/react-table';
+import { useTable } from '../../../hooks/useCustomerTable';
+import { permissionColumns } from '../../../lib/columns/permission-columns';
+import { Permission } from '../../../types/permission';
+import { PaginationState, SortingState } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
-import { getUsers } from '../../api/user';
+import { getPermissions } from '../../api/permission';
 import { DataTable } from '../../../components/data-table/data-table';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
 
-interface UserDataTableProps {
-  initialData?: User[];
+interface PermissionsDataTableProps {
+  initialData?: Permission[];
 }
 
-export default function UserDataTable({
+export default function PermissionsDataTable({
   initialData = []
-}: UserDataTableProps) {
+}: PermissionsDataTableProps) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10
   });
   const [sorting, setSorting] = useState<SortingState[]>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => getUsers()
+    queryKey: ['permissions', pagination, sorting],
+    queryFn: () => getPermissions()
   });
 
   const table = useTable({
-    data: data?.users || [],
-    columns: userColumns,
-    pageCount: Math.ceil((data?.total || 0) / pagination.pageSize),
+    data: data?.permissions || [],
+    columns: permissionColumns,
+    pageCount: data?.total ? Math.ceil(data.total / pagination.pageSize) : 0,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     manualPagination: true,
     manualSorting: true,
-    manualFiltering: true
   });
 
   if (error) {
@@ -55,7 +51,7 @@ export default function UserDataTable({
       <Card>
         <CardContent className="p-6">
           <div className="text-center text-red-500">
-            Error loading customers: {error.message}
+            Error loading permissions: {error.message}
           </div>
         </CardContent>
       </Card>
@@ -65,19 +61,19 @@ export default function UserDataTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Customers</CardTitle>
+        <CardTitle>Permissions</CardTitle>
         <CardDescription>
-          Manage your customers and view their activity.
+          Manage your permissions and view their activity.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           {isLoading ? (
-            <div>Loading users...</div>
+            <div>Loading permissions...</div>
           ) : (
             <>
               <DataTableToolbar table={table} />
-              <DataTable table={table} columns={userColumns} />
+              <DataTable table={table} columns={permissionColumns} />
               <DataTablePagination table={table} />
             </>
           )}

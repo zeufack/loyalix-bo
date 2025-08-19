@@ -9,15 +9,8 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { fetchCustomers } from '@/app/api/customer';
-import {
-  PaginationState,
-  ColumnFiltersState,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel
-} from '@tanstack/react-table';
+import { getCustomers } from '@/app/api/customer';
+import { PaginationState, ColumnFiltersState } from '@tanstack/react-table';
 import { Customer } from '@/types/customer';
 import { customerColumns } from '@/lib/columns/customer-columns';
 import { DataTable } from '@/components/data-table/data-table';
@@ -41,25 +34,20 @@ export function CustomersDataTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['customers'],
-    queryFn: () => fetchCustomers()
+    queryKey: ['customers', pagination, sorting],
+    queryFn: () => getCustomers()
   });
 
   const table = useTable({
     data: data?.customers || [],
     columns: customerColumns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    pageCount: data?.total ? Math.ceil(data.total / pagination.pageSize) : 0,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    state: {
-      pagination,
-      sorting,
-      columnFilters
-    }
+    manualPagination: true,
+    manualSorting: true,
+    manualFiltering: true
   });
 
   if (error) {
@@ -85,11 +73,10 @@ export function CustomersDataTable({
       <CardContent>
         <div className="space-y-4">
           <DataTableToolbar table={table} />
-          <DataTable columns={customerColumns} data={data?.customers || []} />
+          <DataTable table={table} columns={customerColumns} />
           <DataTablePagination table={table} />
         </div>
       </CardContent>
     </Card>
   );
 }
-

@@ -5,7 +5,7 @@ import { Business } from '../../../types/business';
 import { PaginationState, SortingState } from '../../../types/table';
 import { ColumnFiltersState } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
-import { fetchBusiness } from '../../api/business';
+import { getBusinesses } from '../../api/business';
 import { useTable } from '../../../hooks/useCustomerTable';
 import { businessColumns } from '../../../lib/columns/business-columns';
 import {
@@ -35,7 +35,7 @@ export default function BusinessDataTable({
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['business'],
-    queryFn: () => fetchBusiness()
+    queryFn: () => getBusinesses()
   });
 
   const table = useTable({
@@ -72,11 +72,10 @@ export default function BusinessDataTable({
       <CardContent>
         <div className="space-y-4">
           <DataTableToolbar table={table} />
-          <DataTable table={table} />
+          <DataTable table={table} columns={businessColumns} />
           <DataTablePagination table={table} />
         </div>
       </CardContent>
     </Card>
   );
 }
-

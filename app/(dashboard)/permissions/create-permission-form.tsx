@@ -13,12 +13,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState } from 'react';
-import { createLoyaltyProgramType } from '@/app/api/loyalty-program-type';
+import { createPermission } from '@/app/api/permission';
 
-export function CreateLoyaltyProgramTypeForm() {
+export function CreatePermissionForm() {
   const [formData, setFormData] = useState({
-    name: '',
-    description: ''
+    name: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,10 +30,10 @@ export function CreateLoyaltyProgramTypeForm() {
     setLoading(true);
     setError(null);
     try {
-      await createLoyaltyProgramType(formData);
-      // Optionally, you can close the dialog and refresh the loyalty program type list here.
+      await createPermission(formData);
+      // Optionally, you can close the dialog and refresh the permission list here.
     } catch (error) {
-      setError('Failed to create loyalty program type.');
+      setError('Failed to create permission.');
     } finally {
       setLoading(false);
     }
@@ -43,13 +42,13 @@ export function CreateLoyaltyProgramTypeForm() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Create Loyalty Program Type</Button>
+        <Button>Create Permission</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Loyalty Program Type</DialogTitle>
+          <DialogTitle>Create Permission</DialogTitle>
           <DialogDescription>
-            Fill in the details below to create a new loyalty program type.
+            Fill in the details below to create a new permission.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -57,17 +56,9 @@ export function CreateLoyaltyProgramTypeForm() {
             <Label htmlFor="name">Name</Label>
             <Input
               id="name"
+              type="text"
               className="col-span-3"
               value={formData.name}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description">Description</Label>
-            <Input
-              id="description"
-              className="col-span-3"
-              value={formData.description}
               onChange={handleChange}
             />
           </div>

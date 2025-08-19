@@ -13,7 +13,7 @@ import { Fragment } from 'react';
 
 type ActionItem = {
   label: string;
-  action: (data: any) => void;
+  action: (data: T) => void;
   separatorBefore?: boolean;
 };
 

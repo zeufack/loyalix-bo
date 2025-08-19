@@ -1,8 +1,9 @@
 import { http } from './http';
 import { User } from '@/types/user';
 
-export const getUsers = async (): Promise<User[]> => {
+export const getUsers = async (): Promise<any> => {
   const response = await http.get('/users');
+  console.log(response);
   return response.data;
 };
 

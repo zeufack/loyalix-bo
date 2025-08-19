@@ -47,27 +47,39 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async jwt({ token, user, trigger, session }) {
-      console.log(`token in callback ${token}`);
       if (user) {
         token.user = {
           id: user.id,
           email: user.email,
+          name: user.name,
           roles: user.roles,
           isEmailVerified: user.isEmailVerified
         };
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
+        token.accessTokenExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
       }
-      return token;
+
+      // Return previous token if the access token has not expired yet
+      if (new Date() < token.accessTokenExpires) {
+        return token;
+      }
+
+      // Access token has expired, try to refresh it
+      const refreshed = await refreshAccessToken(token);
+
+      if (refreshed.signOut) {
+        return null;
+      }
+
+      return refreshed;
     },
     async session({ session, token }) {
-      if (token.accessToken && typeof token.accessToken === 'string') {
-        session.accessToken = token.accessToken;
-        session.refreshToken = token.refreshToken;
-        session.user = token.user;
-        session.error = token.error;
-        return session;
-      }
+      session.accessToken = token.accessToken;
+      session.refreshToken = token.refreshToken;
+      session.user = token.user;
+      session.error = token.error;
+      return session;
       return session;
     }
   },
@@ -86,3 +98,44 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   secret: process.env.NEXTAUTH_SECRET
 });
+
+// Token refresh function
+async function refreshAccessToken(token: { refreshToken: string }) {
+  try {
+    const response = await fetch(
+      `${process.env.NESTJS_API_URL}/auth/refresh-token`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token.refreshToken}`
+        },
+        body: JSON.stringify({
+          refreshToken: token.refreshToken
+        })
+      }
+    );
+
+    const refreshedTokens = await response.json();
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        return { ...token, error: 'RefreshAccessTokenError', signOut: true };
+      }
+      throw refreshedTokens;
+    }
+
+    return {
+      ...token,
+      accessToken: refreshedTokens.accessToken,
+      accessTokenExpires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
+      refreshToken: refreshedTokens.refreshToken ?? token.refreshToken
+    };
+  } catch (error) {
+    console.error('Error refreshing access token:', error);
+    return {
+      ...token,
+      error: 'RefreshAccessTokenError'
+    };
+  }
+}

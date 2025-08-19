@@ -16,7 +16,8 @@ import {
   ScrollText,
   Tag,
   Ruler,
-  Bell
+  Bell,
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -50,7 +51,8 @@ const mainNavItems = [
   { href: '/promotions', label: 'Promotions', icon: Tag },
   { href: '/rule-types', label: 'Rule Types', icon: Ruler },
   { href: '/event-types', label: 'Event Types', icon: Bell },
-  { href: '/activities', label: 'Activities', icon: LineChart }
+  { href: '/activities', label: 'Activities', icon: LineChart },
+  { href: '/permissions', label: 'Permissions', icon: Shield }
 ];
 
 export default function DashboardLayout({
