@@ -1,12 +1,13 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { User } from '../types/user';
 
 interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
-  user: any; // You might want to define a more specific type for user
+  user: User | null; // You might want to define a more specific type for user
   setTokens: (accessToken: string, refreshToken: string) => void;
-  setUser: (user: any) => void;
+  setUser: (user: User) => void;
   logout: () => void;
 }
 

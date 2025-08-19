@@ -1,9 +1,8 @@
 import * as React from 'react';
 import {
-  ColumnDef,
+  Table as ReactTableType,
   flexRender,
-  getCoreRowModel,
-  useReactTable
+  ColumnDef
 } from '@tanstack/react-table';
 
 import {
@@ -15,20 +14,15 @@ import {
   TableRow
 } from '@/components/ui/table';
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+interface DataTableProps<TData> {
+  table: ReactTableType<TData>;
+  columns: ColumnDef<TData>[];
 }
 
-export function DataTable<TData, TValue>({
-  columns,
-  data
-}: DataTableProps<TData, TValue>) {
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel()
-  });
+export function DataTable<TData>({
+  table,
+  columns
+}: DataTableProps<TData>) {
 
   return (
     <div className="rounded-md border">

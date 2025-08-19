@@ -6,7 +6,9 @@ export const getLoyaltyPrograms = async (): Promise<LoyaltyProgram[]> => {
   return response.data;
 };
 
-export const createLoyaltyProgram = async (data: Partial<LoyaltyProgram>): Promise<LoyaltyProgram> => {
+export const createLoyaltyProgram = async (
+  data: Partial<LoyaltyProgram>
+): Promise<LoyaltyProgram> => {
   const response = await http.post('/loyality-program', data);
   return response.data;
 };

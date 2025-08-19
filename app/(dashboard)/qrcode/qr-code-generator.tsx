@@ -1,5 +1,7 @@
+'use client';
+
 import { useState } from 'react';
-import QRCode from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,7 +27,7 @@ export function QRCodeGenerator() {
           </div>
           {text && (
             <div className="flex justify-center mt-4">
-              <QRCode value={text} size={256} level="H" />
+              <QRCodeCanvas value={text} size={256} level={"H"} />
             </div>
           )}
         </div>

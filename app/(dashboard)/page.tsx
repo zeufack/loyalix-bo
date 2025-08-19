@@ -1,7 +1,7 @@
 import { DashboardStats } from './dashboard-stats';
 
-export default function DashboardPage() {
-  return (
-    <DashboardStats />
-  );
+export default async function DashboardPage() {
+    return (
+        <DashboardStats />
+    );
 }

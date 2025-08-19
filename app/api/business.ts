@@ -4,6 +4,7 @@ import { http } from './http';
 export const getBusinesses = async (): Promise<Business[]> => {
   try {
     const response = await http.get('/business');
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching businesses:', error);
@@ -11,7 +12,9 @@ export const getBusinesses = async (): Promise<Business[]> => {
   }
 };
 
-export const createBusiness = async (data: Partial<Business>): Promise<Business> => {
+export const createBusiness = async (
+  data: Partial<Business>
+): Promise<Business> => {
   try {
     const response = await http.post('/business', data);
     return response.data;
@@ -21,7 +24,10 @@ export const createBusiness = async (data: Partial<Business>): Promise<Business>
   }
 };
 
-export const updateBusiness = async (id: string, data: Partial<Business>): Promise<Business> => {
+export const updateBusiness = async (
+  id: string,
+  data: Partial<Business>
+): Promise<Business> => {
   try {
     const response = await http.put(`/business/${id}`, data);
     return response.data;

@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { Business } from '../../../types/business';
-import { PaginationState, SortingState } from '../../../types/table';
-import { ColumnFiltersState } from '@tanstack/react-table';
+import { PaginationState } from '../../../types/table';
+import { ColumnFiltersState, SortingState } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
-import { fetchBusiness } from '../../api/business';
+import { getBusinesses } from '../../api/business';
 import { useTable } from '../../../hooks/useCustomerTable';
 import { businessColumns } from '../../../lib/columns/business-columns';
 import {
@@ -30,20 +30,21 @@ export default function BusinessDataTable({
     pageIndex: 0,
     pageSize: 10
   });
-  const [sorting, setSorting] = useState<SortingState>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [sorting, setSorting] = useState<any[]>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['business'],
-    queryFn: () => fetchBusiness()
+    queryFn: () => getBusinesses()
   });
 
   const table = useTable({
-    data: data?.business || [],
+    data: data || [],
     columns: businessColumns,
-    pageCount: Math.ceil((data?.total || 0) / pagination.pageSize),
+    pageCount: Math.ceil((data?.length || 0) / pagination.pageSize),
     onPaginationChange: setPagination,
-    onSortingChange: setSorting,
+    onSortingChange: setSorting as (sorting: SortingState) => void,
     onColumnFiltersChange: setColumnFilters,
     manualPagination: true,
     manualSorting: true,
@@ -72,11 +73,10 @@ export default function BusinessDataTable({
       <CardContent>
         <div className="space-y-4">
           <DataTableToolbar table={table} />
-          <DataTable table={table} />
+          <DataTable table={table} columns={businessColumns} />
           <DataTablePagination table={table} />
         </div>
       </CardContent>
     </Card>
   );
 }
-
