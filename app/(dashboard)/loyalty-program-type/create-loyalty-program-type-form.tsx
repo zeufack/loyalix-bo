@@ -1,19 +1,20 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import AddItemButton from '@/components/ui/add-item-btn';
+import { useState } from 'react';
+import { createCustomer } from '../../api/customer';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
+  DialogTrigger,
   DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useState } from 'react';
-import { createLoyaltyProgramType } from '@/app/api/loyalty-program-type';
+  DialogDescription,
+  DialogFooter
+} from '../../../components/ui/dialog';
+import { Label } from '../../../components/ui/label';
+import { Input } from '../../../components/ui/input';
+import { Button } from '../../../components/ui/button';
 
 export function CreateLoyaltyProgramTypeForm() {
   const [formData, setFormData] = useState({
@@ -43,7 +44,7 @@ export function CreateLoyaltyProgramTypeForm() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Create Loyalty Program Type</Button>
+        <AddItemButton title="Create Loyalty Program Type" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

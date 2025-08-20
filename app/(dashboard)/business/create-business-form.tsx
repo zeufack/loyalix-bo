@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 import { createBusiness } from '@/app/api/business';
+import AddItemButton from '@/components/ui/add-item-btn';
 
 export function CreateBusinessForm() {
   const [formData, setFormData] = useState({
@@ -44,7 +45,7 @@ export function CreateBusinessForm() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Create Business</Button>
+        <AddItemButton title="Create Business" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

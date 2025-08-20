@@ -1,20 +1,20 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import AddItemButton from '@/components/ui/add-item-btn';
+import { useState } from 'react';
+import { createCustomer } from '../../api/customer';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
+  DialogTrigger,
   DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useState } from 'react';
-import { createPermission } from '@/app/api/permission';
-
+  DialogDescription,
+  DialogFooter
+} from '../../../components/ui/dialog';
+import { Label } from '../../../components/ui/label';
+import { Input } from '../../../components/ui/input';
+import { Button } from '../../../components/ui/button';
 export function CreatePermissionForm() {
   const [formData, setFormData] = useState({
     name: ''
@@ -42,7 +42,7 @@ export function CreatePermissionForm() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Create Permission</Button>
+        <AddItemButton title="Create Permission" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

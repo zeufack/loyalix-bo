@@ -1,19 +1,21 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import AddItemButton from '@/components/ui/add-item-btn';
+import { useState } from 'react';
+import { createCustomer } from '../../api/customer';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
+  DialogTrigger,
   DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useState } from 'react';
-import { createEventType } from '@/app/api/event-type';
+  DialogDescription,
+  DialogFooter
+} from '../../../components/ui/dialog';
+import { Label } from '../../../components/ui/label';
+import { Input } from '../../../components/ui/input';
+import { Button } from '../../../components/ui/button';
+import { createEventType } from '../../api/event-type';
 
 export function CreateEventTypeForm() {
   const [formData, setFormData] = useState({
@@ -43,7 +45,7 @@ export function CreateEventTypeForm() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Create Event Type</Button>
+        <AddItemButton title="Create Event Type" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -82,4 +84,3 @@ export function CreateEventTypeForm() {
     </Dialog>
   );
 }
-

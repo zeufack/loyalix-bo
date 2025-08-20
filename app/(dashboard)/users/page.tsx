@@ -7,8 +7,8 @@ import {
   TabsTrigger
 } from '../../../components/ui/tabs';
 import ExportButton from '../../../components/ui/export-btn';
-import AddItemButton from '../../../components/ui/add-item-btn';
 import UserDataTable from './user-data-table';
+import { CreateUserForm } from './create-user-form';
 
 export default async function UserPage() {
   const session = await auth();
@@ -29,7 +29,7 @@ export default async function UserPage() {
         </TabsList>
         <div className="ml-auto flex items-center gap-2">
           <ExportButton />
-          <AddItemButton />
+          <CreateUserForm />
         </div>
       </div>
       <TabsContent value="all">
