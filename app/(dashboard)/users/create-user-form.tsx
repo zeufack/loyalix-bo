@@ -1,30 +1,44 @@
-import { Button } from '@/components/ui/button';
+'use client';
+
+import AddItemButton from '@/components/ui/add-item-btn';
+import { useState } from 'react';
+import { createCustomer } from '../../api/customer';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
+  DialogTrigger,
   DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useState } from 'react';
-import { createUser } from '@/app/api/user';
+  DialogDescription,
+  DialogFooter
+} from '../../../components/ui/dialog';
+import { Label } from '../../../components/ui/label';
+import { Input } from '../../../components/ui/input';
+import { Button } from '../../../components/ui/button';
+import { UserRole } from '../../../types/user';
+import { createUser } from '../../api/user';
 
 export function CreateUserForm() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     firstName: '',
-    lastName: ''
+    lastName: '',
+    roles: [] as UserRole[]
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const roles = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value as UserRole
+    );
+    setFormData({ ...formData, roles });
   };
 
   const handleSubmit = async () => {
@@ -43,7 +57,7 @@ export function CreateUserForm() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Create User</Button>
+        <AddItemButton title="Create User" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -90,6 +104,21 @@ export function CreateUserForm() {
               value={formData.lastName}
               onChange={handleChange}
             />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="roles">Roles</Label>
+            <select
+              multiple
+              id="roles"
+              onChange={handleRoleChange}
+              className="col-span-3"
+            >
+              {Object.values(UserRole).map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </select>
           </div>
           {error && <p className="text-red-500">{error}</p>}
         </div>

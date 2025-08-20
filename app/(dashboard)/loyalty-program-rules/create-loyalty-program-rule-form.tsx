@@ -1,5 +1,6 @@
 'use client';
 
+import AddItemButton from '@/components/ui/add-item-btn';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -46,7 +47,7 @@ export function CreateLoyaltyProgramRuleForm() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Create Loyalty Program Rule</Button>
+        <AddItemButton title="Create Loyalty Program Rule" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
