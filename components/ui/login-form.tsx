@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { signIn } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { Spinner } from "./shadcn-io/spinner";
 
 export function LoginForm({
     className,
@@ -96,7 +97,7 @@ export function LoginForm({
                             )}
 
                             <Button type="submit" className="w-full" disabled={loading}>
-                                {loading ? "Logging in..." : "Login"}
+                                {loading ? <Spinner /> : "Login"}
                             </Button>
 
                             {/* Optional OAuth button */}

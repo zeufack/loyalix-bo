@@ -26,7 +26,6 @@ export const authConfig = {
           );
 
           const responseBody = await response.json();
-          console.log('Response body:', responseBody);
 
           if (!response.ok) {
             throw new Error(responseBody.message || 'Authentication failed');

@@ -1,4 +1,4 @@
-import { DashboardStats } from './dashboard-stats';
+import { DashboardStats } from './components/dashboard-stats';
 
 export default async function DashboardPage() {
     return (

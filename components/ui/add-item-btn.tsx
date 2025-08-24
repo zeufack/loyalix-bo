@@ -4,7 +4,8 @@ import { PlusCircle } from 'lucide-react';
 import { Button } from './button';
 import React from 'react';
 
-interface AddItemButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface AddItemButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   title: string;
 }
 

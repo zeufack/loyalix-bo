@@ -34,7 +34,6 @@ export function CreateEventTypeForm() {
     setError(null);
     try {
       await createEventType(formData);
-      // Optionally, you can close the dialog and refresh the event type list here.
     } catch (error) {
       setError('Failed to create event type.');
     } finally {
