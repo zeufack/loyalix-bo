@@ -17,6 +17,15 @@ import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
 import { UserRole } from '../../../types/user';
 import { createUser } from '../../api/user';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue
+} from '../../../components/ui/select';
 
 export function CreateUserForm() {
   const [formData, setFormData] = useState({
@@ -28,26 +37,30 @@ export function CreateUserForm() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const roles = Array.from(
-      e.target.selectedOptions,
-      (option) => option.value as UserRole
-    );
-    setFormData({ ...formData, roles });
+  const handleRoleChange = (value: string) => {
+    setFormData({ ...formData, roles: [value as UserRole] });
   };
-
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
     try {
       await createUser(formData);
-      // Optionally, you can close the dialog and refresh the user list here.
+      setOpen(false); // Close the dialog after successful creation
+      setFormData({
+        email: '',
+        password: '',
+        firstName: '',
+        lastName: '',
+        roles: []
+      });
     } catch (error) {
+      console.log(error);
       setError('Failed to create user.');
     } finally {
       setLoading(false);
@@ -55,7 +68,7 @@ export function CreateUserForm() {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <AddItemButton title="Create User" />
       </DialogTrigger>
@@ -107,18 +120,24 @@ export function CreateUserForm() {
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="roles">Roles</Label>
-            <select
-              multiple
-              id="roles"
-              onChange={handleRoleChange}
-              className="col-span-3"
+            <Select
+              value={formData.roles[0] || ''}
+              onValueChange={handleRoleChange}
             >
-              {Object.values(UserRole).map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a role for this user" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Roles</SelectLabel>
+                  {Object.values(UserRole).map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {role}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
           {error && <p className="text-red-500">{error}</p>}
         </div>

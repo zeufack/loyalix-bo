@@ -19,10 +19,6 @@ export interface User {
   emailVerificationToken?: string;
   isActive: boolean;
   roles: UserRole[];
-  //   customerProfile?: Customer;
-  //   staffProfile?: BusinessStaff;
-  //   roles?: Role[];
-  //   refreshTokens?: RefreshToken[];
   createdAt: Date;
   updatedAt: Date;
 }
