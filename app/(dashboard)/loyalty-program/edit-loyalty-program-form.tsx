@@ -24,7 +24,7 @@ export function EditLoyaltyProgramForm({ loyaltyProgram }: EditLoyaltyProgramFor
   const [formData, setFormData] = useState<Partial<LoyaltyProgram>>({
     name: '',
     description: '',
-    typeId: ''
+    type: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export function EditLoyaltyProgramForm({ loyaltyProgram }: EditLoyaltyProgramFor
       setFormData({
         name: loyaltyProgram.name,
         description: loyaltyProgram.description,
-        typeId: loyaltyProgram.typeId
+        type: loyaltyProgram.type
       });
     }
   }, [loyaltyProgram]);
@@ -91,11 +91,11 @@ export function EditLoyaltyProgramForm({ loyaltyProgram }: EditLoyaltyProgramFor
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="typeId">Type ID</Label>
+            <Label htmlFor="type">Type</Label>
             <Input
-              id="typeId"
+              id="type"
               className="col-span-3"
-              value={formData.typeId}
+              value={formData.type}
               onChange={handleChange}
             />
           </div>

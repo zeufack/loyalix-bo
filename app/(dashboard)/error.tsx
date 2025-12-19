@@ -1,6 +1,17 @@
 'use client';
 
 import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
+import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Error({
   error,
@@ -11,36 +22,47 @@ export default function Error({
 }) {
   useEffect(() => {
     // Log the error to an error reporting service
-    console.error(error);
+    console.error('Dashboard Error:', error);
   }, [error]);
 
   return (
-    <main className="p-4 md:p-6">
-      <div className="mb-8 space-y-4">
-        <h1 className="font-semibold text-lg md:text-2xl">
-          Please complete setup
-        </h1>
-        <p>
-          Inside the Vercel Postgres dashboard, create a table based on the
-          schema defined in this repository.
-        </p>
-        <pre className="my-4 px-3 py-4 bg-black text-white rounded-lg max-w-2xl overflow-scroll flex text-wrap">
-          <code>
-            {`CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
-  email VARCHAR(255) NOT NULL,
-  name VARCHAR(255),
-  username VARCHAR(255)
-);`}
-          </code>
-        </pre>
-        <p>Insert a row for testing:</p>
-        <pre className="my-4 px-3 py-4 bg-black text-white rounded-lg max-w-2xl overflow-scroll flex text-wrap">
-          <code>
-            {`INSERT INTO users (id, email, name, username) VALUES (1, 'me@site.com', 'Me', 'username');`}
-          </code>
-        </pre>
-      </div>
-    </main>
+    <div className="flex items-center justify-center min-h-[60vh] p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+            <AlertTriangle className="h-6 w-6 text-destructive" />
+          </div>
+          <CardTitle className="text-xl">Something went wrong</CardTitle>
+          <CardDescription>
+            An unexpected error occurred while loading this page.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-lg bg-muted p-3 text-sm">
+            <p className="font-medium text-muted-foreground mb-1">Error details:</p>
+            <p className="text-destructive break-words">
+              {error.message || 'Unknown error'}
+            </p>
+            {error.digest && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Error ID: {error.digest}
+              </p>
+            )}
+          </div>
+        </CardContent>
+        <CardFooter className="flex gap-2">
+          <Button onClick={reset} variant="default" className="flex-1">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Try again
+          </Button>
+          <Button asChild variant="outline" className="flex-1">
+            <Link href="/">
+              <Home className="mr-2 h-4 w-4" />
+              Dashboard
+            </Link>
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }

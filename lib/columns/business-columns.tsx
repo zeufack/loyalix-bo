@@ -2,8 +2,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '../../components/ui/badge';
 import { DataTableColumnHeader } from '../../components/data-table/data-table-column-header';
 import { Business } from '../../types/business';
-import { createActionsColumn } from '../../components/data-table/actions-column';
-import { copyToClipboard } from '../utils';
+import { BusinessActionsCell } from '../../app/(dashboard)/business/business-actions-cell';
 
 export const businessColumns: ColumnDef<Business>[] = [
   {
@@ -55,7 +54,7 @@ export const businessColumns: ColumnDef<Business>[] = [
     ),
     cell: ({ row }) => (
       <Badge variant="outline" className="capitalize">
-        {row.getValue('businessType')}
+        {row.getValue('businessType') || 'N/A'}
       </Badge>
     ),
     filterFn: (row, id, value) => {
@@ -83,7 +82,11 @@ export const businessColumns: ColumnDef<Business>[] = [
       <DataTableColumnHeader column={column} title="Created" />
     ),
     cell: ({ row }) => (
-      <div className="whitespace-nowrap">{row.getValue('createdAt')}</div>
+      <div className="whitespace-nowrap">
+        {row.getValue('createdAt')
+          ? new Date(row.getValue('createdAt')).toLocaleDateString()
+          : 'N/A'}
+      </div>
     ),
     sortingFn: 'datetime'
   },
@@ -107,23 +110,12 @@ export const businessColumns: ColumnDef<Business>[] = [
     ),
     enableSorting: false
   },
-  createActionsColumn<Business>(
-    [
-      {
-        label: 'Copy customer ID',
-        action: (customer: Business) => copyToClipboard(customer.id)
-      },
-      {
-        label: 'View customer',
-        action: (customer: Business) => console.log('View', customer.id),
-        separatorBefore: true
-      },
-      {
-        label: 'Edit customer',
-        action: (customer: Business) => console.log('Edit', customer.id)
-      }
-    ],
-    { enableSorting: false, enableHiding: false }
-  )
+  {
+    id: 'actions',
+    header: () => <span className="sr-only">Actions</span>,
+    cell: ({ row }) => <BusinessActionsCell business={row.original} />,
+    enableSorting: false,
+    enableHiding: false
+  }
 ];
 

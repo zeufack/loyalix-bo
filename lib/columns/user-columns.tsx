@@ -1,12 +1,113 @@
+'use client';
+
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '../../components/ui/badge';
 import { DataTableColumnHeader } from '../../components/data-table/data-table-column-header';
 import { User } from '../../types/user';
-import { createActionsColumn } from '../../components/data-table/actions-column';
 import { copyToClipboard } from '../utils';
-import { Check, X } from 'lucide-react';
+import { Check, X, MoreHorizontal } from 'lucide-react';
+import { createSelectColumn } from '@/components/data-table/data-table-bulk-actions';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
+import { deleteUser } from '@/app/api/user';
+import { useQueryClient } from '@tanstack/react-query';
+import { EditUserForm } from '@/app/(dashboard)/users/edit-user-form';
+
+import { toast } from 'sonner';
+import { getApiErrorMessage } from '@/lib/api-error';
+import { useState } from 'react';
+
+const ActionsCell = ({ user }: { user: User }) => {
+  const queryClient = useQueryClient();
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleCopyId = () => {
+    copyToClipboard(user.id);
+    toast.success('User ID copied to clipboard');
+  };
+
+  const handleDelete = async () => {
+    setLoading(true);
+    try {
+      await deleteUser(user.id);
+      toast.success('User deleted successfully');
+      await queryClient.invalidateQueries({ queryKey: ['users'] });
+      setDeleteOpen(false);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem onClick={handleCopyId}>
+            Copy user ID
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <EditUserForm user={user} />
+          <DropdownMenuSeparator />
+          <AlertDialogTrigger asChild>
+            <DropdownMenuItem className="text-destructive">
+              Delete user
+            </DropdownMenuItem>
+          </AlertDialogTrigger>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete User?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete the user
+            &quot;{user.email}&quot;.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={loading}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {loading ? 'Deleting...' : 'Delete'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
 
 export const userColumns: ColumnDef<User>[] = [
+  createSelectColumn<User>(),
   {
     accessorKey: 'email',
     header: ({ column }) => (
@@ -121,31 +222,10 @@ export const userColumns: ColumnDef<User>[] = [
     ),
     sortingFn: 'datetime'
   },
-  createActionsColumn<User>(
-    [
-      {
-        label: 'Copy user ID',
-        action: (user: User) => copyToClipboard(user.id)
-      },
-      {
-        label: 'View user',
-        action: (user: User) => console.log('View', user.id),
-        separatorBefore: true
-      },
-      {
-        label: 'Edit user',
-        action: (user: User) => console.log('Edit', user.id)
-      }
-      //   {
-      //     label: (user) => (user.isActive ? 'Deactivate' : 'Activate'),
-      //     action: (user: User) => console.log('Toggle Active', user.id),
-      //     separatorBefore: true
-      //   },
-      //   {
-      //     label: 'Reset password',
-      //     action: (user: User) => console.log('Reset password', user.id)
-      //   }
-    ],
-    { enableSorting: false, enableHiding: false }
-  )
+  {
+    id: 'actions',
+    cell: ({ row }) => <ActionsCell user={row.original} />,
+    enableSorting: false,
+    enableHiding: false
+  }
 ];

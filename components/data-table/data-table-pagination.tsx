@@ -16,20 +16,32 @@ import {
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
+  totalItems?: number;
 }
 
 export function DataTablePagination<TData>({
-  table
+  table,
+  totalItems
 }: Readonly<DataTablePaginationProps<TData>>) {
+  const selectedCount = table.getFilteredSelectedRowModel().rows.length;
+  const displayTotal = totalItems ?? table.getFilteredRowModel().rows.length;
+
   return (
-    <div className="flex items-center justify-between px-2">
-      <div className="flex-1 text-sm text-muted-foreground">
-        {table.getFilteredSelectedRowModel().rows.length} of{' '}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
+    <div className="flex flex-col gap-2 px-2 sm:flex-row sm:items-center sm:justify-between">
+      {/* Row count - hidden on very small screens */}
+      <div className="text-sm text-muted-foreground text-center sm:text-left">
+        {selectedCount > 0 ? (
+          <span>{selectedCount} of {displayTotal} row(s) selected.</span>
+        ) : (
+          <span>{displayTotal} total row(s).</span>
+        )}
       </div>
-      <div className="flex items-center space-x-6 lg:space-x-8">
-        <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Rows per page</p>
+
+      {/* Pagination controls */}
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end sm:gap-4 lg:gap-6">
+        {/* Rows per page - hidden on mobile */}
+        <div className="hidden items-center space-x-2 sm:flex">
+          <p className="text-sm font-medium whitespace-nowrap">Rows per page</p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
@@ -48,11 +60,15 @@ export function DataTablePagination<TData>({
             </SelectContent>
           </Select>
         </div>
-        <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+
+        {/* Page indicator */}
+        <div className="flex items-center justify-center text-sm font-medium whitespace-nowrap">
           Page {table.getState().pagination.pageIndex + 1} of{' '}
-          {table.getPageCount()}
+          {table.getPageCount() || 1}
         </div>
-        <div className="flex items-center space-x-2">
+
+        {/* Navigation buttons */}
+        <div className="flex items-center space-x-1 sm:space-x-2">
           <Button
             variant="outline"
             className="hidden h-8 w-8 p-0 lg:flex"

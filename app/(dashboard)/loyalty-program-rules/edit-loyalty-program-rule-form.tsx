@@ -100,7 +100,7 @@ export function EditLoyaltyProgramRuleForm({ loyaltyProgramRule }: EditLoyaltyPr
               id="points"
               type="number"
               className="col-span-3"
-              value={formData.points}
+              value={formData.points ?? ''}
               onChange={handleChange}
             />
           </div>
@@ -110,7 +110,7 @@ export function EditLoyaltyProgramRuleForm({ loyaltyProgramRule }: EditLoyaltyPr
               id="purchaseAmount"
               type="number"
               className="col-span-3"
-              value={formData.purchaseAmount}
+              value={formData.purchaseAmount ?? ''}
               onChange={handleChange}
             />
           </div>

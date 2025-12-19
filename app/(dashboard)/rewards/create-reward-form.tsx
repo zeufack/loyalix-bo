@@ -2,7 +2,7 @@
 
 import AddItemButton from '@/components/ui/add-item-btn';
 import { useState } from 'react';
-import { createCustomer } from '../../api/customer';
+import { createReward } from '../../api/reward';
 import {
   Dialog,
   DialogContent,

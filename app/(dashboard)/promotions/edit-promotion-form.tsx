@@ -1,7 +1,5 @@
 'use client';
 
-'use client';
-
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -104,7 +102,7 @@ export function EditPromotionForm({ promotion }: EditPromotionFormProps) {
               id="startDate"
               type="date"
               className="col-span-3"
-              value={new Date(formData.startDate).toISOString().split('T')[0]}
+              value={formData.startDate ? new Date(formData.startDate).toISOString().split('T')[0] : ''}
               onChange={handleChange}
             />
           </div>
@@ -114,7 +112,7 @@ export function EditPromotionForm({ promotion }: EditPromotionFormProps) {
               id="endDate"
               type="date"
               className="col-span-3"
-              value={new Date(formData.endDate).toISOString().split('T')[0]}
+              value={formData.endDate ? new Date(formData.endDate).toISOString().split('T')[0] : ''}
               onChange={handleChange}
             />
           </div>
