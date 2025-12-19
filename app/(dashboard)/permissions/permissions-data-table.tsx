@@ -11,39 +11,41 @@ import {
 } from '../../../components/ui/card';
 import { useTable } from '../../../hooks/useCustomerTable';
 import { permissionColumns } from '../../../lib/columns/permission-columns';
-import { Permission } from '../../../types/permission';
-import { PaginationState, SortingState } from '@tanstack/react-table';
+import { PaginationState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { getPermissions } from '../../api/permission';
 import { DataTable } from '../../../components/data-table/data-table';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
+import { TableSkeleton } from '../../../components/ui/table-skeleton';
 
-interface PermissionsDataTableProps {
-  initialData?: Permission[];
-}
-
-export default function PermissionsDataTable({
-  initialData = []
-}: PermissionsDataTableProps) {
+export default function PermissionsDataTable() {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10
   });
-  const [sorting, setSorting] = useState<SortingState[]>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['permissions', pagination, sorting],
-    queryFn: () => getPermissions()
+    queryKey: ['permissions', pagination.pageIndex, pagination.pageSize, sorting],
+    queryFn: () => getPermissions({
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+      sortBy: sorting[0]?.id,
+      sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
+    })
   });
 
   const table = useTable({
-    data: data || [],
+    data: data?.data || [],
     columns: permissionColumns,
-    pageCount: data?.length ? Math.ceil(data.length / pagination.pageSize) : 0,
+    pageCount: data?.totalPages || 0,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
     manualPagination: true,
     manualSorting: true,
+    manualFiltering: true
   });
 
   if (error) {
@@ -63,20 +65,23 @@ export default function PermissionsDataTable({
       <CardHeader>
         <CardTitle>Permissions</CardTitle>
         <CardDescription>
-          Manage your permissions and view their activity.
+          Manage permissions and access control.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          <DataTableToolbar
+            table={table}
+            exportFilename="permissions"
+            searchColumn="name"
+            searchPlaceholder="Search permissions..."
+          />
           {isLoading ? (
-            <div>Loading permissions...</div>
+            <TableSkeleton columns={5} rows={5} />
           ) : (
-            <>
-              <DataTableToolbar table={table} />
-              <DataTable table={table} columns={permissionColumns} />
-              <DataTablePagination table={table} />
-            </>
+            <DataTable table={table} columns={permissionColumns} />
           )}
+          <DataTablePagination table={table} totalItems={data?.total} />
         </div>
       </CardContent>
     </Card>

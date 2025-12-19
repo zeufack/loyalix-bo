@@ -11,14 +11,14 @@ import {
 import { ColumnDef } from '@tanstack/react-table';
 import { Fragment } from 'react';
 
-type ActionItem = {
+type ActionItem<T> = {
   label: string;
   action: (data: T) => void;
   separatorBefore?: boolean;
 };
 
 export const createActionsColumn = <T,>(
-  actions: ActionItem[],
+  actions: ActionItem<T>[],
   options?: {
     enableSorting?: boolean;
     enableHiding?: boolean;

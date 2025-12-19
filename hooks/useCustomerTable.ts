@@ -7,19 +7,26 @@ import {
   type ColumnDef,
   type PaginationState,
   type SortingState,
-  type ColumnFiltersState
+  type ColumnFiltersState,
+  type RowSelectionState,
+  type OnChangeFn
 } from '@tanstack/react-table';
 
 interface UseTableProps<TData> {
   data: TData[];
   columns: ColumnDef<TData>[];
   pageCount?: number;
-  onPaginationChange?: (pagination: PaginationState) => void;
-  onSortingChange?: (sorting: SortingState[]) => void;
-  onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
+  onPaginationChange?: OnChangeFn<PaginationState>;
+  onSortingChange?: OnChangeFn<SortingState>;
+  onColumnFiltersChange?: OnChangeFn<ColumnFiltersState>;
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+  state?: {
+    rowSelection?: RowSelectionState;
+  };
   manualPagination?: boolean;
   manualSorting?: boolean;
   manualFiltering?: boolean;
+  enableRowSelection?: boolean;
 }
 
 export function useTable<TData>({
@@ -29,9 +36,12 @@ export function useTable<TData>({
   onPaginationChange,
   onSortingChange,
   onColumnFiltersChange,
+  onRowSelectionChange,
+  state,
   manualPagination = false,
   manualSorting = false,
-  manualFiltering = false
+  manualFiltering = false,
+  enableRowSelection = false
 }: UseTableProps<TData>) {
   const table = useReactTable({
     data,
@@ -40,6 +50,11 @@ export function useTable<TData>({
     onPaginationChange,
     onSortingChange,
     onColumnFiltersChange,
+    onRowSelectionChange,
+    enableRowSelection,
+    state: {
+      ...state
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

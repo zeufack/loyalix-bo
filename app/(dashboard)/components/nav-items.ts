@@ -11,12 +11,19 @@ import {
   Ruler,
   Bell,
   LineChart,
-  Shield
+  Shield,
+  Gift,
+  UserCheck,
+  Trophy,
+  KeyRound,
+  Settings,
+  QrCode
 } from 'lucide-react';
 
 export const mainNavItems = [
   { href: '/', label: 'Dashboard', icon: Home },
   { href: '/business', label: 'Business', icon: Building2 },
+  { href: '/qrcode', label: 'QR Code', icon: QrCode },
   { href: '/loyalty-program', label: 'Loyalty Program', icon: Sprout },
   { href: '/loyalty-program-type', label: 'Loyalty Program Type', icon: Tag },
   {
@@ -25,12 +32,17 @@ export const mainNavItems = [
     icon: ScrollText
   },
   { href: '/customers', label: 'Customers', icon: Users2 },
+  { href: '/customer-enrollments', label: 'Customer Enrollments', icon: UserCheck },
+  { href: '/customers-progress', label: 'Customer Progress', icon: TrendingUp },
   { href: '/rewards', label: 'Rewards', icon: Medal },
+  { href: '/rewards-earned', label: 'Rewards Earned', icon: Trophy },
+  { href: '/reward-types', label: 'Reward Types', icon: Gift },
   { href: '/users', label: 'Users', icon: UserIcon },
-  { href: 'customers-progress', label: 'Customer Progress', icon: TrendingUp },
+  { href: '/roles', label: 'Roles', icon: KeyRound },
   { href: '/promotions', label: 'Promotions', icon: Tag },
   { href: '/rule-types', label: 'Rule Types', icon: Ruler },
   { href: '/event-types', label: 'Event Types', icon: Bell },
   { href: '/activities', label: 'Activities', icon: LineChart },
-  { href: '/permissions', label: 'Permissions', icon: Shield }
+  { href: '/permissions', label: 'Permissions', icon: Shield },
+  { href: '/settings', label: 'Settings', icon: Settings }
 ];

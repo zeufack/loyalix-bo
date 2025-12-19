@@ -2,8 +2,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Customer } from '@/types/customer';
 import { Badge } from '@/components/ui/badge';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import { createActionsColumn } from '@/components/data-table/actions-column';
-import { copyToClipboard } from '@/lib/utils';
+import { CustomerActionsCell } from '@/app/(dashboard)/customers/customer-actions-cell';
 
 export const customerColumns: ColumnDef<Customer>[] = [
   {
@@ -11,7 +10,6 @@ export const customerColumns: ColumnDef<Customer>[] = [
     header: () => <span className="sr-only">Image</span>,
     cell: () => (
       <div className="hidden sm:table-cell w-[100px]">
-        {/*TODO Add image component here */}
         <div className="h-10 w-10 rounded-full bg-muted" />
       </div>
     ),
@@ -28,15 +26,33 @@ export const customerColumns: ColumnDef<Customer>[] = [
       const customer = row.original;
       return (
         <div className="font-medium">
-          {customer.user.firstName} {customer.user.lastName}
+          {customer.user?.firstName || ''} {customer.user?.lastName || ''}
         </div>
       );
     },
     filterFn: (row, id, value) => {
       const customer = row.original;
       const fullName =
-        `${customer.user.firstName} ${customer.user.lastName}`.toLowerCase();
+        `${customer.user?.firstName || ''} ${customer.user?.lastName || ''}`.toLowerCase();
       return fullName.includes(value.toLowerCase());
+    }
+  },
+  {
+    accessorKey: 'user.email',
+    id: 'email',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Email" />
+    ),
+    cell: ({ row }) => {
+      const customer = row.original;
+      return (
+        <a
+          href={`mailto:${customer.user?.email}`}
+          className="text-primary hover:underline"
+        >
+          {customer.user?.email || 'N/A'}
+        </a>
+      );
     }
   },
   {
@@ -77,24 +93,13 @@ export const customerColumns: ColumnDef<Customer>[] = [
       );
     }
   },
-  createActionsColumn<Customer>(
-    [
-      {
-        label: 'Copy customer ID',
-        action: (customer: Customer) => copyToClipboard(customer.id)
-      },
-      {
-        label: 'View customer',
-        action: (customer: Customer) => console.log('View', customer.id),
-        separatorBefore: true
-      },
-      {
-        label: 'Edit customer',
-        action: (customer: Customer) => console.log('Edit', customer.id)
-      }
-    ],
-    { enableSorting: false, enableHiding: false }
-  )
+  {
+    id: 'actions',
+    header: () => <span className="sr-only">Actions</span>,
+    cell: ({ row }) => <CustomerActionsCell customer={row.original} />,
+    enableSorting: false,
+    enableHiding: false
+  }
 ];
 
 

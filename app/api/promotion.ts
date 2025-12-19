@@ -1,9 +1,31 @@
 import { http } from './http';
 import { Promotion } from '@/types/promotion';
+import { PaginationParams, PaginatedResponse } from './business';
 
-export const getPromotions = async (): Promise<Promotion[]> => {
-  const response = await http.get('/promotions');
-  return response.data;
+export const getPromotions = async (
+  params: PaginationParams = {}
+): Promise<PaginatedResponse<Promotion>> => {
+  const { page = 1, limit = 10, sortBy, sortOrder } = params;
+  const response = await http.get('/promotions', {
+    params: { page, limit, sortBy, sortOrder }
+  });
+  // Handle backend response format
+  if (Array.isArray(response.data)) {
+    return {
+      data: response.data,
+      total: response.data.length,
+      page: 1,
+      limit: response.data.length,
+      totalPages: 1
+    };
+  }
+  return {
+    data: response.data.promotions || response.data.data || [],
+    total: response.data.total || 0,
+    page,
+    limit,
+    totalPages: Math.ceil((response.data.total || 0) / limit)
+  };
 };
 
 export const createPromotion = async (data: Partial<Promotion>): Promise<Promotion> => {
@@ -12,7 +34,7 @@ export const createPromotion = async (data: Partial<Promotion>): Promise<Promoti
 };
 
 export const updatePromotion = async (id: string, data: Partial<Promotion>): Promise<Promotion> => {
-  const response = await http.put(`/promotions/${id}`, data);
+  const response = await http.patch(`/promotions/${id}`, data);
   return response.data;
 };
 

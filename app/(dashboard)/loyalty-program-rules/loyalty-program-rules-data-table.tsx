@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { LoyaltyProgramRule } from '../../../types/loyalty-program-rule';
-import { PaginationState } from '../../../types/table';
-import { ColumnFiltersState, SortingState } from '@tanstack/react-table';
+import { ColumnFiltersState, SortingState, PaginationState } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { getLoyaltyProgramRules } from '../../api/loyalty-program-rule';
 import { useTable } from '../../../hooks/useCustomerTable';
@@ -30,8 +29,7 @@ export function LoyaltyProgramRulesDataTable({
     pageIndex: 0,
     pageSize: 10
   });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [sorting, setSorting] = useState<any[]>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const { data, isLoading, error } = useQuery({
@@ -44,7 +42,7 @@ export function LoyaltyProgramRulesDataTable({
     columns: loyaltyProgramRuleColumns,
     pageCount: Math.ceil((data?.length || 0) / pagination.pageSize),
     onPaginationChange: setPagination,
-    onSortingChange: setSorting as (sorting: SortingState) => void,
+    onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     manualPagination: true,
     manualSorting: true,
@@ -72,7 +70,10 @@ export function LoyaltyProgramRulesDataTable({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <DataTableToolbar table={table} />
+          <DataTableToolbar
+            table={table}
+            exportFilename="loyalty-program-rules"
+          />
           <DataTable table={table} columns={loyaltyProgramRuleColumns} />
           <DataTablePagination table={table} />
         </div>

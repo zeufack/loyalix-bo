@@ -2,7 +2,7 @@
 
 import AddItemButton from '@/components/ui/add-item-btn';
 import { useState } from 'react';
-import { createCustomer } from '../../api/customer';
+import { createLoyaltyProgramType } from '../../api/loyalty-program-type';
 import {
   Dialog,
   DialogContent,
@@ -15,14 +15,17 @@ import {
 import { Label } from '../../../components/ui/label';
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function CreateLoyaltyProgramTypeForm() {
+  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -33,7 +36,9 @@ export function CreateLoyaltyProgramTypeForm() {
     setError(null);
     try {
       await createLoyaltyProgramType(formData);
-      // Optionally, you can close the dialog and refresh the loyalty program type list here.
+      queryClient.invalidateQueries({ queryKey: ['loyalty-program-type'] });
+      setFormData({ name: '', description: '' });
+      setOpen(false);
     } catch (error) {
       setError('Failed to create loyalty program type.');
     } finally {
@@ -42,7 +47,7 @@ export function CreateLoyaltyProgramTypeForm() {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <AddItemButton title="Create Loyalty Program Type" />
       </DialogTrigger>

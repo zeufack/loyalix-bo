@@ -7,102 +7,140 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger
+  DialogTitle
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useEffect, useState } from 'react';
 import { updateBusiness } from '@/app/api/business';
 import { Business } from '@/types/business';
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
+import { updateBusinessSchema, BusinessFormData } from '@/lib/validations';
+import { getApiErrorMessage } from '@/lib/api-error';
 
 interface EditBusinessFormProps {
   business: Business;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function EditBusinessForm({ business }: EditBusinessFormProps) {
-  const [formData, setFormData] = useState<Partial<Business>>({
+export function EditBusinessForm({ business, open, onOpenChange }: EditBusinessFormProps) {
+  const [formData, setFormData] = useState<Partial<BusinessFormData>>({
     name: '',
     email: '',
-    phoneNumber: ''
+    phone: ''
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (business) {
+    if (business && open) {
       setFormData({
-        name: business.name,
-        email: business.email,
-        phoneNumber: business.phoneNumber
+        name: business.name || '',
+        email: business.email || '',
+        phone: business.phone || ''
       });
+      setErrors({});
     }
-  }, [business]);
+  }, [business, open]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+    if (errors[id]) {
+      setErrors({ ...errors, [id]: '' });
+    }
   };
 
   const handleSubmit = async () => {
     setLoading(true);
-    setError(null);
+    setErrors({});
+
+    const result = updateBusinessSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      setLoading(false);
+      return;
+    }
+
     try {
-      await updateBusiness(business.id, formData);
-      // Optionally, you can close the dialog and refresh the business list here.
+      await updateBusiness(business.id, result.data);
+      toast.success('Business updated successfully');
+      await queryClient.invalidateQueries({ queryKey: ['business'] });
+      onOpenChange(false);
     } catch (error) {
-      setError('Failed to update business.');
+      toast.error(getApiErrorMessage(error));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Open menu</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-dots-horizontal"><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/></svg>
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Business</DialogTitle>
           <DialogDescription>
-            Fill in the details below to edit the business.
+            Update the business details below.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              className="col-span-3"
-              value={formData.name}
-              onChange={handleChange}
-            />
+            <div className="col-span-3 space-y-1">
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={handleChange}
+                className={errors.name ? 'border-red-500' : ''}
+              />
+              {errors.name && (
+                <p className="text-sm text-red-500">{errors.name}</p>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              className="col-span-3"
-              value={formData.email}
-              onChange={handleChange}
-            />
+            <div className="col-span-3 space-y-1">
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                className={errors.email ? 'border-red-500' : ''}
+              />
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email}</p>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="phoneNumber">Phone Number</Label>
-            <Input
-              id="phoneNumber"
-              className="col-span-3"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-            />
+            <Label htmlFor="phone">Phone</Label>
+            <div className="col-span-3 space-y-1">
+              <Input
+                id="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                className={errors.phone ? 'border-red-500' : ''}
+              />
+              {errors.phone && (
+                <p className="text-sm text-red-500">{errors.phone}</p>
+              )}
+            </div>
           </div>
-          {error && <p className="text-red-500">{error}</p>}
         </div>
         <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? 'Updating...' : 'Update'}
           </Button>

@@ -10,38 +10,36 @@ import {
   CardTitle
 } from '@/components/ui/card';
 import { getCustomers } from '@/app/api/customer';
-import { PaginationState, ColumnFiltersState } from '@tanstack/react-table';
-import { Customer } from '@/types/customer';
+import { PaginationState, ColumnFiltersState, SortingState } from '@tanstack/react-table';
 import { customerColumns } from '@/lib/columns/customer-columns';
 import { DataTable } from '@/components/data-table/data-table';
 import { useTable } from '@/hooks/useCustomerTable';
 import { DataTablePagination } from '@/components/data-table/data-table-pagination';
 import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
-import { SortingState } from '@/types/table';
+import { TableSkeleton } from '@/components/ui/table-skeleton';
 
-interface CustomersDataTableProps {
-  initialData?: Customer[];
-}
-
-export function CustomersDataTable({
-  initialData = []
-}: CustomersDataTableProps) {
+export function CustomersDataTable() {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10
   });
-  const [sorting, setSorting] = useState<SortingState[]>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['customers', pagination, sorting],
-    queryFn: () => getCustomers()
+    queryKey: ['customers', pagination.pageIndex, pagination.pageSize, sorting],
+    queryFn: () => getCustomers({
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+      sortBy: sorting[0]?.id,
+      sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
+    })
   });
 
   const table = useTable({
-    data: data?.customers || [],
+    data: data?.data || [],
     columns: customerColumns,
-    pageCount: data?.total ? Math.ceil(data.total / pagination.pageSize) : 0,
+    pageCount: data?.totalPages || 0,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -72,9 +70,18 @@ export function CustomersDataTable({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <DataTableToolbar table={table} />
-          <DataTable table={table} columns={customerColumns} />
-          <DataTablePagination table={table} />
+          <DataTableToolbar
+            table={table}
+            exportFilename="customers"
+            searchColumn="name"
+            searchPlaceholder="Search customers..."
+          />
+          {isLoading ? (
+            <TableSkeleton columns={5} rows={5} />
+          ) : (
+            <DataTable table={table} columns={customerColumns} />
+          )}
+          <DataTablePagination table={table} totalItems={data?.total} />
         </div>
       </CardContent>
     </Card>

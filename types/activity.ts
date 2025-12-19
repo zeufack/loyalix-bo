@@ -1,6 +1,13 @@
 export interface Activity {
   id: string;
-  description: string;
   userId: string;
+  type: string;
+  metadata?: Record<string, any>;
   createdAt: Date;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }

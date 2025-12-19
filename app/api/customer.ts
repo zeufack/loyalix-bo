@@ -1,18 +1,35 @@
-import { Customer } from '@/types/customer';
+import { Customer, CreateCustomerDto } from '@/types/customer';
 import { http } from './http';
+import { PaginationParams, PaginatedResponse } from './business';
 
 export const getCustomers = async (
-  page: number = 1,
-  limit: number = 10
-): Promise<{ customers: Customer[]; total: number }> => {
+  params: PaginationParams = {}
+): Promise<PaginatedResponse<Customer>> => {
+  const { page = 1, limit = 10, sortBy, sortOrder } = params;
   const response = await http.get('/customer', {
-    params: { page, limit }
+    params: { page, limit, sortBy, sortOrder }
   });
-  return response.data;
+  // Handle backend response format
+  if (Array.isArray(response.data)) {
+    return {
+      data: response.data,
+      total: response.data.length,
+      page: 1,
+      limit: response.data.length,
+      totalPages: 1
+    };
+  }
+  return {
+    data: response.data.customers || response.data.data || [],
+    total: response.data.total || 0,
+    page,
+    limit,
+    totalPages: Math.ceil((response.data.total || 0) / limit)
+  };
 };
 
 export const createCustomer = async (
-  data: Partial<Customer>
+  data: CreateCustomerDto
 ): Promise<Customer> => {
   const response = await http.post('/customer', data);
   return response.data;
@@ -22,7 +39,7 @@ export const updateCustomer = async (
   id: string,
   data: Partial<Customer>
 ): Promise<Customer> => {
-  const response = await http.put(`/customer/${id}`, data);
+  const response = await http.patch(`/customer/${id}`, data);
   return response.data;
 };
 

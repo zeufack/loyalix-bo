@@ -2,10 +2,16 @@ import { User } from './user';
 
 export interface Customer {
   id: string;
-  user: Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'isActive'>; // You'll also need a User type
-  deviceToken?: string; // nullable → optional
+  user: Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'isActive'>;
+  deviceToken?: string;
   createdAt: Date;
-  lastActive?: Date; // nullable → optional
-  // enrollments?: CustomerEnrollment[]; // relations are optional
+  lastActive?: Date;
   notifications?: Notification[];
+}
+
+export interface CreateCustomerDto {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
 }

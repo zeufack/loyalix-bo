@@ -13,7 +13,7 @@ export const RoleGate = ({ children, allowedRoles }: RoleGateProps) => {
     return null;
   }
 
-  const hasAccess = roles.some((role) => allowedRoles.includes(role));
+  const hasAccess = roles.some((role) => allowedRoles.includes(role as UserRole));
 
   if (!hasAccess) {
     return null;

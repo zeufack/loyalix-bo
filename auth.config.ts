@@ -31,7 +31,7 @@ export const authConfig = {
             throw new Error(responseBody.message || 'Authentication failed');
           }
 
-          const { accessToken, refreshToken, user } = responseBody;
+          const { accessToken, refreshToken, user } = responseBody.data;
           return {
             id: user.id,
             email: user.email,
@@ -70,7 +70,7 @@ export const authConfig = {
       // Access token has expired, try to refresh it
       const refreshed = await refreshAccessToken(token as any);
 
-      if (refreshed.signOut) {
+      if ('signOut' in refreshed && refreshed.signOut) {
         return null;
       }
 
