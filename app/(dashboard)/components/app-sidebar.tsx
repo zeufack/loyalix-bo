@@ -23,7 +23,7 @@ export function AppSidebar() {
             <span>Loyalix</span>
           </Link>
         </div>
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 ">
           <nav
             className="grid items-start px-2 text-sm font-medium lg:px-4"
             aria-label="Main navigation"
@@ -33,7 +33,7 @@ export function AppSidebar() {
             ))}
           </nav>
         </div>
-        <div className="mt-auto p-4">
+        {/* <div className="mt-auto p-4">
           <nav
             className="grid items-start px-2 text-sm font-medium lg:px-4"
             aria-label="Settings navigation"
@@ -46,7 +46,7 @@ export function AppSidebar() {
               Settings
             </Link>
           </nav>
-        </div>
+        </div> */}
       </div>
     </aside>
   );

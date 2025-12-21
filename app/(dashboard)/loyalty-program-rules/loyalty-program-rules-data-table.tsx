@@ -33,14 +33,20 @@ export function LoyaltyProgramRulesDataTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['loyalty-program-rules'],
-    queryFn: () => getLoyaltyProgramRules()
+    queryKey: ['loyalty-program-rules', pagination, sorting],
+    queryFn: () =>
+      getLoyaltyProgramRules({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        sortBy: sorting[0]?.id,
+        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
+      })
   });
 
   const table = useTable({
-    data: data || [],
+    data: data?.data || [],
     columns: loyaltyProgramRuleColumns,
-    pageCount: Math.ceil((data?.length || 0) / pagination.pageSize),
+    pageCount: data?.totalPages || 0,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
