@@ -2,38 +2,56 @@ import { http } from './http';
 import { EventType } from '@/types/event-type';
 import { PaginationParams, PaginatedResponse } from './business';
 
+interface BackendPaginatedResponse<T> {
+  items: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+function transformPaginatedResponse<T>(
+  response: BackendPaginatedResponse<T>
+): PaginatedResponse<T> {
+  return {
+    data: response.items,
+    total: response.meta.total,
+    page: response.meta.page,
+    limit: response.meta.limit,
+    totalPages: response.meta.totalPages,
+  };
+}
+
 export const getEventTypes = async (
   params: PaginationParams = {}
 ): Promise<PaginatedResponse<EventType>> => {
   const { page = 1, limit = 10, sortBy, sortOrder } = params;
-  const response = await http.get('/event-types', {
-    params: { page, limit, sortBy, sortOrder }
-  });
-  if (Array.isArray(response.data)) {
-    return {
-      data: response.data,
-      total: response.data.length,
-      page: 1,
-      limit: response.data.length,
-      totalPages: 1
-    };
-  }
-  return {
-    data: response.data.eventTypes || response.data.data || [],
-    total: response.data.total || 0,
-    page,
-    limit,
-    totalPages: Math.ceil((response.data.total || 0) / limit)
-  };
+  const response = await http.get<BackendPaginatedResponse<EventType>>(
+    '/event-types',
+    { params: { page, limit, sortBy, sortOrder } }
+  );
+  return transformPaginatedResponse(response.data);
 };
 
-export const createEventType = async (data: Partial<EventType>): Promise<EventType> => {
-  const response = await http.post('/event-types', data);
+export const getEventType = async (id: string): Promise<EventType> => {
+  const response = await http.get<EventType>(`/event-types/${id}`);
   return response.data;
 };
 
-export const updateEventType = async (id: string, data: Partial<EventType>): Promise<EventType> => {
-  const response = await http.patch(`/event-types/${id}`, data);
+export const createEventType = async (
+  data: Partial<EventType>
+): Promise<EventType> => {
+  const response = await http.post<EventType>('/event-types', data);
+  return response.data;
+};
+
+export const updateEventType = async (
+  id: string,
+  data: Partial<EventType>
+): Promise<EventType> => {
+  const response = await http.patch<EventType>(`/event-types/${id}`, data);
   return response.data;
 };
 
@@ -42,6 +60,6 @@ export const deleteEventType = async (id: string): Promise<void> => {
 };
 
 export const getTotalEventTypes = async (): Promise<number> => {
-  const response = await http.get('/event-types/count');
+  const response = await http.get<number>('/event-types/count');
   return response.data;
 };

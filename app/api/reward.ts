@@ -2,38 +2,54 @@ import { http } from './http';
 import { Reward } from '@/types/reward';
 import { PaginationParams, PaginatedResponse } from './business';
 
+interface BackendPaginatedResponse<T> {
+  items: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+function transformPaginatedResponse<T>(
+  response: BackendPaginatedResponse<T>
+): PaginatedResponse<T> {
+  return {
+    data: response.items,
+    total: response.meta.total,
+    page: response.meta.page,
+    limit: response.meta.limit,
+    totalPages: response.meta.totalPages,
+  };
+}
+
 export const getRewards = async (
   params: PaginationParams = {}
 ): Promise<PaginatedResponse<Reward>> => {
   const { page = 1, limit = 10, sortBy, sortOrder } = params;
-  const response = await http.get('/rewards', {
-    params: { page, limit, sortBy, sortOrder }
-  });
-  if (Array.isArray(response.data)) {
-    return {
-      data: response.data,
-      total: response.data.length,
-      page: 1,
-      limit: response.data.length,
-      totalPages: 1
-    };
-  }
-  return {
-    data: response.data.rewards || response.data.data || [],
-    total: response.data.total || 0,
-    page,
-    limit,
-    totalPages: Math.ceil((response.data.total || 0) / limit)
-  };
+  const response = await http.get<BackendPaginatedResponse<Reward>>(
+    '/rewards',
+    { params: { page, limit, sortBy, sortOrder } }
+  );
+  return transformPaginatedResponse(response.data);
 };
 
-export const createReward = async (data: Partial<Reward>): Promise<Reward> => {
-  const response = await http.post('/rewards', data);
+export const getReward = async (id: string): Promise<Reward> => {
+  const response = await http.get<Reward>(`/rewards/${id}`);
   return response.data;
 };
 
-export const updateReward = async (id: string, data: Partial<Reward>): Promise<Reward> => {
-  const response = await http.patch(`/rewards/${id}`, data);
+export const createReward = async (data: Partial<Reward>): Promise<Reward> => {
+  const response = await http.post<Reward>('/rewards', data);
+  return response.data;
+};
+
+export const updateReward = async (
+  id: string,
+  data: Partial<Reward>
+): Promise<Reward> => {
+  const response = await http.patch<Reward>(`/rewards/${id}`, data);
   return response.data;
 };
 
@@ -42,6 +58,6 @@ export const deleteReward = async (id: string): Promise<void> => {
 };
 
 export const getTotalRewards = async (): Promise<number> => {
-  const response = await http.get('/rewards/count');
+  const response = await http.get<number>('/rewards/count');
   return response.data;
 };
