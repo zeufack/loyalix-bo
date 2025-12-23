@@ -1,4 +1,4 @@
-import { Business } from '@/types/business';
+import { Business, CreateBusinessPayload } from '@/types/business';
 import { http } from './http';
 
 export interface PaginationParams {
@@ -58,7 +58,7 @@ export const getBusiness = async (id: string): Promise<Business> => {
 };
 
 export const createBusiness = async (
-  data: Partial<Business>
+  data: CreateBusinessPayload
 ): Promise<Business> => {
   const response = await http.post<Business>('/business', data);
   return response.data;

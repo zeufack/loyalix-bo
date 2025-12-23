@@ -33,20 +33,6 @@ export function AppSidebar() {
             ))}
           </nav>
         </div>
-        {/* <div className="mt-auto p-4">
-          <nav
-            className="grid items-start px-2 text-sm font-medium lg:px-4"
-            aria-label="Settings navigation"
-          >
-            <Link
-              href="/settings"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
-            >
-              <Settings className="h-4 w-4" aria-hidden="true" />
-              Settings
-            </Link>
-          </nav>
-        </div> */}
       </div>
     </aside>
   );

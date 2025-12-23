@@ -48,13 +48,13 @@ export const businessColumns: ColumnDef<Business>[] = [
     )
   },
   {
-    accessorKey: 'businessType',
+    accessorKey: 'industryType',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Type" />
+      <DataTableColumnHeader column={column} title="Industry Type" />
     ),
     cell: ({ row }) => (
       <Badge variant="outline" className="capitalize">
-        {row.getValue('businessType') || 'N/A'}
+        {row.getValue('industryType') || 'N/A'}
       </Badge>
     ),
     filterFn: (row, id, value) => {

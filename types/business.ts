@@ -1,11 +1,13 @@
 export interface Business {
   id: string;
   name: string;
-  phone: string;
+  phone?: string;
   email: string;
-  businessType: string;
+  description?: string | null;
+  industryType: string;
   address?: string | null;
-  qrSecret: string;
+  owner?: string;
+  qrSecret?: string;
   createdAt: Date;
   updatedAt: Date;
   staff?: any[];
@@ -14,13 +16,18 @@ export interface Business {
 
 export type BusinessTableItem = Pick<
   Business,
-  'id' | 'name' | 'email' | 'phone' | 'businessType' | 'createdAt'
+  'id' | 'name' | 'email' | 'phone' | 'industryType' | 'createdAt'
 > & {
   staffCount: number;
   programsCount: number;
 };
 
-export type BusinessCreatePayload = Omit<
-  Business,
-  'id' | 'createdAt' | 'updatedAt' | 'staff' | 'programs'
->;
+export interface CreateBusinessPayload {
+  name: string;
+  email: string;
+  phone?: string;
+  description?: string;
+  industryType: string;
+  address?: string;
+  owner: string;
+}

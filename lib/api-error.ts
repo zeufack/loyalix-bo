@@ -1,12 +1,29 @@
 import { AxiosError } from 'axios';
 
 /**
+ * Backend error detail structure (validation errors)
+ */
+export interface ErrorDetail {
+  field: string;
+  message: string;
+}
+
+/**
+ * Backend structured error response
+ * Matches the HttpExceptionFilter format from loyalix-backend
+ */
+export interface BackendError {
+  code: string;
+  message: string;
+  details?: ErrorDetail[];
+  documentation_url?: string;
+}
+
+/**
  * API Error Response structure from backend
  */
 export interface ApiErrorResponse {
-  message: string | string[];
-  error?: string;
-  statusCode?: number;
+  error: BackendError;
 }
 
 /**
@@ -28,11 +45,13 @@ export enum ErrorCategory {
  */
 export interface ApiError {
   message: string;
+  code: string;
   category: ErrorCategory;
   statusCode?: number;
   isRetryable: boolean;
   originalError: unknown;
-  validationErrors?: string[];
+  validationErrors?: ErrorDetail[];
+  documentationUrl?: string;
 }
 
 /**
@@ -60,9 +79,7 @@ function isBrowser(): boolean {
  * Check if the error is a network/connectivity error
  */
 function isNetworkError(error: AxiosError): boolean {
-  // No response means network issue
   if (!error.response) {
-    // Check for known network error codes
     if (
       error.code === 'ERR_NETWORK' ||
       error.code === 'ECONNABORTED' ||
@@ -71,17 +88,43 @@ function isNetworkError(error: AxiosError): boolean {
     ) {
       return true;
     }
-    // Check navigator.onLine only in browser
     if (isBrowser() && !navigator.onLine) {
       return true;
     }
-    return true; // No response generally means network issue
+    return true;
   }
   return false;
 }
 
 /**
- * Determine error category from status code
+ * Map backend error code to error category
+ */
+function getCategoryFromErrorCode(code: string): ErrorCategory {
+  const upperCode = code.toUpperCase();
+
+  if (upperCode.includes('UNAUTHORIZED') || upperCode.includes('FORBIDDEN')) {
+    return ErrorCategory.AUTH;
+  }
+  if (upperCode.includes('NOT_FOUND')) {
+    return ErrorCategory.NOT_FOUND;
+  }
+  if (upperCode.includes('CONFLICT')) {
+    return ErrorCategory.CONFLICT;
+  }
+  if (upperCode.includes('BAD_REQUEST') || upperCode.includes('VALIDATION')) {
+    return ErrorCategory.VALIDATION;
+  }
+  if (upperCode.includes('TOO_MANY_REQUESTS')) {
+    return ErrorCategory.RATE_LIMIT;
+  }
+  if (upperCode.includes('INTERNAL_SERVER_ERROR') || upperCode.includes('SERVER')) {
+    return ErrorCategory.SERVER;
+  }
+  return ErrorCategory.UNKNOWN;
+}
+
+/**
+ * Determine error category from status code (fallback)
  */
 function getCategoryFromStatus(status: number): ErrorCategory {
   if (status === 401 || status === 403) return ErrorCategory.AUTH;
@@ -97,25 +140,25 @@ function getCategoryFromStatus(status: number): ErrorCategory {
  * Check if error is retryable
  */
 function isRetryableError(category: ErrorCategory, statusCode?: number): boolean {
-  // Network errors are retryable
   if (category === ErrorCategory.NETWORK) return true;
-  // Rate limit errors are retryable after waiting
   if (category === ErrorCategory.RATE_LIMIT) return true;
-  // Server errors (5xx) except 501 are retryable
   if (category === ErrorCategory.SERVER && statusCode !== 501) return true;
-  // 408 Request Timeout is retryable
   if (statusCode === 408) return true;
   return false;
 }
 
 /**
- * Extract validation errors from response
+ * Type guard to check if response data matches backend error format
  */
-function extractValidationErrors(data: ApiErrorResponse): string[] {
-  if (Array.isArray(data.message)) {
-    return data.message;
-  }
-  return [];
+function isBackendErrorResponse(data: unknown): data is ApiErrorResponse {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'error' in data &&
+    typeof (data as ApiErrorResponse).error === 'object' &&
+    (data as ApiErrorResponse).error !== null &&
+    typeof (data as ApiErrorResponse).error.message === 'string'
+  );
 }
 
 /**
@@ -128,6 +171,7 @@ export function parseApiError(error: unknown): ApiError {
     if (isNetworkError(error)) {
       return {
         message: ERROR_MESSAGES[ErrorCategory.NETWORK],
+        code: 'NETWORK_ERROR',
         category: ErrorCategory.NETWORK,
         isRetryable: true,
         originalError: error,
@@ -135,33 +179,59 @@ export function parseApiError(error: unknown): ApiError {
     }
 
     const status = error.response?.status;
-    const data = error.response?.data as ApiErrorResponse | undefined;
-    const category = status ? getCategoryFromStatus(status) : ErrorCategory.UNKNOWN;
+    const data = error.response?.data;
 
-    // Extract message from response
+    // Handle backend structured error format: { error: { code, message, details, documentation_url } }
+    if (isBackendErrorResponse(data)) {
+      const backendError = data.error;
+      const category = getCategoryFromErrorCode(backendError.code);
+
+      return {
+        message: backendError.message,
+        code: backendError.code,
+        category,
+        statusCode: status,
+        isRetryable: isRetryableError(category, status),
+        originalError: error,
+        validationErrors: backendError.details,
+        documentationUrl: backendError.documentation_url,
+      };
+    }
+
+    // Fallback for non-standard error responses
+    const category = status ? getCategoryFromStatus(status) : ErrorCategory.UNKNOWN;
     let message = ERROR_MESSAGES[category];
-    if (data?.message) {
-      message = Array.isArray(data.message) ? data.message[0] : data.message;
-    } else if (data?.error) {
-      message = data.error;
+
+    // Try to extract message from various formats
+    if (typeof data === 'string') {
+      message = data;
+    } else if (typeof data === 'object' && data !== null) {
+      const legacyData = data as { message?: string | string[]; error?: string };
+      if (legacyData.message) {
+        message = Array.isArray(legacyData.message)
+          ? legacyData.message.join(', ')
+          : legacyData.message;
+      } else if (legacyData.error && typeof legacyData.error === 'string') {
+        message = legacyData.error;
+      }
     }
 
     return {
       message,
+      code: category.toUpperCase(),
       category,
       statusCode: status,
       isRetryable: isRetryableError(category, status),
       originalError: error,
-      validationErrors: category === ErrorCategory.VALIDATION ? extractValidationErrors(data || { message: '' }) : undefined,
     };
   }
 
   // Handle regular Error objects
   if (error instanceof Error) {
-    // Check for network-related error messages
     if (error.message.includes('fetch') || error.message.includes('network')) {
       return {
         message: ERROR_MESSAGES[ErrorCategory.NETWORK],
+        code: 'NETWORK_ERROR',
         category: ErrorCategory.NETWORK,
         isRetryable: true,
         originalError: error,
@@ -170,6 +240,7 @@ export function parseApiError(error: unknown): ApiError {
 
     return {
       message: error.message,
+      code: 'UNKNOWN_ERROR',
       category: ErrorCategory.UNKNOWN,
       isRetryable: false,
       originalError: error,
@@ -179,6 +250,7 @@ export function parseApiError(error: unknown): ApiError {
   // Handle unknown errors
   return {
     message: ERROR_MESSAGES[ErrorCategory.UNKNOWN],
+    code: 'UNKNOWN_ERROR',
     category: ErrorCategory.UNKNOWN,
     isRetryable: false,
     originalError: error,
@@ -187,40 +259,49 @@ export function parseApiError(error: unknown): ApiError {
 
 /**
  * Get user-friendly error message from any error
- * @deprecated Use parseApiError() for more control, or getApiErrorMessage() for simple cases
  */
 export function getApiErrorMessage(error: unknown): string {
   return parseApiError(error).message;
 }
 
 /**
+ * Get error code from any error
+ */
+export function getApiErrorCode(error: unknown): string {
+  return parseApiError(error).code;
+}
+
+/**
  * Check if error is an authentication error
  */
 export function isAuthError(error: unknown): boolean {
-  const parsed = parseApiError(error);
-  return parsed.category === ErrorCategory.AUTH;
+  return parseApiError(error).category === ErrorCategory.AUTH;
 }
 
 /**
  * Check if error is a network error
  */
 export function isNetworkErrorType(error: unknown): boolean {
-  const parsed = parseApiError(error);
-  return parsed.category === ErrorCategory.NETWORK;
+  return parseApiError(error).category === ErrorCategory.NETWORK;
 }
 
 /**
  * Check if error can be retried
  */
 export function canRetry(error: unknown): boolean {
-  const parsed = parseApiError(error);
-  return parsed.isRetryable;
+  return parseApiError(error).isRetryable;
 }
 
 /**
  * Get validation errors array if available
  */
-export function getValidationErrors(error: unknown): string[] {
-  const parsed = parseApiError(error);
-  return parsed.validationErrors || [];
+export function getValidationErrors(error: unknown): ErrorDetail[] {
+  return parseApiError(error).validationErrors || [];
+}
+
+/**
+ * Get documentation URL if available
+ */
+export function getDocumentationUrl(error: unknown): string | undefined {
+  return parseApiError(error).documentationUrl;
 }
