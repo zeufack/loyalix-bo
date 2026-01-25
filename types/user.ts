@@ -1,10 +1,8 @@
-export enum UserRole {
-  SUPER_ADMIN = 'SUPER_ADMIN',
-  ADMIN = 'ADMIN',
-  BUSINESS_OWNER = 'BUSINESS_OWNER',
-  STAFF = 'STAFF',
-  CUSTOMER = 'CUSTOMER'
-}
+// Import and re-export Role from shared types as UserRole for backwards compatibility
+import { Role } from '@loyal-ix/loyalix-shared-types';
+export { Role };
+export const UserRole = Role;
+export type UserRole = Role;
 
 export interface User {
   id: string;
@@ -15,9 +13,8 @@ export interface User {
   phoneNumber?: string | null;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
-  isEmailVerified: boolean;
+  isVerified: boolean;
   emailVerificationToken?: string;
-  isActive: boolean;
   roles: UserRole[];
   createdAt: Date;
   updatedAt: Date;

@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@loyal-ix/loyalix-shared-types':
+        specifier: ^1.0.0
+        version: 1.0.0
       '@neondatabase/serverless':
         specifier: ^0.9.5
         version: 0.9.5
@@ -688,6 +691,9 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@loyal-ix/loyalix-shared-types@1.0.0':
+    resolution: {integrity: sha512-FzscGKt9Vj4aS1GKO0sBDxSEQV2MWPrxm1BRYnBB1Rn16HwkcA9iaHqQnhxFbhZSd2C2Wrbb5R/bm1gAPNqEbA==}
 
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
@@ -4033,6 +4039,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@loyal-ix/loyalix-shared-types@1.0.0': {}
 
   '@napi-rs/wasm-runtime@0.2.12':
     dependencies:

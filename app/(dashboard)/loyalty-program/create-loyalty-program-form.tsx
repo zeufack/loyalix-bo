@@ -1,6 +1,5 @@
 'use client';
 
-import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -13,41 +12,99 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { useState } from 'react';
 import { createLoyaltyProgram } from '@/app/api/loyalty-program';
-import AddItemButton from '../../../components/ui/add-item-btn'; // No-op change
+import { getBusinesses } from '@/app/api/business';
+import AddItemButton from '@/components/ui/add-item-btn';
+import { toast } from 'sonner';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getApiErrorMessage } from '@/lib/api-error';
+import { z } from 'zod';
+import type { CreateLoyaltyProgramDto } from '@loyal-ix/loyalix-shared-types';
+
+const createLoyaltyProgramSchema = z.object({
+  businessId: z.string().min(1, 'Please select a business'),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  isActive: z.boolean().optional()
+});
 
 export function CreateLoyaltyProgramForm() {
-  const [formData, setFormData] = useState({
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState<CreateLoyaltyProgramDto>({
+    businessId: '',
     name: '',
-    description: '',
-    type: '',
-    businessId: ''
+    isActive: true
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const queryClient = useQueryClient();
+
+  const { data: businessesData } = useQuery({
+    queryKey: ['businesses'],
+    queryFn: () => getBusinesses({ limit: 100 }),
+    enabled: open
+  });
+
+  const businesses = businessesData?.data || [];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+    if (errors[id]) {
+      setErrors({ ...errors, [id]: '' });
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({ businessId: '', name: '', isActive: true });
+    setErrors({});
   };
 
   const handleSubmit = async () => {
     setLoading(true);
-    setError(null);
+    setErrors({});
+
+    const result = createLoyaltyProgramSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      setLoading(false);
+      return;
+    }
+
     try {
-      await createLoyaltyProgram(formData);
-      // Optionally, you can close the dialog and refresh the loyalty program list here.
+      await createLoyaltyProgram(result.data);
+      toast.success('Loyalty program created successfully');
+      await queryClient.invalidateQueries({ queryKey: ['loyalty-programs'] });
+      resetForm();
+      setOpen(false);
     } catch (error) {
-      setError('Failed to create loyalty program.');
+      toast.error(getApiErrorMessage(error));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) resetForm();
+    }}>
       <DialogTrigger asChild>
-        <AddItemButton title="Create Loyalty Program"></AddItemButton>
+        <AddItemButton title="Create Loyalty Program" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -58,44 +115,59 @@ export function CreateLoyaltyProgramForm() {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              className="col-span-3"
-              value={formData.name}
-              onChange={handleChange}
-            />
+            <Label htmlFor="businessId">Business *</Label>
+            <div className="col-span-3 space-y-1">
+              <Select
+                value={formData.businessId}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, businessId: value });
+                  if (errors.businessId) setErrors({ ...errors, businessId: '' });
+                }}
+              >
+                <SelectTrigger className={errors.businessId ? 'border-red-500' : ''}>
+                  <SelectValue placeholder="Select a business" />
+                </SelectTrigger>
+                <SelectContent>
+                  {businesses.map((business) => (
+                    <SelectItem key={business.id} value={business.id}>
+                      {business.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.businessId && (
+                <p className="text-sm text-red-500">{errors.businessId}</p>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description">Description</Label>
-            <Input
-              id="description"
-              className="col-span-3"
-              value={formData.description}
-              onChange={handleChange}
-            />
+            <Label htmlFor="name">Name *</Label>
+            <div className="col-span-3 space-y-1">
+              <Input
+                id="name"
+                placeholder="e.g., Premium Rewards"
+                value={formData.name}
+                onChange={handleChange}
+                className={errors.name ? 'border-red-500' : ''}
+              />
+              {errors.name && (
+                <p className="text-sm text-red-500">{errors.name}</p>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="type">Type</Label>
-            <Input
-              id="type"
-              className="col-span-3"
-              value={formData.type}
-              onChange={handleChange}
+            <Label htmlFor="isActive">Active</Label>
+            <Switch
+              id="isActive"
+              checked={formData.isActive}
+              onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="businessId">Business ID</Label>
-            <Input
-              id="businessId"
-              className="col-span-3"
-              value={formData.businessId}
-              onChange={handleChange}
-            />
-          </div>
-          {error && <p className="text-red-500">{error}</p>}
         </div>
         <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? 'Creating...' : 'Create'}
           </Button>

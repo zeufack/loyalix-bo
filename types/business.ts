@@ -1,17 +1,24 @@
+// Import and re-export BusinessStatus from shared types
+import { BusinessStatus } from '@loyal-ix/loyalix-shared-types';
+export { BusinessStatus };
+
 export interface Business {
   id: string;
   name: string;
   phone?: string;
   email: string;
   description?: string | null;
-  industryType: string;
+  industryType?: {
+    id: string;
+    name: string;
+  };
   address?: string | null;
-  owner?: string;
   qrSecret?: string;
+  status: BusinessStatus;
   createdAt: Date;
   updatedAt: Date;
-  staff?: any[];
-  programs?: any[];
+  staffMembers?: any[];
+  loyaltyPrograms?: any[];
 }
 
 export type BusinessTableItem = Pick<
@@ -30,4 +37,13 @@ export interface CreateBusinessPayload {
   industryType: string;
   address?: string;
   owner: string;
+}
+
+export interface UpdateBusinessPayload {
+  name?: string;
+  email?: string;
+  phone?: string;
+  description?: string;
+  industryType?: string;
+  address?: string;
 }

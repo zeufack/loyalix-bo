@@ -16,8 +16,9 @@ import { updateBusiness } from '@/app/api/business';
 import { Business } from '@/types/business';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
-import { updateBusinessSchema, BusinessFormData } from '@/lib/validations';
+import { updateBusinessSchema } from '@/lib/validations';
 import { getApiErrorMessage } from '@/lib/api-error';
+import type { UpdateBusinessDto } from '@loyal-ix/loyalix-shared-types';
 
 interface EditBusinessFormProps {
   business: Business;
@@ -26,7 +27,7 @@ interface EditBusinessFormProps {
 }
 
 export function EditBusinessForm({ business, open, onOpenChange }: EditBusinessFormProps) {
-  const [formData, setFormData] = useState<Partial<BusinessFormData>>({
+  const [formData, setFormData] = useState<UpdateBusinessDto>({
     name: '',
     email: '',
     phone: ''

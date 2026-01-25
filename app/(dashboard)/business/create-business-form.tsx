@@ -29,11 +29,11 @@ import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createBusinessSchema } from '@/lib/validations';
 import { getApiErrorMessage } from '@/lib/api-error';
-import { CreateBusinessPayload } from '@/types/business';
+import type { CreateBusinessDto } from '@loyal-ix/loyalix-shared-types';
 
 export function CreateBusinessForm() {
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState<Partial<CreateBusinessPayload>>({
+  const [formData, setFormData] = useState<Partial<CreateBusinessDto>>({
     name: '',
     email: '',
     phone: '',

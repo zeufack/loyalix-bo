@@ -1,6 +1,5 @@
 import './globals.css';
 
-import { Analytics } from '@vercel/analytics/react';
 import { Poppins, Crimson_Text, Fira_Code } from 'next/font/google';
 import { QueryProvider } from './providers';
 import { Toaster } from 'sonner';
@@ -37,14 +36,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${poppins.variable} ${crimsonText.variable} ${firaCode.variable} flex min-h-screen w-full flex-col font-sans antialiased`}
+        className={`${poppins.variable} ${crimsonText.variable} ${firaCode.variable} font-sans antialiased`}
       >
         <QueryProvider>{children}</QueryProvider>
         <Toaster richColors position="top-right" />
       </body>
-      <Analytics />
     </html>
   );
 }

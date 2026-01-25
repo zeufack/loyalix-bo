@@ -31,7 +31,14 @@ import { getTotalCustomerEnrollments } from '@/app/api/customer-enrollment';
 import { getTotalPromotions } from '@/app/api/promotion';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+const COLORS = [
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
+  'var(--chart-6)'
+];
 
 export function AnalyticsCharts() {
   const { data: totalUsers, isLoading: loadingUsers } = useQuery({
@@ -145,9 +152,9 @@ export function AnalyticsCharts() {
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
+                    backgroundColor: 'var(--card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-lg)'
                   }}
                 />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
@@ -188,9 +195,9 @@ export function AnalyticsCharts() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
+                    backgroundColor: 'var(--card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-lg)'
                   }}
                 />
               </PieChart>
@@ -222,9 +229,9 @@ export function AnalyticsCharts() {
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
+                  backgroundColor: 'var(--card)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-lg)'
                 }}
               />
               <Legend />

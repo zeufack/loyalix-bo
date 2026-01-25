@@ -13,36 +13,27 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { UserRole, User } from '@/types/user';
+import { User } from '@/types/user';
 import { updateUser } from '@/app/api/user';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useQueryClient } from '@tanstack/react-query';
 import { Pencil } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { getApiErrorMessage } from '@/lib/api-error';
+import type { UpdateUserDto } from '@loyal-ix/loyalix-shared-types';
 
 interface EditUserFormProps {
   user: User;
 }
 
 export function EditUserForm({ user }: EditUserFormProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<UpdateUserDto>({
     email: '',
     firstName: '',
     lastName: '',
     phoneNumber: '',
-    isActive: true,
-    roles: [] as UserRole[]
+    isVerified: false
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,18 +47,13 @@ export function EditUserForm({ user }: EditUserFormProps) {
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         phoneNumber: user.phoneNumber || '',
-        isActive: user.isActive ?? true,
-        roles: user.roles || []
+        isVerified: user.isVerified ?? false
       });
     }
   }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
-  };
-
-  const handleRoleChange = (value: string) => {
-    setFormData({ ...formData, roles: [value as UserRole] });
   };
 
   const handleSubmit = async () => {
@@ -109,7 +95,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
               id="email"
               type="email"
               className="col-span-3"
-              value={formData.email}
+              value={formData.email || ''}
               onChange={handleChange}
             />
           </div>
@@ -120,7 +106,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
             <Input
               id="firstName"
               className="col-span-3"
-              value={formData.firstName}
+              value={formData.firstName || ''}
               onChange={handleChange}
             />
           </div>
@@ -131,7 +117,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
             <Input
               id="lastName"
               className="col-span-3"
-              value={formData.lastName}
+              value={formData.lastName || ''}
               onChange={handleChange}
             />
           </div>
@@ -142,43 +128,20 @@ export function EditUserForm({ user }: EditUserFormProps) {
             <Input
               id="phoneNumber"
               className="col-span-3"
-              value={formData.phoneNumber}
+              value={formData.phoneNumber || ''}
               onChange={handleChange}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="roles" className="text-right">
-              Role
-            </Label>
-            <Select
-              value={formData.roles[0] || ''}
-              onValueChange={handleRoleChange}
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Roles</SelectLabel>
-                  {Object.values(UserRole).map((role) => (
-                    <SelectItem key={role} value={role}>
-                      {role.replace('_', ' ')}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="isActive" className="text-right">
-              Active
+            <Label htmlFor="isVerified" className="text-right">
+              Verified
             </Label>
             <div className="col-span-3">
               <Switch
-                id="isActive"
-                checked={formData.isActive}
+                id="isVerified"
+                checked={formData.isVerified || false}
                 onCheckedChange={(checked) =>
-                  setFormData({ ...formData, isActive: checked })
+                  setFormData({ ...formData, isVerified: checked })
                 }
               />
             </div>

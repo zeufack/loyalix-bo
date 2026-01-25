@@ -12,19 +12,20 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useEffect, useState } from 'react';
 import { updateLoyaltyProgram } from '@/app/api/loyalty-program';
 import { LoyaltyProgram } from '@/types/loyalty-program';
+import type { UpdateLoyaltyProgramDto } from '@loyal-ix/loyalix-shared-types';
 
 interface EditLoyaltyProgramFormProps {
   loyaltyProgram: LoyaltyProgram;
 }
 
 export function EditLoyaltyProgramForm({ loyaltyProgram }: EditLoyaltyProgramFormProps) {
-  const [formData, setFormData] = useState<Partial<LoyaltyProgram>>({
+  const [formData, setFormData] = useState<UpdateLoyaltyProgramDto>({
     name: '',
-    description: '',
-    type: ''
+    isActive: true
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,8 +34,7 @@ export function EditLoyaltyProgramForm({ loyaltyProgram }: EditLoyaltyProgramFor
     if (loyaltyProgram) {
       setFormData({
         name: loyaltyProgram.name,
-        description: loyaltyProgram.description,
-        type: loyaltyProgram.type
+        isActive: loyaltyProgram.isActive
       });
     }
   }, [loyaltyProgram]);
@@ -77,26 +77,16 @@ export function EditLoyaltyProgramForm({ loyaltyProgram }: EditLoyaltyProgramFor
             <Input
               id="name"
               className="col-span-3"
-              value={formData.name}
+              value={formData.name || ''}
               onChange={handleChange}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description">Description</Label>
-            <Input
-              id="description"
-              className="col-span-3"
-              value={formData.description}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="type">Type</Label>
-            <Input
-              id="type"
-              className="col-span-3"
-              value={formData.type}
-              onChange={handleChange}
+            <Label htmlFor="isActive">Active</Label>
+            <Switch
+              id="isActive"
+              checked={formData.isActive || false}
+              onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
             />
           </div>
           {error && <p className="text-red-500">{error}</p>}
