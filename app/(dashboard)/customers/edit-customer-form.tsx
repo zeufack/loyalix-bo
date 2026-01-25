@@ -54,8 +54,8 @@ export function ViewCustomerForm({ customer }: ViewCustomerFormProps) {
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right text-muted-foreground">Status</Label>
             <div className="col-span-3">
-              <Badge variant={customer.user?.isActive ? 'default' : 'secondary'}>
-                {customer.user?.isActive ? 'Active' : 'Inactive'}
+              <Badge variant={customer.user?.isVerified ? 'default' : 'secondary'}>
+                {customer.user?.isVerified ? 'Verified' : 'Unverified'}
               </Badge>
             </div>
           </div>

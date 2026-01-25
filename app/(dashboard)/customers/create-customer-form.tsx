@@ -24,7 +24,7 @@ import {
   SelectValue
 } from '../../../components/ui/select';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { CreateCustomerDto } from '@/types/customer';
+import type { CreateCustomerDto } from '@loyal-ix/loyalix-shared-types';
 import { toast } from 'sonner';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { z } from 'zod';

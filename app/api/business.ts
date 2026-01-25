@@ -1,45 +1,12 @@
 import { Business } from '@/types/business';
 import { http } from './http';
-
-export interface PaginationParams {
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
-interface BackendPaginatedResponse<T> {
-  items: T[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-}
-
-/**
- * Helper to transform backend paginated response to frontend format
- */
-function transformPaginatedResponse<T>(
-  response: BackendPaginatedResponse<T>
-): PaginatedResponse<T> {
-  return {
-    data: response.items,
-    total: response.meta.total,
-    page: response.meta.page,
-    limit: response.meta.limit,
-    totalPages: response.meta.totalPages,
-  };
-}
+import {
+  PaginationParams,
+  PaginatedResponse,
+  BackendPaginatedResponse,
+  transformPaginatedResponse,
+} from './types';
+import type { CreateBusinessDto, UpdateBusinessDto } from '@loyal-ix/loyalix-shared-types';
 
 export const getBusinesses = async (
   params: PaginationParams = {}
@@ -58,7 +25,7 @@ export const getBusiness = async (id: string): Promise<Business> => {
 };
 
 export const createBusiness = async (
-  data: Partial<Business>
+  data: CreateBusinessDto
 ): Promise<Business> => {
   const response = await http.post<Business>('/business', data);
   return response.data;
@@ -66,7 +33,7 @@ export const createBusiness = async (
 
 export const updateBusiness = async (
   id: string,
-  data: Partial<Business>
+  data: UpdateBusinessDto
 ): Promise<Business> => {
   const response = await http.patch<Business>(`/business/${id}`, data);
   return response.data;

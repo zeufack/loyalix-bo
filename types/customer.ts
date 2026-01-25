@@ -2,7 +2,7 @@ import { User } from './user';
 
 export interface Customer {
   id: string;
-  user: Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'isActive'>;
+  user: Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'isVerified'>;
   deviceToken?: string;
   createdAt: Date;
   lastActive?: Date;

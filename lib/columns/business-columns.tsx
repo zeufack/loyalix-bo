@@ -48,13 +48,13 @@ export const businessColumns: ColumnDef<Business>[] = [
     )
   },
   {
-    accessorKey: 'businessType',
+    accessorKey: 'industryType',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Type" />
+      <DataTableColumnHeader column={column} title="Industry Type" />
     ),
     cell: ({ row }) => (
       <Badge variant="outline" className="capitalize">
-        {row.getValue('businessType') || 'N/A'}
+        {row.original.industryType?.name || 'N/A'}
       </Badge>
     ),
     filterFn: (row, id, value) => {
@@ -91,22 +91,22 @@ export const businessColumns: ColumnDef<Business>[] = [
     sortingFn: 'datetime'
   },
   {
-    accessorKey: 'staff',
+    accessorKey: 'staffMembers',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Staff" />
     ),
     cell: ({ row }) => (
-      <div className="text-right">{row.original.staff?.length || 0}</div>
+      <div className="text-right">{row.original.staffMembers?.length || 0}</div>
     ),
     enableSorting: false
   },
   {
-    accessorKey: 'programs',
+    accessorKey: 'loyaltyPrograms',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Programs" />
     ),
     cell: ({ row }) => (
-      <div className="text-right">{row.original.programs?.length || 0}</div>
+      <div className="text-right">{row.original.loyaltyPrograms?.length || 0}</div>
     ),
     enableSorting: false
   },

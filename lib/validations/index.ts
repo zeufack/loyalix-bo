@@ -4,9 +4,11 @@ import { z } from 'zod';
 export const businessSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
-  phone: z.string().min(8, 'Phone number must be at least 8 characters'),
+  phone: z.string().optional(),
+  description: z.string().optional(),
+  industryType: z.string().min(1, 'Industry type is required'),
   address: z.string().optional(),
-  businessType: z.string().optional()
+  owner: z.string().uuid('Owner must be a valid user')
 });
 
 export const createBusinessSchema = businessSchema;

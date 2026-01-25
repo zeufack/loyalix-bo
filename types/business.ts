@@ -1,26 +1,49 @@
+// Import and re-export BusinessStatus from shared types
+import { BusinessStatus } from '@loyal-ix/loyalix-shared-types';
+export { BusinessStatus };
+
 export interface Business {
   id: string;
   name: string;
-  phone: string;
+  phone?: string;
   email: string;
-  businessType: string;
+  description?: string | null;
+  industryType?: {
+    id: string;
+    name: string;
+  };
   address?: string | null;
-  qrSecret: string;
+  qrSecret?: string;
+  status: BusinessStatus;
   createdAt: Date;
   updatedAt: Date;
-  staff?: any[];
-  programs?: any[];
+  staffMembers?: any[];
+  loyaltyPrograms?: any[];
 }
 
 export type BusinessTableItem = Pick<
   Business,
-  'id' | 'name' | 'email' | 'phone' | 'businessType' | 'createdAt'
+  'id' | 'name' | 'email' | 'phone' | 'industryType' | 'createdAt'
 > & {
   staffCount: number;
   programsCount: number;
 };
 
-export type BusinessCreatePayload = Omit<
-  Business,
-  'id' | 'createdAt' | 'updatedAt' | 'staff' | 'programs'
->;
+export interface CreateBusinessPayload {
+  name: string;
+  email: string;
+  phone?: string;
+  description?: string;
+  industryType: string;
+  address?: string;
+  owner: string;
+}
+
+export interface UpdateBusinessPayload {
+  name?: string;
+  email?: string;
+  phone?: string;
+  description?: string;
+  industryType?: string;
+  address?: string;
+}

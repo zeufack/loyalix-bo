@@ -17,12 +17,14 @@ import {
   Trophy,
   KeyRound,
   Settings,
-  QrCode
+  QrCode,
+  Store
 } from 'lucide-react';
 
 export const mainNavItems = [
   { href: '/', label: 'Dashboard', icon: Home },
   { href: '/business', label: 'Business', icon: Building2 },
+  { href: '/business-types', label: 'Business Types', icon: Store },
   { href: '/qrcode', label: 'QR Code', icon: QrCode },
   { href: '/loyalty-program', label: 'Loyalty Program', icon: Sprout },
   { href: '/loyalty-program-type', label: 'Loyalty Program Type', icon: Tag },

@@ -1,53 +1,103 @@
 'use client';
 
 import Link from 'next/link';
-import { Package2, Settings } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import Image from 'next/image';
+import { Settings } from 'lucide-react';
 import { mainNavItems } from './nav-items';
-import { SidebarMenuButton } from './sidebar-menu-button';
+import {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarGroup,
+  SidebarGroupContent
+} from '@/components/ui/sidebar';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export function AppSidebar() {
+  const pathname = usePathname();
+
   return (
-    <aside
-      className="hidden border-r bg-muted/40 md:block"
-      role="complementary"
-      aria-label="Main navigation sidebar"
-    >
-      <div className="flex h-full max-h-screen flex-col gap-2">
-        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-          <Link
-            href="/"
-            className="flex items-center gap-2 font-semibold"
-            aria-label="Loyalix - Go to dashboard"
-          >
-            <Package2 className="h-6 w-6" aria-hidden="true" />
-            <span>Loyalix</span>
-          </Link>
-        </div>
-        <div className="flex-1 ">
-          <nav
-            className="grid items-start px-2 text-sm font-medium lg:px-4"
-            aria-label="Main navigation"
-          >
-            {mainNavItems.map((item) => (
-              <SidebarMenuButton key={item.label} item={item} />
-            ))}
-          </nav>
-        </div>
-        {/* <div className="mt-auto p-4">
-          <nav
-            className="grid items-start px-2 text-sm font-medium lg:px-4"
-            aria-label="Settings navigation"
-          >
-            <Link
-              href="/settings"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size="lg"
+              asChild
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Settings className="h-4 w-4" aria-hidden="true" />
-              Settings
-            </Link>
-          </nav>
-        </div> */}
-      </div>
-    </aside>
+              <Link href="/" aria-label="Loyalix - Go to dashboard">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg ">
+                  <Image
+                    src="/loyalix.png"
+                    alt="Loyalix"
+                    width={64}
+                    height={64}
+                    className="size-6 object-contain"
+                  />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">Loyalix</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    Back Office
+                  </span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {mainNavItems
+                .filter((item) => item.href !== '/settings')
+                .map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        tooltip={item.label}
+                      >
+                        <Link href={item.href}>
+                          <item.icon className="size-4" />
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="Settings">
+              <Link href="/settings">
+                <Settings className="size-4" />
+                <span>Settings</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <div className="flex w-full  px-2 py-1.5 group-data-[collapsible=icon]:px-0">
+              <ThemeToggle />
+            </div>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
   );
 }

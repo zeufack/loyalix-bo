@@ -103,8 +103,8 @@ export const customerEnrollmentColumns: ColumnDef<CustomerEnrollment>[] = [
       return (
         <div>
           <div className="font-medium">{program.name}</div>
-          <Badge variant="outline" className="mt-1">
-            {program.type || 'Standard'}
+          <Badge variant={program.isActive ? 'default' : 'secondary'} className="mt-1">
+            {program.isActive ? 'Active' : 'Inactive'}
           </Badge>
         </div>
       );

@@ -6,7 +6,7 @@ declare module 'next-auth' {
     id: string;
     email: string;
     roles: string[];
-    isEmailVerified: boolean;
+    isVerified: boolean;
     accessToken: string;
     refreshToken: string;
   }

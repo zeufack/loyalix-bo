@@ -1,28 +1,12 @@
 import { http } from './http';
 import { User } from '@/types/user';
-import { PaginationParams, PaginatedResponse } from './business';
-
-interface BackendPaginatedResponse<T> {
-  items: T[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-}
-
-function transformPaginatedResponse<T>(
-  response: BackendPaginatedResponse<T>
-): PaginatedResponse<T> {
-  return {
-    data: response.items,
-    total: response.meta.total,
-    page: response.meta.page,
-    limit: response.meta.limit,
-    totalPages: response.meta.totalPages,
-  };
-}
+import {
+  PaginationParams,
+  PaginatedResponse,
+  BackendPaginatedResponse,
+  transformPaginatedResponse,
+} from './types';
+import type { CreateUserDto, UpdateUserDto } from '@loyal-ix/loyalix-shared-types';
 
 export const getUsers = async (
   params: PaginationParams = {}
@@ -39,14 +23,14 @@ export const getUser = async (id: string): Promise<User> => {
   return response.data;
 };
 
-export const createUser = async (data: Partial<User>): Promise<User> => {
+export const createUser = async (data: CreateUserDto): Promise<User> => {
   const response = await http.post<User>('/users', data);
   return response.data;
 };
 
 export const updateUser = async (
   id: string,
-  data: Partial<User>
+  data: UpdateUserDto
 ): Promise<User> => {
   const response = await http.patch<User>(`/users/${id}`, data);
   return response.data;

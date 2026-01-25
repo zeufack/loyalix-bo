@@ -121,7 +121,7 @@ export const userColumns: ColumnDef<User>[] = [
         >
           {row.getValue('email')}
         </a>
-        {row.original.isEmailVerified && (
+        {row.original.isVerified && (
           <Badge variant="secondary" className="gap-1">
             <Check className="h-3 w-3" />
             Verified

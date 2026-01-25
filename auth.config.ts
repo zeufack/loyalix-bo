@@ -30,13 +30,14 @@ export const authConfig = {
             throw new Error(responseBody.message || 'Authentication failed');
           }
 
-          const { accessToken, refreshToken, user } = responseBody;
+          const { accessToken, refreshToken, accessTokenExpiresIn, user } = responseBody;
           return {
             id: user.id,
             email: user.email,
             name: user.name,
             accessToken,
             refreshToken,
+            accessTokenExpiresIn: accessTokenExpiresIn || 900, // Default to 15 min if not provided
             ...user
           };
         } catch (error) {
@@ -54,11 +55,13 @@ export const authConfig = {
           email: user.email,
           name: user.name,
           roles: user.roles,
-          isEmailVerified: user.isEmailVerified
+          isVerified: user.isVerified
         };
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
-        token.accessTokenExpires = Date.now() + 15 * 60 * 1000; // 15 minutes from now
+        // Use dynamic expiration from backend (in seconds), fallback to 15 min
+        const expiresInSeconds = (user as { accessTokenExpiresIn?: number }).accessTokenExpiresIn || 900;
+        token.accessTokenExpires = Date.now() + expiresInSeconds * 1000;
       }
 
       // Return previous token if the access token has not expired yet
@@ -143,11 +146,13 @@ async function refreshAccessToken(token: {
     }
 
     const refreshedTokens = responseBody;
+    // Use dynamic expiration from backend (in seconds), fallback to 15 min
+    const expiresInSeconds = refreshedTokens.accessTokenExpiresIn || 900;
 
     return {
       ...token,
       accessToken: refreshedTokens.accessToken,
-      accessTokenExpires: Date.now() + 15 * 60 * 1000, // 15 minutes from now
+      accessTokenExpires: Date.now() + expiresInSeconds * 1000,
       refreshToken: refreshedTokens.refreshToken ?? token.refreshToken,
       error: undefined
     };
