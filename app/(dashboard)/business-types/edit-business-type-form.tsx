@@ -13,9 +13,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useEffect, useState } from 'react';
-import { updateBusinessType } from '@/app/api/business-type';
+import {
+  updateBusinessType,
+  uploadBusinessTypeIcon
+} from '@/app/api/business-type';
 import { BusinessType } from '@/types/business-type';
 import { useQueryClient } from '@tanstack/react-query';
 import { Pencil } from 'lucide-react';
@@ -26,12 +30,16 @@ interface EditBusinessTypeFormProps {
   businessType: BusinessType;
 }
 
-export function EditBusinessTypeForm({ businessType }: EditBusinessTypeFormProps) {
+export function EditBusinessTypeForm({
+  businessType
+}: EditBusinessTypeFormProps) {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<Partial<BusinessType>>({
     name: '',
     description: ''
   });
+  const [iconFile, setIconFile] = useState<File | null>(null);
+  const [existingIconUrl, setExistingIconUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -42,6 +50,8 @@ export function EditBusinessTypeForm({ businessType }: EditBusinessTypeFormProps
         name: businessType.name,
         description: businessType.description || ''
       });
+      setExistingIconUrl(businessType.icon?.url || null);
+      setIconFile(null);
     }
   }, [businessType]);
 
@@ -49,6 +59,14 @@ export function EditBusinessTypeForm({ businessType }: EditBusinessTypeFormProps
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleIconChange = (file: File | null) => {
+    setIconFile(file);
+    if (file === null) {
+      // User cleared the image
+      setExistingIconUrl(null);
+    }
   };
 
   const handleSubmit = async () => {
@@ -60,7 +78,21 @@ export function EditBusinessTypeForm({ businessType }: EditBusinessTypeFormProps
     setLoading(true);
     setError(null);
     try {
-      await updateBusinessType(businessType.id, formData);
+      // Update text fields
+      await updateBusinessType(businessType.id, {
+        name: formData.name,
+        description: formData.description
+      });
+
+      // Upload new icon if a file was selected
+      if (iconFile) {
+        try {
+          await uploadBusinessTypeIcon(businessType.id, iconFile);
+        } catch (iconErr) {
+          toast.warning('Business type updated, but icon upload failed.');
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ['business-types'] });
       toast.success('Business type updated successfully');
       setOpen(false);
@@ -110,6 +142,17 @@ export function EditBusinessTypeForm({ businessType }: EditBusinessTypeFormProps
               value={formData.description || ''}
               onChange={handleChange}
             />
+          </div>
+          <div className="grid grid-cols-4 items-start gap-4">
+            <Label className="text-right pt-2">Icon</Label>
+            <div className="col-span-3">
+              <ImageUpload
+                value={existingIconUrl}
+                onChange={handleIconChange}
+                disabled={loading}
+                label="Upload an icon"
+              />
+            </div>
           </div>
           {error && (
             <p className="text-sm text-destructive text-center">{error}</p>
