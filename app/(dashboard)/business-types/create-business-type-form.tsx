@@ -13,8 +13,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { useState } from 'react';
-import { createBusinessType } from '@/app/api/business-type';
+import {
+  createBusinessType,
+  uploadBusinessTypeIcon
+} from '@/app/api/business-type';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -26,6 +30,7 @@ export function CreateBusinessTypeForm() {
     name: '',
     description: ''
   });
+  const [iconFile, setIconFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -38,6 +43,7 @@ export function CreateBusinessTypeForm() {
 
   const resetForm = () => {
     setFormData({ name: '', description: '' });
+    setIconFile(null);
     setError(null);
   };
 
@@ -50,7 +56,20 @@ export function CreateBusinessTypeForm() {
     setLoading(true);
     setError(null);
     try {
-      await createBusinessType(formData);
+      const created = await createBusinessType(formData);
+
+      // Upload icon if a file was selected
+      if (iconFile) {
+        try {
+          await uploadBusinessTypeIcon(created.id, iconFile);
+        } catch (iconErr) {
+          // Business type was created, but icon upload failed
+          toast.warning(
+            'Business type created, but icon upload failed. You can add an icon by editing it.'
+          );
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ['business-types'] });
       toast.success('Business type created successfully');
       resetForm();
@@ -65,10 +84,13 @@ export function CreateBusinessTypeForm() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      setOpen(isOpen);
-      if (!isOpen) resetForm();
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) resetForm();
+      }}
+    >
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -79,7 +101,8 @@ export function CreateBusinessTypeForm() {
         <DialogHeader>
           <DialogTitle>Create Business Type</DialogTitle>
           <DialogDescription>
-            Add a new business type category. Examples: Restaurant, Salon, Gym, Spa.
+            Add a new business type category. Examples: Restaurant, Salon, Gym,
+            Spa.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -106,6 +129,16 @@ export function CreateBusinessTypeForm() {
               value={formData.description}
               onChange={handleChange}
             />
+          </div>
+          <div className="grid grid-cols-4 items-start gap-4">
+            <Label className="text-right pt-2">Icon</Label>
+            <div className="col-span-3">
+              <ImageUpload
+                onChange={setIconFile}
+                disabled={loading}
+                label="Upload an icon"
+              />
+            </div>
           </div>
           {error && (
             <p className="text-sm text-destructive text-center">{error}</p>

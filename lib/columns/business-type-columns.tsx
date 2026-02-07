@@ -24,7 +24,7 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { EditBusinessTypeForm } from '@/app/(dashboard)/business-types/edit-business-type-form';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, ImageIcon } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getApiErrorMessage } from '@/lib/api-error';
@@ -80,6 +80,26 @@ const ActionsCell = ({ businessType }: { businessType: BusinessType }) => {
 };
 
 export const businessTypeColumns: ColumnDef<BusinessType>[] = [
+  {
+    accessorKey: 'icon',
+    header: 'Icon',
+    cell: ({ row }) => {
+      const icon = row.original.icon;
+      return icon?.url ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={icon.thumbnailUrl || icon.url}
+          alt={`${row.original.name} icon`}
+          className="h-8 w-8 rounded-md object-cover"
+        />
+      ) : (
+        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
+          <ImageIcon className="h-4 w-4 text-muted-foreground" />
+        </div>
+      );
+    },
+    size: 60
+  },
   {
     accessorKey: 'name',
     header: 'Name'

@@ -1,10 +1,14 @@
-import { BusinessType, CreateBusinessTypePayload, UpdateBusinessTypePayload } from '@/types/business-type';
+import {
+  BusinessType,
+  CreateBusinessTypePayload,
+  UpdateBusinessTypePayload
+} from '@/types/business-type';
 import { http } from './http';
 import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
 
 export const getBusinessTypes = async (
@@ -34,7 +38,10 @@ export const updateBusinessType = async (
   id: string,
   data: UpdateBusinessTypePayload
 ): Promise<BusinessType> => {
-  const response = await http.patch<BusinessType>(`/business-types/${id}`, data);
+  const response = await http.patch<BusinessType>(
+    `/business-types/${id}`,
+    data
+  );
   return response.data;
 };
 
@@ -44,5 +51,19 @@ export const deleteBusinessType = async (id: string): Promise<void> => {
 
 export const getTotalBusinessTypes = async (): Promise<number> => {
   const response = await http.get<number>('/business-types/count');
+  return response.data;
+};
+
+export const uploadBusinessTypeIcon = async (
+  id: string,
+  file: File
+): Promise<BusinessType> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await http.post<BusinessType>(
+    `/business-types/${id}/icon`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  );
   return response.data;
 };
