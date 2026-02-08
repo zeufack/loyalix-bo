@@ -1,5 +1,6 @@
 // Import and re-export BusinessStatus from shared types
 import { BusinessStatus } from '@loyal-ix/loyalix-shared-types';
+import { Icon } from './icon';
 export { BusinessStatus };
 
 export interface Business {
@@ -19,11 +20,13 @@ export interface Business {
   updatedAt: Date;
   staffMembers?: any[];
   loyaltyPrograms?: any[];
+  profileImage?: Icon | null;
+  images?: Icon[];
 }
 
 export type BusinessTableItem = Pick<
   Business,
-  'id' | 'name' | 'email' | 'phone' | 'industryType' | 'createdAt'
+  'id' | 'name' | 'email' | 'phone' | 'industryType' | 'createdAt' | 'profileImage'
 > & {
   staffCount: number;
   programsCount: number;

@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ImageUpload } from '@/components/ui/image-upload';
+import { FormImageField } from '@/components/ui/form-image-field';
 import { useState } from 'react';
 import {
   createBusinessType,
@@ -22,18 +22,27 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
-import { getApiErrorMessage } from '@/lib/api-error';
+import { useImageUpload } from '@/hooks/use-image-upload';
+import { useEntityForm } from '@/hooks/use-entity-form';
+import type { CreateBusinessTypePayload } from '@/types/business-type';
 
 export function CreateBusinessTypeForm() {
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateBusinessTypePayload>({
     name: '',
     description: ''
   });
-  const [iconFile, setIconFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  
+  const { file: iconFile, previewUrl: iconPreview, handleChange: handleIconChange, reset: resetIcon } = useImageUpload();
   const queryClient = useQueryClient();
+  
+  const { loading, error, setError, handleCreate } = useEntityForm({
+    createEntity: createBusinessType,
+    uploadImage: uploadBusinessTypeIcon,
+    queryKey: 'business-types',
+    successMessage: 'Business type created successfully',
+    imageUploadErrorMessage: 'Business type created, but icon upload failed. You can add an icon by editing it.'
+  });
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -43,43 +52,22 @@ export function CreateBusinessTypeForm() {
 
   const resetForm = () => {
     setFormData({ name: '', description: '' });
-    setIconFile(null);
+    resetIcon();
     setError(null);
   };
 
-  const handleSubmit = async () => {
+  const validate = () => {
     if (!formData.name.trim()) {
-      setError('Name is required');
-      return;
+      return 'Name is required';
     }
+    return null;
+  };
 
-    setLoading(true);
-    setError(null);
-    try {
-      const created = await createBusinessType(formData);
-
-      // Upload icon if a file was selected
-      if (iconFile) {
-        try {
-          await uploadBusinessTypeIcon(created.id, iconFile);
-        } catch (iconErr) {
-          // Business type was created, but icon upload failed
-          toast.warning(
-            'Business type created, but icon upload failed. You can add an icon by editing it.'
-          );
-        }
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['business-types'] });
-      toast.success('Business type created successfully');
+  const handleSubmit = async () => {
+    const result = await handleCreate(formData, iconFile, validate);
+    if (result) {
       resetForm();
       setOpen(false);
-    } catch (err) {
-      const message = getApiErrorMessage(err);
-      setError(message);
-      toast.error(message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -126,20 +114,17 @@ export function CreateBusinessTypeForm() {
               id="description"
               placeholder="Optional description..."
               className="col-span-3"
-              value={formData.description}
+              value={formData.description || ''}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-start gap-4">
-            <Label className="text-right pt-2">Icon</Label>
-            <div className="col-span-3">
-              <ImageUpload
-                onChange={setIconFile}
-                disabled={loading}
-                label="Upload an icon"
-              />
-            </div>
-          </div>
+          <FormImageField
+            label="Icon"
+            value={iconPreview}
+            onChange={handleIconChange}
+            disabled={loading}
+            uploadLabel="Upload an icon"
+          />
           {error && (
             <p className="text-sm text-destructive text-center">{error}</p>
           )}

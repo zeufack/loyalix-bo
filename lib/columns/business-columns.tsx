@@ -1,10 +1,33 @@
+'use client';
+
 import { ColumnDef } from '@tanstack/react-table';
-import { Badge } from '../../components/ui/badge';
-import { DataTableColumnHeader } from '../../components/data-table/data-table-column-header';
-import { Business } from '../../types/business';
-import { BusinessActionsCell } from '../../app/(dashboard)/business/business-actions-cell';
+import { Badge } from '@/components/ui/badge';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { Business } from '@/types/business';
+import { BusinessActionsCell } from '@/app/(dashboard)/business/business-actions-cell';
+import { ImageIcon } from 'lucide-react';
 
 export const businessColumns: ColumnDef<Business>[] = [
+  {
+    accessorKey: 'profileImage',
+    header: 'Image',
+    cell: ({ row }) => {
+      const profileImage = row.original.profileImage;
+      return profileImage?.url ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={profileImage.thumbnailUrl || profileImage.url}
+          alt={`${row.original.name} profile`}
+          className="h-8 w-8 rounded-md object-cover"
+        />
+      ) : (
+        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
+          <ImageIcon className="h-4 w-4 text-muted-foreground" />
+        </div>
+      );
+    },
+    size: 60
+  },
   {
     accessorKey: 'name',
     header: ({ column }) => (
@@ -118,4 +141,3 @@ export const businessColumns: ColumnDef<Business>[] = [
     enableHiding: false
   }
 ];
-

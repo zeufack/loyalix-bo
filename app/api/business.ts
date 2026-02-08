@@ -1,5 +1,5 @@
-import { Business } from '@/types/business';
 import { http } from './http';
+import { Business } from '@/types/business';
 import {
   PaginationParams,
   PaginatedResponse,
@@ -46,4 +46,41 @@ export const deleteBusiness = async (id: string): Promise<void> => {
 export const getTotalBusinesses = async (): Promise<number> => {
   const response = await http.get<number>('/business/count');
   return response.data;
+};
+
+export const uploadBusinessProfileImage = async (
+  id: string,
+  file: File
+): Promise<Business> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await http.post<Business>(
+    `/business/${id}/profile-image`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  );
+  return response.data;
+};
+
+export const uploadBusinessGalleryImages = async (
+  id: string,
+  files: File[]
+): Promise<Business> => {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append('files', file);
+  });
+  const response = await http.post<Business>(
+    `/business/${id}/images`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  );
+  return response.data;
+};
+
+export const deleteBusinessImage = async (
+  businessId: string,
+  imageId: string
+): Promise<void> => {
+  await http.delete(`/business/${businessId}/images/${imageId}`);
 };

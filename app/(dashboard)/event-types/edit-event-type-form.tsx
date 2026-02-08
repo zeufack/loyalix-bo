@@ -12,21 +12,41 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { FormImageField } from '@/components/ui/form-image-field';
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useEffect, useState } from 'react';
-import { updateEventType } from '@/app/api/event-type';
+import { updateEventType, uploadEventTypeIcon } from '@/app/api/event-type';
 import { EventType } from '@/types/event-type';
+import { Pencil } from 'lucide-react';
+import { useImageUpload } from '@/hooks/use-image-upload';
+import { useEntityForm } from '@/hooks/use-entity-form';
 
 interface EditEventTypeFormProps {
   eventType: EventType;
 }
 
 export function EditEventTypeForm({ eventType }: EditEventTypeFormProps) {
+  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<Partial<EventType>>({
     name: '',
     description: ''
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  const { 
+    file: iconFile, 
+    previewUrl: iconPreview, 
+    handleChange: handleIconChange, 
+    setPreviewUrl 
+  } = useImageUpload(eventType.icon?.url);
+
+  const { loading, error, setError, handleUpdate } = useEntityForm<EventType, Partial<EventType>>({
+    createEntity: async () => eventType,
+    updateEntity: updateEventType,
+    uploadImage: uploadEventTypeIcon,
+    queryKey: 'event-types',
+    successMessage: 'Event type updated successfully'
+  });
 
   useEffect(() => {
     if (eventType) {
@@ -34,44 +54,51 @@ export function EditEventTypeForm({ eventType }: EditEventTypeFormProps) {
         name: eventType.name,
         description: eventType.description
       });
+      setPreviewUrl(eventType.icon?.url || null);
     }
-  }, [eventType]);
+  }, [eventType, setPreviewUrl]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
+  const validate = () => {
+    if (!formData.name?.trim()) {
+      return 'Name is required';
+    }
+    return null;
+  };
+
   const handleSubmit = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      await updateEventType(eventType.id, formData);
-      // Optionally, you can close the dialog and refresh the event type list here.
-    } catch (error) {
-      setError('Failed to update event type.');
-    } finally {
-      setLoading(false);
+    const result = await handleUpdate(
+      eventType.id, 
+      { name: formData.name, description: formData.description }, 
+      iconFile, 
+      validate
+    );
+    if (result) {
+      setOpen(false);
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Open menu</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-dots-horizontal"><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/></svg>
-        </Button>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          <Pencil className="mr-2 h-4 w-4" />
+          Edit
+        </DropdownMenuItem>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Event Type</DialogTitle>
           <DialogDescription>
-            Fill in the details below to edit the event type.
+            Update the event type details.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name" className="text-right">Name</Label>
             <Input
               id="name"
               className="col-span-3"
@@ -80,23 +107,30 @@ export function EditEventTypeForm({ eventType }: EditEventTypeFormProps) {
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description">Description</Label>
-            <Input
+            <Label htmlFor="description" className="text-right">Description</Label>
+            <Textarea
               id="description"
               className="col-span-3"
-              value={formData.description}
+              value={formData.description || ''}
               onChange={handleChange}
             />
           </div>
-          {error && <p className="text-red-500">{error}</p>}
+          <FormImageField
+            label="Icon"
+            value={iconPreview}
+            onChange={handleIconChange}
+            disabled={loading}
+            uploadLabel="Upload an icon"
+          />
+          {error && <p className="text-sm text-destructive text-center">{error}</p>}
         </div>
         <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
           <Button onClick={handleSubmit} disabled={loading}>
-            {loading ? 'Updating...' : 'Update'}
+            {loading ? 'Saving...' : 'Save Changes'}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-

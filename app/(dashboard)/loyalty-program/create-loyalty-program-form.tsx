@@ -13,6 +13,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { FormImageField } from '@/components/ui/form-image-field';
 import {
   Select,
   SelectContent,
@@ -21,31 +23,34 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { useState } from 'react';
-import { createLoyaltyProgram } from '@/app/api/loyalty-program';
+import { createLoyaltyProgram, uploadLoyaltyProgramCoverImage } from '@/app/api/loyalty-program';
 import { getBusinesses } from '@/app/api/business';
 import AddItemButton from '@/components/ui/add-item-btn';
-import { toast } from 'sonner';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getApiErrorMessage } from '@/lib/api-error';
+import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
+import { useImageUpload } from '@/hooks/use-image-upload';
+import { useEntityForm } from '@/hooks/use-entity-form';
 import type { CreateLoyaltyProgramDto } from '@loyal-ix/loyalix-shared-types';
+import type { LoyaltyProgram } from '@/types/loyalty-program';
 
 const createLoyaltyProgramSchema = z.object({
   businessId: z.string().min(1, 'Please select a business'),
   name: z.string().min(2, 'Name must be at least 2 characters'),
+  description: z.string().optional(),
   isActive: z.boolean().optional()
 });
 
 export function CreateLoyaltyProgramForm() {
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState<CreateLoyaltyProgramDto>({
+  const [formData, setFormData] = useState<CreateLoyaltyProgramDto & { description?: string }>({
     businessId: '',
     name: '',
+    description: '',
     isActive: true
   });
-  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const queryClient = useQueryClient();
+
+  const { file: coverFile, previewUrl: coverPreview, handleChange: handleCoverChange, reset: resetCover } = useImageUpload();
 
   const { data: businessesData } = useQuery({
     queryKey: ['businesses'],
@@ -55,7 +60,15 @@ export function CreateLoyaltyProgramForm() {
 
   const businesses = businessesData?.data || [];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { loading, error, setError, handleCreate } = useEntityForm<LoyaltyProgram, typeof formData>({
+    createEntity: createLoyaltyProgram,
+    uploadImage: uploadLoyaltyProgramCoverImage,
+    queryKey: 'loyalty-programs',
+    successMessage: 'Loyalty program created successfully',
+    imageUploadErrorMessage: 'Loyalty program created, but cover image upload failed. You can add a cover image by editing it.'
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
     if (errors[id]) {
@@ -64,14 +77,13 @@ export function CreateLoyaltyProgramForm() {
   };
 
   const resetForm = () => {
-    setFormData({ businessId: '', name: '', isActive: true });
+    setFormData({ businessId: '', name: '', description: '', isActive: true });
+    resetCover();
     setErrors({});
+    setError(null);
   };
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    setErrors({});
-
+  const validate = () => {
     const result = createLoyaltyProgramSchema.safeParse(formData);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
@@ -81,20 +93,17 @@ export function CreateLoyaltyProgramForm() {
         }
       });
       setErrors(fieldErrors);
-      setLoading(false);
-      return;
+      return 'Validation failed';
     }
+    return null;
+  };
 
-    try {
-      await createLoyaltyProgram(result.data);
-      toast.success('Loyalty program created successfully');
-      await queryClient.invalidateQueries({ queryKey: ['loyalty-programs'] });
+  const handleSubmit = async () => {
+    const { description, ...submitData } = formData;
+    const result = await handleCreate(submitData, coverFile, validate);
+    if (result) {
       resetForm();
       setOpen(false);
-    } catch (error) {
-      toast.error(getApiErrorMessage(error));
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -115,7 +124,7 @@ export function CreateLoyaltyProgramForm() {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="businessId">Business *</Label>
+            <Label htmlFor="businessId" className="text-right">Business *</Label>
             <div className="col-span-3 space-y-1">
               <Select
                 value={formData.businessId}
@@ -141,7 +150,7 @@ export function CreateLoyaltyProgramForm() {
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name">Name *</Label>
+            <Label htmlFor="name" className="text-right">Name *</Label>
             <div className="col-span-3 space-y-1">
               <Input
                 id="name"
@@ -155,14 +164,34 @@ export function CreateLoyaltyProgramForm() {
               )}
             </div>
           </div>
+          <div className="grid grid-cols-4 items-start gap-4">
+            <Label htmlFor="description" className="text-right pt-2">Description</Label>
+            <div className="col-span-3 space-y-1">
+              <Textarea
+                id="description"
+                placeholder="Program description..."
+                value={formData.description || ''}
+                onChange={handleChange}
+                rows={3}
+              />
+            </div>
+          </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="isActive">Active</Label>
+            <Label htmlFor="isActive" className="text-right">Active</Label>
             <Switch
               id="isActive"
               checked={formData.isActive}
               onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
             />
           </div>
+          <FormImageField
+            label="Cover Image"
+            value={coverPreview}
+            onChange={handleCoverChange}
+            disabled={loading}
+            uploadLabel="Upload a cover image"
+          />
+          {error && <p className="text-sm text-destructive text-center">{error}</p>}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>

@@ -1,14 +1,10 @@
-export interface BusinessTypeIcon {
-  id: string;
-  url: string;
-  thumbnailUrl?: string;
-}
+import { Icon } from './icon';
 
 export interface BusinessType {
   id: string;
   name: string;
   description?: string | null;
-  icon?: BusinessTypeIcon | null;
+  icon?: Icon | null;
 }
 
 export type CreateBusinessTypePayload = Omit<BusinessType, 'id' | 'icon'>;

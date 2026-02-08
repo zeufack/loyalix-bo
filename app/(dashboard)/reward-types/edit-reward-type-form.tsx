@@ -13,12 +13,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { FormImageField } from '@/components/ui/form-image-field';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useEffect, useState } from 'react';
-import { updateRewardType } from '@/app/api/reward-type';
+import { updateRewardType, uploadRewardTypeIcon } from '@/app/api/reward-type';
 import { RewardType } from '@/types/reward-type';
-import { useQueryClient } from '@tanstack/react-query';
 import { Pencil } from 'lucide-react';
+import { useImageUpload } from '@/hooks/use-image-upload';
+import { useEntityForm } from '@/hooks/use-entity-form';
 
 interface EditRewardTypeFormProps {
   rewardType: RewardType;
@@ -30,9 +32,21 @@ export function EditRewardTypeForm({ rewardType }: EditRewardTypeFormProps) {
     name: '',
     description: ''
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const queryClient = useQueryClient();
+
+  const { 
+    file: iconFile, 
+    previewUrl: iconPreview, 
+    handleChange: handleIconChange, 
+    setPreviewUrl 
+  } = useImageUpload(rewardType.icon?.url);
+
+  const { loading, error, setError, handleUpdate } = useEntityForm<RewardType, Partial<RewardType>>({
+    createEntity: async () => rewardType,
+    updateEntity: updateRewardType,
+    uploadImage: uploadRewardTypeIcon,
+    queryKey: 'reward-types',
+    successMessage: 'Reward type updated successfully'
+  });
 
   useEffect(() => {
     if (rewardType) {
@@ -40,8 +54,9 @@ export function EditRewardTypeForm({ rewardType }: EditRewardTypeFormProps) {
         name: rewardType.name,
         description: rewardType.description || ''
       });
+      setPreviewUrl(rewardType.icon?.url || null);
     }
-  }, [rewardType]);
+  }, [rewardType, setPreviewUrl]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -49,22 +64,22 @@ export function EditRewardTypeForm({ rewardType }: EditRewardTypeFormProps) {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  const handleSubmit = async () => {
+  const validate = () => {
     if (!formData.name?.trim()) {
-      setError('Name is required');
-      return;
+      return 'Name is required';
     }
+    return null;
+  };
 
-    setLoading(true);
-    setError(null);
-    try {
-      await updateRewardType(rewardType.id, formData);
-      queryClient.invalidateQueries({ queryKey: ['reward-types'] });
+  const handleSubmit = async () => {
+    const result = await handleUpdate(
+      rewardType.id, 
+      { name: formData.name, description: formData.description }, 
+      iconFile, 
+      validate
+    );
+    if (result) {
       setOpen(false);
-    } catch (err) {
-      setError('Failed to update reward type.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -106,6 +121,13 @@ export function EditRewardTypeForm({ rewardType }: EditRewardTypeFormProps) {
               onChange={handleChange}
             />
           </div>
+          <FormImageField
+            label="Icon"
+            value={iconPreview}
+            onChange={handleIconChange}
+            disabled={loading}
+            uploadLabel="Upload an icon"
+          />
           {error && (
             <p className="text-sm text-destructive text-center">{error}</p>
           )}

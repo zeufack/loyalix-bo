@@ -1,3 +1,5 @@
+import { Icon } from './icon';
+
 export interface LoyaltyProgram {
   id: string;
   name: string;
@@ -6,4 +8,5 @@ export interface LoyaltyProgram {
   businessId: string;
   createdAt: Date;
   updatedAt: Date;
+  coverImage?: Icon | null;
 }

@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ImageUpload } from '@/components/ui/image-upload';
+import { FormImageField } from '@/components/ui/form-image-field';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useEffect, useState } from 'react';
 import {
@@ -21,10 +21,9 @@ import {
   uploadBusinessTypeIcon
 } from '@/app/api/business-type';
 import { BusinessType } from '@/types/business-type';
-import { useQueryClient } from '@tanstack/react-query';
 import { Pencil } from 'lucide-react';
-import { toast } from 'sonner';
-import { getApiErrorMessage } from '@/lib/api-error';
+import { useImageUpload } from '@/hooks/use-image-upload';
+import { useEntityForm } from '@/hooks/use-entity-form';
 
 interface EditBusinessTypeFormProps {
   businessType: BusinessType;
@@ -38,11 +37,21 @@ export function EditBusinessTypeForm({
     name: '',
     description: ''
   });
-  const [iconFile, setIconFile] = useState<File | null>(null);
-  const [existingIconUrl, setExistingIconUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const queryClient = useQueryClient();
+
+  const { 
+    file: iconFile, 
+    previewUrl: iconPreview, 
+    handleChange: handleIconChange, 
+    setPreviewUrl 
+  } = useImageUpload(businessType.icon?.url);
+
+  const { loading, error, setError, handleUpdate } = useEntityForm({
+    createEntity: async () => businessType,
+    updateEntity: updateBusinessType,
+    uploadImage: uploadBusinessTypeIcon,
+    queryKey: 'business-types',
+    successMessage: 'Business type updated successfully'
+  });
 
   useEffect(() => {
     if (businessType) {
@@ -50,10 +59,9 @@ export function EditBusinessTypeForm({
         name: businessType.name,
         description: businessType.description || ''
       });
-      setExistingIconUrl(businessType.icon?.url || null);
-      setIconFile(null);
+      setPreviewUrl(businessType.icon?.url || null);
     }
-  }, [businessType]);
+  }, [businessType, setPreviewUrl]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -61,47 +69,22 @@ export function EditBusinessTypeForm({
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  const handleIconChange = (file: File | null) => {
-    setIconFile(file);
-    if (file === null) {
-      // User cleared the image
-      setExistingIconUrl(null);
+  const validate = () => {
+    if (!formData.name?.trim()) {
+      return 'Name is required';
     }
+    return null;
   };
 
   const handleSubmit = async () => {
-    if (!formData.name?.trim()) {
-      setError('Name is required');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    try {
-      // Update text fields
-      await updateBusinessType(businessType.id, {
-        name: formData.name,
-        description: formData.description
-      });
-
-      // Upload new icon if a file was selected
-      if (iconFile) {
-        try {
-          await uploadBusinessTypeIcon(businessType.id, iconFile);
-        } catch (iconErr) {
-          toast.warning('Business type updated, but icon upload failed.');
-        }
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['business-types'] });
-      toast.success('Business type updated successfully');
+    const result = await handleUpdate(
+      businessType.id, 
+      { name: formData.name, description: formData.description }, 
+      iconFile, 
+      validate
+    );
+    if (result) {
       setOpen(false);
-    } catch (err) {
-      const message = getApiErrorMessage(err);
-      setError(message);
-      toast.error(message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -143,17 +126,13 @@ export function EditBusinessTypeForm({
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-start gap-4">
-            <Label className="text-right pt-2">Icon</Label>
-            <div className="col-span-3">
-              <ImageUpload
-                value={existingIconUrl}
-                onChange={handleIconChange}
-                disabled={loading}
-                label="Upload an icon"
-              />
-            </div>
-          </div>
+          <FormImageField
+            label="Icon"
+            value={iconPreview}
+            onChange={handleIconChange}
+            disabled={loading}
+            uploadLabel="Upload an icon"
+          />
           {error && (
             <p className="text-sm text-destructive text-center">{error}</p>
           )}

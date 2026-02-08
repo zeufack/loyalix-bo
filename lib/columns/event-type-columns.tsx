@@ -1,3 +1,5 @@
+'use client';
+
 import { ColumnDef } from '@tanstack/react-table';
 import { EventType } from '@/types/event-type';
 import {
@@ -22,11 +24,81 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { EditEventTypeForm } from '@/app/(dashboard)/event-types/edit-event-type-form';
+import { ImageIcon, MoreHorizontal } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { getApiErrorMessage } from '@/lib/api-error';
+
+const ActionsCell = ({ eventType }: { eventType: EventType }) => {
+  const queryClient = useQueryClient();
+
+  const handleDelete = async () => {
+    try {
+      await deleteEventType(eventType.id);
+      queryClient.invalidateQueries({ queryKey: ['event-types'] });
+      toast.success('Event type deleted successfully');
+    } catch (error) {
+      toast.error(getApiErrorMessage(error));
+    }
+  };
+
+  return (
+    <AlertDialog>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <EditEventTypeForm eventType={eventType} />
+          <DropdownMenuSeparator />
+          <AlertDialogTrigger asChild>
+            <DropdownMenuItem className="text-destructive">
+              Delete
+            </DropdownMenuItem>
+          </AlertDialogTrigger>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete the
+            event type &quot;{eventType.name}&quot;.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
 
 export const eventTypeColumns: ColumnDef<EventType>[] = [
   {
-    accessorKey: 'id',
-    header: 'ID'
+    accessorKey: 'icon',
+    header: 'Icon',
+    cell: ({ row }) => {
+      const icon = row.original.icon;
+      return icon?.url ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={icon.thumbnailUrl || icon.url}
+          alt={`${row.original.name} icon`}
+          className="h-8 w-8 rounded-md object-cover"
+        />
+      ) : (
+        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
+          <ImageIcon className="h-4 w-4 text-muted-foreground" />
+        </div>
+      );
+    },
+    size: 60
   },
   {
     accessorKey: 'name',
@@ -34,56 +106,11 @@ export const eventTypeColumns: ColumnDef<EventType>[] = [
   },
   {
     accessorKey: 'description',
-    header: 'Description'
+    header: 'Description',
+    cell: ({ row }) => row.original.description || '-'
   },
   {
     id: 'actions',
-    cell: ({ row }) => {
-      const eventType = row.original;
-
-      return (
-        <AlertDialog>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-dots-horizontal"><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/></svg>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem asChild>
-                <EditEventTypeForm eventType={eventType} />
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem>Delete</DropdownMenuItem>
-              </AlertDialogTrigger>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the
-                event type and all its data.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={async () => {
-                  await deleteEventType(eventType.id);
-                  // Optionally, you can refresh the event type list here.
-                }}
-              >
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      );
-    }
+    cell: ({ row }) => <ActionsCell eventType={row.original} />
   }
 ];
-

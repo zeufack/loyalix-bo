@@ -13,10 +13,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { FormImageField } from '@/components/ui/form-image-field';
 import { useState } from 'react';
-import { createRewardType } from '@/app/api/reward-type';
-import { useQueryClient } from '@tanstack/react-query';
+import { createRewardType, uploadRewardTypeIcon } from '@/app/api/reward-type';
 import { Plus } from 'lucide-react';
+import { useImageUpload } from '@/hooks/use-image-upload';
+import { useEntityForm } from '@/hooks/use-entity-form';
+import type { RewardType } from '@/types/reward-type';
 
 export function CreateRewardTypeForm() {
   const [open, setOpen] = useState(false);
@@ -24,9 +27,16 @@ export function CreateRewardTypeForm() {
     name: '',
     description: ''
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const queryClient = useQueryClient();
+
+  const { file: iconFile, previewUrl: iconPreview, handleChange: handleIconChange, reset: resetIcon } = useImageUpload();
+
+  const { loading, error, setError, handleCreate } = useEntityForm<RewardType, typeof formData>({
+    createEntity: createRewardType,
+    uploadImage: uploadRewardTypeIcon,
+    queryKey: 'reward-types',
+    successMessage: 'Reward type created successfully',
+    imageUploadErrorMessage: 'Reward type created, but icon upload failed. You can add an icon by editing it.'
+  });
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -34,28 +44,32 @@ export function CreateRewardTypeForm() {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  const handleSubmit = async () => {
-    if (!formData.name.trim()) {
-      setError('Name is required');
-      return;
-    }
-
-    setLoading(true);
+  const resetForm = () => {
+    setFormData({ name: '', description: '' });
+    resetIcon();
     setError(null);
-    try {
-      await createRewardType(formData);
-      queryClient.invalidateQueries({ queryKey: ['reward-types'] });
-      setFormData({ name: '', description: '' });
+  };
+
+  const validate = () => {
+    if (!formData.name.trim()) {
+      return 'Name is required';
+    }
+    return null;
+  };
+
+  const handleSubmit = async () => {
+    const result = await handleCreate(formData, iconFile, validate);
+    if (result) {
+      resetForm();
       setOpen(false);
-    } catch (err) {
-      setError('Failed to create reward type.');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) resetForm();
+    }}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -95,6 +109,13 @@ export function CreateRewardTypeForm() {
               onChange={handleChange}
             />
           </div>
+          <FormImageField
+            label="Icon"
+            value={iconPreview}
+            onChange={handleIconChange}
+            disabled={loading}
+            uploadLabel="Upload an icon"
+          />
           {error && (
             <p className="text-sm text-destructive text-center">{error}</p>
           )}

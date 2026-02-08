@@ -46,3 +46,17 @@ export const getTotalRewardTypes = async (): Promise<number> => {
   const response = await http.get<number>('/reward-types/count');
   return response.data;
 };
+
+export const uploadRewardTypeIcon = async (
+  id: string,
+  file: File
+): Promise<RewardType> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await http.post<RewardType>(
+    `/reward-types/${id}/icon`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  );
+  return response.data;
+};

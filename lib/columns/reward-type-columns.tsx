@@ -24,15 +24,22 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { EditRewardTypeForm } from '@/app/(dashboard)/reward-types/edit-reward-type-form';
-import { MoreHorizontal } from 'lucide-react';
+import { ImageIcon, MoreHorizontal } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { getApiErrorMessage } from '@/lib/api-error';
 
 const ActionsCell = ({ rewardType }: { rewardType: RewardType }) => {
   const queryClient = useQueryClient();
 
   const handleDelete = async () => {
-    await deleteRewardType(rewardType.id);
-    queryClient.invalidateQueries({ queryKey: ['reward-types'] });
+    try {
+      await deleteRewardType(rewardType.id);
+      queryClient.invalidateQueries({ queryKey: ['reward-types'] });
+      toast.success('Reward type deleted successfully');
+    } catch (error) {
+      toast.error(getApiErrorMessage(error));
+    }
   };
 
   return (
@@ -73,6 +80,26 @@ const ActionsCell = ({ rewardType }: { rewardType: RewardType }) => {
 };
 
 export const rewardTypeColumns: ColumnDef<RewardType>[] = [
+  {
+    accessorKey: 'icon',
+    header: 'Icon',
+    cell: ({ row }) => {
+      const icon = row.original.icon;
+      return icon?.url ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={icon.thumbnailUrl || icon.url}
+          alt={`${row.original.name} icon`}
+          className="h-8 w-8 rounded-md object-cover"
+        />
+      ) : (
+        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
+          <ImageIcon className="h-4 w-4 text-muted-foreground" />
+        </div>
+      );
+    },
+    size: 60
+  },
   {
     accessorKey: 'name',
     header: 'Name'

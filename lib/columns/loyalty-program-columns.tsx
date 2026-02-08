@@ -1,3 +1,5 @@
+'use client';
+
 import { ColumnDef } from '@tanstack/react-table';
 import { LoyaltyProgram } from '@/types/loyalty-program';
 import {
@@ -22,11 +24,82 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { ImageIcon, MoreHorizontal } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { getApiErrorMessage } from '@/lib/api-error';
+
+const ActionsCell = ({ loyaltyProgram }: { loyaltyProgram: LoyaltyProgram }) => {
+  const queryClient = useQueryClient();
+
+  const handleDelete = async () => {
+    try {
+      await deleteLoyaltyProgram(loyaltyProgram.id);
+      queryClient.invalidateQueries({ queryKey: ['loyalty-programs'] });
+      toast.success('Loyalty program deleted successfully');
+    } catch (error) {
+      toast.error(getApiErrorMessage(error));
+    }
+  };
+
+  return (
+    <AlertDialog>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <EditLoyaltyProgramForm loyaltyProgram={loyaltyProgram} />
+          <DropdownMenuSeparator />
+          <AlertDialogTrigger asChild>
+            <DropdownMenuItem className="text-destructive">
+              Delete
+            </DropdownMenuItem>
+          </AlertDialogTrigger>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete the
+            loyalty program &quot;{loyaltyProgram.name}&quot;.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
 
 export const loyaltyProgramColumns: ColumnDef<LoyaltyProgram>[] = [
   {
-    accessorKey: 'id',
-    header: 'ID'
+    accessorKey: 'coverImage',
+    header: 'Cover',
+    cell: ({ row }) => {
+      const coverImage = row.original.coverImage;
+      return coverImage?.url ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={coverImage.thumbnailUrl || coverImage.url}
+          alt={`${row.original.name} cover`}
+          className="h-10 w-16 rounded-md object-cover"
+        />
+      ) : (
+        <div className="flex h-10 w-16 items-center justify-center rounded-md bg-muted">
+          <ImageIcon className="h-4 w-4 text-muted-foreground" />
+        </div>
+      );
+    },
+    size: 80
   },
   {
     accessorKey: 'name',
@@ -34,64 +107,20 @@ export const loyaltyProgramColumns: ColumnDef<LoyaltyProgram>[] = [
   },
   {
     accessorKey: 'description',
-    header: 'Description'
+    header: 'Description',
+    cell: ({ row }) => row.original.description || '-'
   },
   {
-    accessorKey: 'type',
-    header: 'Type'
-  },
-  {
-    accessorKey: 'businessId',
-    header: 'Business ID'
+    accessorKey: 'isActive',
+    header: 'Status',
+    cell: ({ row }) => (
+      <Badge variant={row.original.isActive ? 'default' : 'secondary'}>
+        {row.original.isActive ? 'Active' : 'Inactive'}
+      </Badge>
+    )
   },
   {
     id: 'actions',
-    cell: ({ row }) => {
-      const loyaltyProgram = row.original;
-
-      return (
-        <AlertDialog>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-dots-horizontal"><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/></svg>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem asChild>
-                <EditLoyaltyProgramForm loyaltyProgram={loyaltyProgram} />
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem>Delete</DropdownMenuItem>
-              </AlertDialogTrigger>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the
-                loyalty program and all its data.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={async () => {
-                  await deleteLoyaltyProgram(loyaltyProgram.id);
-                  // Optionally, you can refresh the loyalty program list here.
-                }}
-              >
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      );
-    }
+    cell: ({ row }) => <ActionsCell loyaltyProgram={row.original} />
   }
 ];
-

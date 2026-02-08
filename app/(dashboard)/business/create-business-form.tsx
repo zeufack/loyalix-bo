@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { FormImageField } from '@/components/ui/form-image-field';
 import {
   Select,
   SelectContent,
@@ -21,15 +22,16 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { useState } from 'react';
-import { createBusiness } from '@/app/api/business';
+import { createBusiness, uploadBusinessProfileImage } from '@/app/api/business';
 import { getBusinessTypes } from '@/app/api/business-type';
 import { getUsers } from '@/app/api/user';
 import AddItemButton from '@/components/ui/add-item-btn';
-import { toast } from 'sonner';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { createBusinessSchema } from '@/lib/validations';
-import { getApiErrorMessage } from '@/lib/api-error';
+import { useImageUpload } from '@/hooks/use-image-upload';
+import { useEntityForm } from '@/hooks/use-entity-form';
 import type { CreateBusinessDto } from '@loyal-ix/loyalix-shared-types';
+import type { Business } from '@/types/business';
 
 export function CreateBusinessForm() {
   const [open, setOpen] = useState(false);
@@ -42,9 +44,9 @@ export function CreateBusinessForm() {
     address: '',
     owner: ''
   });
-  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const queryClient = useQueryClient();
+
+  const { file: profileImage, previewUrl: profilePreview, handleChange: handleProfileChange, reset: resetProfile } = useImageUpload();
 
   const { data: businessTypesData } = useQuery({
     queryKey: ['business-types'],
@@ -60,6 +62,14 @@ export function CreateBusinessForm() {
 
   const businessTypes = businessTypesData?.data || [];
   const users = usersData?.data || [];
+
+  const { loading, error, setError, handleCreate } = useEntityForm<Business, CreateBusinessDto>({
+    createEntity: createBusiness,
+    uploadImage: uploadBusinessProfileImage,
+    queryKey: 'business',
+    successMessage: 'Business created successfully',
+    imageUploadErrorMessage: 'Business created, but profile image upload failed. You can add a profile image by editing it.'
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -86,13 +96,12 @@ export function CreateBusinessForm() {
       address: '',
       owner: ''
     });
+    resetProfile();
     setErrors({});
+    setError(null);
   };
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    setErrors({});
-
+  const validate = () => {
     const result = createBusinessSchema.safeParse(formData);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
@@ -102,20 +111,16 @@ export function CreateBusinessForm() {
         }
       });
       setErrors(fieldErrors);
-      setLoading(false);
-      return;
+      return 'Validation failed';
     }
+    return null;
+  };
 
-    try {
-      await createBusiness(result.data);
-      toast.success('Business created successfully');
-      await queryClient.invalidateQueries({ queryKey: ['business'] });
+  const handleSubmit = async () => {
+    const result = await handleCreate(formData as CreateBusinessDto, profileImage, validate);
+    if (result) {
       resetForm();
       setOpen(false);
-    } catch (error) {
-      toast.error(getApiErrorMessage(error));
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -264,6 +269,16 @@ export function CreateBusinessForm() {
               )}
             </div>
           </div>
+
+          <FormImageField
+            label="Profile Image"
+            value={profilePreview}
+            onChange={handleProfileChange}
+            disabled={loading}
+            uploadLabel="Upload a profile image"
+          />
+
+          {error && <p className="text-sm text-destructive text-center">{error}</p>}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
