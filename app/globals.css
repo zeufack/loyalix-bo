@@ -6,18 +6,30 @@
    ============================================ */
 
 :root {
-  /* Gray Scale */
+  /* Gray Scale — cool neutral (hue ~250) */
   --color-gray-0: oklch(1 0 0);
-  --color-gray-10: oklch(0.985 0.001 17.18);
-  --color-gray-20: oklch(0.925 0.006 70.48);
-  --color-gray-30: oklch(0.865 0.009 70.48);
-  --color-gray-40: oklch(0.785 0.012 52.05);
-  --color-gray-50: oklch(0.727 0.01 52.05);
-  --color-gray-60: oklch(0.635 0.014 52.05);
-  --color-gray-70: oklch(0.555 0.012 52.05);
-  --color-gray-80: oklch(0.475 0.011 52.05);
-  --color-gray-90: oklch(0.395 0.011 44.71);
-  --color-gray-100: oklch(0.286 0.017 59.53);
+  --color-gray-10: oklch(0.984 0.003 250);
+  --color-gray-20: oklch(0.928 0.005 250);
+  --color-gray-30: oklch(0.868 0.007 250);
+  --color-gray-40: oklch(0.788 0.009 250);
+  --color-gray-50: oklch(0.722 0.01 250);
+  --color-gray-60: oklch(0.632 0.011 250);
+  --color-gray-70: oklch(0.552 0.012 250);
+  --color-gray-80: oklch(0.472 0.012 250);
+  --color-gray-90: oklch(0.382 0.012 252);
+  --color-gray-100: oklch(0.252 0.015 255);
+
+  /* Navy Scale (Secondary Brand — from the Loyalix logo bow) */
+  --color-navy-10: oklch(0.97 0.012 252);
+  --color-navy-20: oklch(0.93 0.025 252);
+  --color-navy-30: oklch(0.85 0.045 252);
+  --color-navy-40: oklch(0.72 0.065 252);
+  --color-navy-50: oklch(0.58 0.08 252);
+  --color-navy-60: oklch(0.49 0.085 252);
+  --color-navy-70: oklch(0.43 0.08 252);
+  --color-navy-80: oklch(0.35 0.065 252);
+  --color-navy-90: oklch(0.28 0.05 252);
+  --color-navy-100: oklch(0.22 0.04 252);
 
   /* Red Scale */
   --color-red-10: oklch(0.961 0.02 13.63);
@@ -89,8 +101,6 @@
   --font-sans: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
   --font-serif: var(--font-serif, ui-serif, Georgia, serif);
   --font-mono: var(--font-mono, ui-monospace, monospace);
-
-  --container-2xl: 1400px;
 
   /* Backgrounds */
   --color-background: var(--background);
@@ -329,8 +339,8 @@
 
 :root {
   /* Backgrounds */
-  --background: var(--color-gray-0);
-  --background-card: var(--color-gray-10);
+  --background: var(--color-gray-10);
+  --background-card: var(--color-gray-0);
   --background-muted: var(--color-gray-20);
   --background-disabled: var(--color-gray-30);
   --background-inverse: var(--color-gray-100);
@@ -355,7 +365,7 @@
   --foreground-success: var(--color-green-70);
   --foreground-warning: var(--color-yellow-60);
   --foreground-error: var(--color-red-60);
-  --foreground-info: var(--color-blue-90);
+  --foreground-info: var(--color-navy-70);
 
   /* Borders */
   --border: var(--color-gray-20);
@@ -386,15 +396,15 @@
   --destructive: var(--color-red-60);
   --destructive-foreground: var(--color-gray-0);
 
-  /* Sidebar */
-  --sidebar-background: var(--color-gray-10);
-  --sidebar-foreground: var(--color-gray-80);
+  /* Sidebar — navy brand chrome in both modes */
+  --sidebar-background: var(--color-navy-90);
+  --sidebar-foreground: var(--color-navy-20);
   --sidebar-primary: var(--color-orange-50);
   --sidebar-primary-foreground: var(--color-gray-0);
-  --sidebar-accent: var(--color-gray-20);
-  --sidebar-accent-foreground: var(--color-gray-100);
-  --sidebar-border: var(--color-gray-20);
-  --sidebar-ring: var(--color-orange-50);
+  --sidebar-accent: var(--color-navy-80);
+  --sidebar-accent-foreground: var(--color-gray-0);
+  --sidebar-border: var(--color-navy-80);
+  --sidebar-ring: var(--color-orange-40);
 
   /* Chart Colors - vibrant for data visualization */
   --chart-1: oklch(0.6 0.15 250);
@@ -417,9 +427,9 @@
 
 .dark {
   /* Backgrounds */
-  --background: var(--color-gray-100);
-  --background-card: oklch(0.22 0.015 59.53);
-  --background-muted: oklch(0.25 0.015 59.53);
+  --background: oklch(0.17 0.012 255);
+  --background-card: oklch(0.215 0.014 255);
+  --background-muted: oklch(0.25 0.015 255);
   --background-disabled: var(--color-gray-90);
   --background-inverse: var(--color-gray-0);
   --background-primary: var(--color-orange-50);
@@ -443,7 +453,7 @@
   --foreground-success: var(--color-green-40);
   --foreground-warning: var(--color-yellow-40);
   --foreground-error: var(--color-red-40);
-  --foreground-info: var(--color-blue-40);
+  --foreground-info: var(--color-navy-30);
 
   /* Borders */
   --border: var(--color-gray-80);
@@ -459,9 +469,9 @@
   --ring: var(--color-orange-40);
 
   /* shadcn/ui Tokens */
-  --card: oklch(0.22 0.015 59.53);
+  --card: oklch(0.215 0.014 255);
   --card-foreground: var(--color-gray-10);
-  --popover: oklch(0.22 0.015 59.53);
+  --popover: oklch(0.215 0.014 255);
   --popover-foreground: var(--color-gray-10);
   --primary: var(--color-orange-50);
   --primary-foreground: var(--color-gray-0);
@@ -474,14 +484,14 @@
   --destructive: var(--color-red-50);
   --destructive-foreground: var(--color-gray-0);
 
-  /* Sidebar */
-  --sidebar-background: oklch(0.22 0.015 59.53);
-  --sidebar-foreground: var(--color-gray-30);
+  /* Sidebar — navy-tinted dark, slightly distinct from the canvas */
+  --sidebar-background: oklch(0.2 0.025 252);
+  --sidebar-foreground: var(--color-navy-20);
   --sidebar-primary: var(--color-orange-50);
   --sidebar-primary-foreground: var(--color-gray-0);
-  --sidebar-accent: var(--color-gray-80);
-  --sidebar-accent-foreground: var(--color-gray-10);
-  --sidebar-border: var(--color-gray-80);
+  --sidebar-accent: var(--color-navy-80);
+  --sidebar-accent-foreground: var(--color-gray-0);
+  --sidebar-border: oklch(0.27 0.03 252);
   --sidebar-ring: var(--color-orange-40);
 
   /* Chart Colors - adjusted for dark mode */
@@ -516,6 +526,11 @@
     font-family: var(--font-sans);
   }
 
+  /* Align numbers in data tables */
+  td {
+    font-variant-numeric: tabular-nums;
+  }
+
   /* Accessibility: Respect reduced motion preference */
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -539,9 +554,15 @@
     padding-inline: 2rem;
 
     @media (width >= 1400px) {
-      max-width: var(--container-2xl);
+      max-width: 1400px;
     }
   }
+}
+
+/* Sidebar nav: thin, low-contrast scrollbar like the shadcn demo */
+[data-sidebar='content'] {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sidebar-accent) transparent;
 }
 
 /* ============================================

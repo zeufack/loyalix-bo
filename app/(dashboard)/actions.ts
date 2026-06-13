@@ -3,10 +3,7 @@
 import { signOut } from '@/lib/auth';
 
 export async function logout() {
-  try {
-    await signOut({ redirectTo: '/login' });
-  } catch (error) {
-    console.error('Logout error:', error);
-    throw new Error('Failed to sign out');
-  }
+  // Clear the session without redirecting. Redirecting here throws
+  // NEXT_REDIRECT, which the client's await would catch as a false error.
+  await signOut({ redirect: false });
 }

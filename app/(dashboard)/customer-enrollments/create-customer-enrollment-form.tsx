@@ -88,17 +88,15 @@ export function CreateCustomerEnrollmentForm() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="customer" className="text-right">
-              Customer
-            </Label>
+          <div className="grid gap-2">
+            <Label htmlFor="customer">Customer</Label>
             <Select
               value={formData.customerId}
               onValueChange={(value) =>
                 setFormData({ ...formData, customerId: value })
               }
             >
-              <SelectTrigger className="col-span-3">
+              <SelectTrigger>
                 <SelectValue placeholder="Select a customer" />
               </SelectTrigger>
               <SelectContent>
@@ -111,17 +109,15 @@ export function CreateCustomerEnrollmentForm() {
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="program" className="text-right">
-              Program
-            </Label>
+          <div className="grid gap-2">
+            <Label htmlFor="program">Program</Label>
             <Select
               value={formData.programId}
               onValueChange={(value) =>
                 setFormData({ ...formData, programId: value })
               }
             >
-              <SelectTrigger className="col-span-3">
+              <SelectTrigger>
                 <SelectValue placeholder="Select a program" />
               </SelectTrigger>
               <SelectContent>

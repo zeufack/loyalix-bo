@@ -8,15 +8,12 @@ import { customerEnrollmentColumns } from '@/lib/columns/customer-enrollment-col
 import { useTable } from '@/hooks/useCustomerTable';
 import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/data-table/data-table-pagination';
-import { TableSkeleton } from '@/components/ui/table-skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
-import { ColumnFiltersState, SortingState, PaginationState } from '@tanstack/react-table';
+  ColumnFiltersState,
+  SortingState,
+  PaginationState
+} from '@tanstack/react-table';
 
 export function CustomerEnrollmentsDataTable() {
   const [pagination, setPagination] = useState<PaginationState>({
@@ -26,14 +23,20 @@ export function CustomerEnrollmentsDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['customer-enrollments', pagination.pageIndex, pagination.pageSize, sorting],
-    queryFn: () => getCustomerEnrollments({
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
-      sortBy: sorting[0]?.id,
-      sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-    })
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: [
+      'customer-enrollments',
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting
+    ],
+    queryFn: () =>
+      getCustomerEnrollments({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        sortBy: sorting[0]?.id,
+        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
+      })
   });
 
   const table = useTable({
@@ -48,25 +51,10 @@ export function CustomerEnrollmentsDataTable() {
     manualFiltering: true
   });
 
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-red-500">
-            Error loading enrollments: {error.message}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Customer Enrollments</CardTitle>
-        <CardDescription>
-          Manage customer enrollments in loyalty programs.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -74,12 +62,19 @@ export function CustomerEnrollmentsDataTable() {
             table={table}
             exportFilename="customer-enrollments"
           />
-          {isLoading ? (
-            <TableSkeleton columns={5} rows={5} />
-          ) : (
-            <DataTable table={table} columns={customerEnrollmentColumns} />
-          )}
-          <DataTablePagination table={table} totalItems={data?.total} />
+          <DataTable
+            table={table}
+            columns={customerEnrollmentColumns}
+            isLoading={isLoading}
+            error={error}
+            onRetry={() => refetch()}
+          />
+          <DataTablePagination
+            table={table}
+            totalItems={data?.total}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
       </CardContent>
     </Card>

@@ -1,20 +1,24 @@
 'use client';
 
 import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { logout } from '../actions';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function LogoutButton() {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const handleLogout = () => {
     startTransition(async () => {
       try {
         await logout();
+        router.push('/login');
+        router.refresh();
       } catch (error) {
         toast.error('Failed to sign out', {
-          description: 'Please try again or refresh the page.',
+          description: 'Please try again or refresh the page.'
         });
       }
     });

@@ -113,12 +113,17 @@ export function SecuritySettings() {
                 type="number"
                 value={settings.passwordMinLength}
                 onChange={(e) =>
-                  setSettings({ ...settings, passwordMinLength: e.target.value })
+                  setSettings({
+                    ...settings,
+                    passwordMinLength: e.target.value
+                  })
                 }
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lockoutDuration">Lockout Duration (minutes)</Label>
+              <Label htmlFor="lockoutDuration">
+                Lockout Duration (minutes)
+              </Label>
               <Input
                 id="lockoutDuration"
                 type="number"

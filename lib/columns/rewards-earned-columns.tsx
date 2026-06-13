@@ -26,26 +26,10 @@ import {
 import { MoreHorizontal, Gift, CheckCircle, Clock, XCircle, AlertCircle } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { useState } from 'react';
 
-const getStatusBadge = (status: string) => {
-  const statusConfig: Record<
-    string,
-    { variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }
-  > = {
-    pending: { variant: 'secondary', icon: <Clock className="h-3 w-3" /> },
-    earned: { variant: 'default', icon: <Gift className="h-3 w-3" /> },
-    redeemed: { variant: 'outline', icon: <CheckCircle className="h-3 w-3" /> },
-    expired: { variant: 'destructive', icon: <XCircle className="h-3 w-3" /> }
-  };
-  const config = statusConfig[status] || { variant: 'secondary' as const, icon: <AlertCircle className="h-3 w-3" /> };
-  return (
-    <Badge variant={config.variant} className="gap-1 capitalize">
-      {config.icon}
-      {status}
-    </Badge>
-  );
-};
+const getStatusBadge = (status: string) => <StatusBadge status={status} />;
 
 const ActionsCell = ({ reward }: { reward: RewardEarned }) => {
   const queryClient = useQueryClient();

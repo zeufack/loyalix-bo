@@ -149,7 +149,10 @@ export function NotificationSettings() {
             <Switch
               checked={settings.rewardRedemptionNotification}
               onCheckedChange={(checked) =>
-                setSettings({ ...settings, rewardRedemptionNotification: checked })
+                setSettings({
+                  ...settings,
+                  rewardRedemptionNotification: checked
+                })
               }
             />
           </div>

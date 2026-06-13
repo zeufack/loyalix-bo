@@ -3,6 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { CustomerProgress } from '@/types/customer-progress.type';
 import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { CheckCircle2, Clock } from 'lucide-react';
 
 const ProgressBar = ({
@@ -74,20 +75,12 @@ export const customerProgressColumns: ColumnDef<CustomerProgress>[] = [
   {
     accessorKey: 'isComplete',
     header: 'Status',
-    cell: ({ row }) => {
-      const isComplete = row.original.isComplete;
-      return isComplete ? (
-        <Badge variant="default" className="gap-1">
-          <CheckCircle2 className="h-3 w-3" />
-          Complete
-        </Badge>
+    cell: ({ row }) =>
+      row.original.isComplete ? (
+        <StatusBadge status="completed" label="Complete" />
       ) : (
-        <Badge variant="secondary" className="gap-1">
-          <Clock className="h-3 w-3" />
-          In Progress
-        </Badge>
-      );
-    }
+        <StatusBadge status="processing" label="In progress" />
+      )
   },
   {
     accessorKey: 'lastUpdated',

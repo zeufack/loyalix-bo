@@ -1,8 +1,6 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LoyaltyProgramRulesDataTable } from './loyalty-program-rules-data-table';
-import ExportButton from '@/components/ui/export-btn';
 import { CreateLoyaltyProgramRuleForm } from './create-loyalty-program-rule-form';
 
 export default async function LoyaltyProgramRulesPage() {
@@ -12,24 +10,11 @@ export default async function LoyaltyProgramRulesPage() {
     redirect('/login');
   }
   return (
-    <Tabs defaultValue="all">
-      <div className="flex items-center">
-        <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="draft">Draft</TabsTrigger>
-          <TabsTrigger value="archived" className="hidden sm:flex">
-            Archived
-          </TabsTrigger>
-        </TabsList>
-        <div className="ml-auto flex items-center gap-2">
-          <ExportButton />
-          <CreateLoyaltyProgramRuleForm />
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-end gap-2">
+        <CreateLoyaltyProgramRuleForm />
       </div>
-      <TabsContent value="all">
-        <LoyaltyProgramRulesDataTable />
-      </TabsContent>
-    </Tabs>
+      <LoyaltyProgramRulesDataTable />
+    </div>
   );
 }

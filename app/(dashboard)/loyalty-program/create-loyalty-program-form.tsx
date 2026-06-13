@@ -23,7 +23,10 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { useState } from 'react';
-import { createLoyaltyProgram, uploadLoyaltyProgramCoverImage } from '@/app/api/loyalty-program';
+import {
+  createLoyaltyProgram,
+  uploadLoyaltyProgramCoverImage
+} from '@/app/api/loyalty-program';
 import { getBusinesses } from '@/app/api/business';
 import AddItemButton from '@/components/ui/add-item-btn';
 import { useQuery } from '@tanstack/react-query';
@@ -42,7 +45,9 @@ const createLoyaltyProgramSchema = z.object({
 
 export function CreateLoyaltyProgramForm() {
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState<CreateLoyaltyProgramDto & { description?: string }>({
+  const [formData, setFormData] = useState<
+    CreateLoyaltyProgramDto & { description?: string }
+  >({
     businessId: '',
     name: '',
     description: '',
@@ -50,7 +55,12 @@ export function CreateLoyaltyProgramForm() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { file: coverFile, previewUrl: coverPreview, handleChange: handleCoverChange, reset: resetCover } = useImageUpload();
+  const {
+    file: coverFile,
+    previewUrl: coverPreview,
+    handleChange: handleCoverChange,
+    reset: resetCover
+  } = useImageUpload();
 
   const { data: businessesData } = useQuery({
     queryKey: ['businesses'],
@@ -60,15 +70,21 @@ export function CreateLoyaltyProgramForm() {
 
   const businesses = businessesData?.data || [];
 
-  const { loading, error, setError, handleCreate } = useEntityForm<LoyaltyProgram, typeof formData>({
+  const { loading, error, setError, handleCreate } = useEntityForm<
+    LoyaltyProgram,
+    typeof formData
+  >({
     createEntity: createLoyaltyProgram,
     uploadImage: uploadLoyaltyProgramCoverImage,
     queryKey: 'loyalty-programs',
     successMessage: 'Loyalty program created successfully',
-    imageUploadErrorMessage: 'Loyalty program created, but cover image upload failed. You can add a cover image by editing it.'
+    imageUploadErrorMessage:
+      'Loyalty program created, but cover image upload failed. You can add a cover image by editing it.'
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
     if (errors[id]) {
@@ -108,10 +124,13 @@ export function CreateLoyaltyProgramForm() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      setOpen(isOpen);
-      if (!isOpen) resetForm();
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) resetForm();
+      }}
+    >
       <DialogTrigger asChild>
         <AddItemButton title="Create Loyalty Program" />
       </DialogTrigger>
@@ -123,17 +142,20 @@ export function CreateLoyaltyProgramForm() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="businessId" className="text-right">Business *</Label>
-            <div className="col-span-3 space-y-1">
+          <div className="grid gap-2">
+            <Label htmlFor="businessId">Business *</Label>
+            <div className="space-y-1">
               <Select
                 value={formData.businessId}
                 onValueChange={(value) => {
                   setFormData({ ...formData, businessId: value });
-                  if (errors.businessId) setErrors({ ...errors, businessId: '' });
+                  if (errors.businessId)
+                    setErrors({ ...errors, businessId: '' });
                 }}
               >
-                <SelectTrigger className={errors.businessId ? 'border-red-500' : ''}>
+                <SelectTrigger
+                  className={errors.businessId ? 'border-border-error' : ''}
+                >
                   <SelectValue placeholder="Select a business" />
                 </SelectTrigger>
                 <SelectContent>
@@ -145,28 +167,32 @@ export function CreateLoyaltyProgramForm() {
                 </SelectContent>
               </Select>
               {errors.businessId && (
-                <p className="text-sm text-red-500">{errors.businessId}</p>
+                <p className="text-sm text-foreground-error">
+                  {errors.businessId}
+                </p>
               )}
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">Name *</Label>
-            <div className="col-span-3 space-y-1">
+          <div className="grid gap-2">
+            <Label htmlFor="name">Name *</Label>
+            <div className="space-y-1">
               <Input
                 id="name"
                 placeholder="e.g., Premium Rewards"
                 value={formData.name}
                 onChange={handleChange}
-                className={errors.name ? 'border-red-500' : ''}
+                className={errors.name ? 'border-border-error' : ''}
               />
               {errors.name && (
-                <p className="text-sm text-red-500">{errors.name}</p>
+                <p className="text-sm text-foreground-error">{errors.name}</p>
               )}
             </div>
           </div>
-          <div className="grid grid-cols-4 items-start gap-4">
-            <Label htmlFor="description" className="text-right pt-2">Description</Label>
-            <div className="col-span-3 space-y-1">
+          <div className="grid gap-2">
+            <Label htmlFor="description" className="pt-2">
+              Description
+            </Label>
+            <div className="space-y-1">
               <Textarea
                 id="description"
                 placeholder="Program description..."
@@ -176,12 +202,14 @@ export function CreateLoyaltyProgramForm() {
               />
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="isActive" className="text-right">Active</Label>
+          <div className="grid gap-2">
+            <Label htmlFor="isActive">Active</Label>
             <Switch
               id="isActive"
               checked={formData.isActive}
-              onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, isActive: checked })
+              }
             />
           </div>
           <FormImageField
@@ -191,7 +219,9 @@ export function CreateLoyaltyProgramForm() {
             disabled={loading}
             uploadLabel="Upload a cover image"
           />
-          {error && <p className="text-sm text-destructive text-center">{error}</p>}
+          {error && (
+            <p className="text-sm text-destructive text-center">{error}</p>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>

@@ -79,31 +79,29 @@ export function CustomerActionsCell({ customer }: CustomerActionsCellProps) {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right text-muted-foreground">Email</Label>
-              <div className="col-span-3 font-medium">
-                {customer.user?.email || 'N/A'}
-              </div>
+            <div className="grid gap-2">
+              <Label className="text-muted-foreground">Email</Label>
+              <div className="font-medium">{customer.user?.email || 'N/A'}</div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right text-muted-foreground">Name</Label>
-              <div className="col-span-3 font-medium">
+            <div className="grid gap-2">
+              <Label className="text-muted-foreground">Name</Label>
+              <div className="font-medium">
                 {customer.user?.firstName || ''} {customer.user?.lastName || ''}
               </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right text-muted-foreground">Status</Label>
-              <div className="col-span-3">
-                <Badge variant={customer.user?.isVerified ? 'default' : 'secondary'}>
+            <div className="grid gap-2">
+              <Label className="text-muted-foreground">Status</Label>
+              <div>
+                <Badge
+                  variant={customer.user?.isVerified ? 'default' : 'secondary'}
+                >
                   {customer.user?.isVerified ? 'Verified' : 'Unverified'}
                 </Badge>
               </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right text-muted-foreground">Joined</Label>
-              <div className="col-span-3">
-                {new Date(customer.createdAt).toLocaleDateString()}
-              </div>
+            <div className="grid gap-2">
+              <Label className="text-muted-foreground">Joined</Label>
+              <div>{new Date(customer.createdAt).toLocaleDateString()}</div>
             </div>
           </div>
         </DialogContent>

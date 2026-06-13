@@ -71,30 +71,29 @@ export function CreateRoleForm() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
             <Input
               id="name"
-              className="col-span-3"
               placeholder="e.g., manager"
               value={formData.name}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              className="col-span-3"
               placeholder="Role description..."
               value={formData.description}
               onChange={handleChange}
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            Role name will be converted to lowercase with hyphens (e.g., &quot;Sales Manager&quot; → &quot;sales-manager&quot;)
+            Role name will be converted to lowercase with hyphens (e.g.,
+            &quot;Sales Manager&quot; → &quot;sales-manager&quot;)
           </p>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-foreground-error text-sm">{error}</p>}
         </div>
         <DialogFooter>
           <Button onClick={handleSubmit} disabled={loading}>

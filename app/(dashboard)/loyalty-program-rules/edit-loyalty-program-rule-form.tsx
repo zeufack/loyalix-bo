@@ -2,14 +2,14 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useEffect, useState } from 'react';
@@ -20,7 +20,9 @@ interface EditLoyaltyProgramRuleFormProps {
   loyaltyProgramRule: LoyaltyProgramRule;
 }
 
-export function EditLoyaltyProgramRuleForm({ loyaltyProgramRule }: EditLoyaltyProgramRuleFormProps) {
+export function EditLoyaltyProgramRuleForm({
+  loyaltyProgramRule
+}: EditLoyaltyProgramRuleFormProps) {
   const [formData, setFormData] = useState<Partial<LoyaltyProgramRule>>({
     ruleName: '',
     ruleType: '',
@@ -61,77 +63,86 @@ export function EditLoyaltyProgramRuleForm({ loyaltyProgramRule }: EditLoyaltyPr
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
+    <Sheet>
+      <SheetTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
           <span className="sr-only">Open menu</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-dots-horizontal"><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-dots-horizontal"
+          >
+            <path d="M8 12h.01" />
+            <path d="M12 12h.01" />
+            <path d="M16 12h.01" />
+          </svg>
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit Loyalty Program Rule</DialogTitle>
-          <DialogDescription>
+      </SheetTrigger>
+      <SheetContent className="overflow-y-auto sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle>Edit Loyalty Program Rule</SheetTitle>
+          <SheetDescription>
             Fill in the details below to edit the loyalty program rule.
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="ruleName">Rule Name</Label>
             <Input
               id="ruleName"
-              className="col-span-3"
               value={formData.ruleName}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="ruleType">Rule Type</Label>
             <Input
               id="ruleType"
-              className="col-span-3"
               value={formData.ruleType}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="points">Points</Label>
             <Input
               id="points"
               type="number"
-              className="col-span-3"
               value={formData.points ?? ''}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="purchaseAmount">Purchase Amount</Label>
             <Input
               id="purchaseAmount"
               type="number"
-              className="col-span-3"
               value={formData.purchaseAmount ?? ''}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="loyaltyProgramId">Loyalty Program ID</Label>
             <Input
               id="loyaltyProgramId"
-              className="col-span-3"
               value={formData.loyaltyProgramId}
               onChange={handleChange}
             />
           </div>
-          {error && <p className="text-red-500">{error}</p>}
+          {error && <p className="text-foreground-error">{error}</p>}
         </div>
-        <DialogFooter>
+        <SheetFooter>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? 'Updating...' : 'Update'}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }
-

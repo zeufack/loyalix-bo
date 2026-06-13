@@ -39,7 +39,9 @@ export default function Error({
         </CardHeader>
         <CardContent>
           <div className="rounded-lg bg-muted p-3 text-sm">
-            <p className="font-medium text-muted-foreground mb-1">Error details:</p>
+            <p className="font-medium text-muted-foreground mb-1">
+              Error details:
+            </p>
             <p className="text-destructive break-words">
               {error.message || 'Unknown error'}
             </p>

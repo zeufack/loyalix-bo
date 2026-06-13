@@ -1,7 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { ColumnFiltersState, SortingState, PaginationState } from '@tanstack/react-table';
+import {
+  ColumnFiltersState,
+  SortingState,
+  PaginationState
+} from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { getCustomerProgress } from '../../api/customer-progress';
 import { useTable } from '../../../hooks/useCustomerTable';
@@ -9,14 +13,12 @@ import { customerProgressColumns } from '../../../lib/columns/customer-progress-
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle
 } from '../../../components/ui/card';
 import { DataTableToolbar } from '../../../components/data-table/data-table-toolbar';
 import { DataTable } from '../../../components/data-table/data-table';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
-import { TableSkeleton } from '../../../components/ui/table-skeleton';
 
 export function CustomersProgressDataTable() {
   const [pagination, setPagination] = useState<PaginationState>({
@@ -26,14 +28,20 @@ export function CustomersProgressDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['customer-progress', pagination.pageIndex, pagination.pageSize, sorting],
-    queryFn: () => getCustomerProgress({
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
-      sortBy: sorting[0]?.id,
-      sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-    })
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: [
+      'customer-progress',
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting
+    ],
+    queryFn: () =>
+      getCustomerProgress({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        sortBy: sorting[0]?.id,
+        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
+      })
   });
 
   const table = useTable({
@@ -48,38 +56,27 @@ export function CustomersProgressDataTable() {
     manualFiltering: true
   });
 
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-red-500">
-            Error loading customer progress: {error.message}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Customer Progress</CardTitle>
-        <CardDescription>
-          Track customer progress toward rewards.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <DataTableToolbar
+          <DataTableToolbar table={table} exportFilename="customer-progress" />
+          <DataTable
             table={table}
-            exportFilename="customer-progress"
+            columns={customerProgressColumns}
+            isLoading={isLoading}
+            error={error}
+            onRetry={() => refetch()}
           />
-          {isLoading ? (
-            <TableSkeleton columns={5} rows={5} />
-          ) : (
-            <DataTable table={table} columns={customerProgressColumns} />
-          )}
-          <DataTablePagination table={table} totalItems={data?.total} />
+          <DataTablePagination
+            table={table}
+            totalItems={data?.total}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
       </CardContent>
     </Card>

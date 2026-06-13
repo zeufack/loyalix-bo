@@ -56,44 +56,36 @@ export function CreateRewardForm() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              className="col-span-3"
-              value={formData.name}
-              onChange={handleChange}
-            />
+            <Input id="name" value={formData.name} onChange={handleChange} />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
             <Input
               id="description"
-              className="col-span-3"
               value={formData.description}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="pointsRequired">Points Required</Label>
             <Input
               id="pointsRequired"
               type="number"
-              className="col-span-3"
               value={formData.pointsRequired}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="businessId">Business ID</Label>
             <Input
               id="businessId"
-              className="col-span-3"
               value={formData.businessId}
               onChange={handleChange}
             />
           </div>
-          {error && <p className="text-red-500">{error}</p>}
+          {error && <p className="text-foreground-error">{error}</p>}
         </div>
         <DialogFooter>
           <Button onClick={handleSubmit} disabled={loading}>

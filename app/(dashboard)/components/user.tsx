@@ -12,6 +12,17 @@ import {
 import Link from 'next/link';
 import { LogoutButton } from './logout-button';
 
+function initialsOf(user?: { name?: string | null; email?: string | null }) {
+  const source = user?.name?.trim() || user?.email || '';
+  if (!source) return '?';
+  const words = source.split(/[\s@.]+/).filter(Boolean);
+  return words
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase();
+}
+
 export async function User() {
   const session = await auth();
   const user = session?.user;
@@ -23,18 +34,32 @@ export async function User() {
           variant="outline"
           size="icon"
           className="overflow-hidden rounded-full"
+          aria-label="Account menu"
         >
-          <Image
-            src={user?.image ?? '/placeholder-user.jpg'}
-            width={36}
-            height={36}
-            alt="Avatar"
-            className="overflow-hidden rounded-full"
-          />
+          {user?.image ? (
+            <Image
+              src={user.image}
+              width={36}
+              height={36}
+              alt="Avatar"
+              className="overflow-hidden rounded-full"
+            />
+          ) : (
+            <span className="flex size-full items-center justify-center rounded-full bg-sidebar text-xs font-semibold text-sidebar-foreground">
+              {initialsOf(user)}
+            </span>
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          {user?.name || user?.email || 'My Account'}
+          {user?.name && user?.email && (
+            <span className="block text-xs font-normal text-muted-foreground">
+              {user.email}
+            </span>
+          )}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/settings">Settings</Link>

@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTrigger,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTrigger,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter
+} from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -72,71 +72,57 @@ export function EditUserForm({ user }: EditUserFormProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
           <Pencil className="mr-2 h-4 w-4" />
           Edit user
         </DropdownMenuItem>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit User</DialogTitle>
-          <DialogDescription>
+      </SheetTrigger>
+      <SheetContent className="overflow-y-auto sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle>Edit User</SheetTitle>
+          <SheetDescription>
             Update user information and settings.
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">
-              Email
-            </Label>
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
-              className="col-span-3"
               value={formData.email || ''}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="firstName" className="text-right">
-              First Name
-            </Label>
+          <div className="grid gap-2">
+            <Label htmlFor="firstName">First Name</Label>
             <Input
               id="firstName"
-              className="col-span-3"
               value={formData.firstName || ''}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="lastName" className="text-right">
-              Last Name
-            </Label>
+          <div className="grid gap-2">
+            <Label htmlFor="lastName">Last Name</Label>
             <Input
               id="lastName"
-              className="col-span-3"
               value={formData.lastName || ''}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="phoneNumber" className="text-right">
-              Phone
-            </Label>
+          <div className="grid gap-2">
+            <Label htmlFor="phoneNumber">Phone</Label>
             <Input
               id="phoneNumber"
-              className="col-span-3"
               value={formData.phoneNumber || ''}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="isVerified" className="text-right">
-              Verified
-            </Label>
-            <div className="col-span-3">
+          <div className="grid gap-2">
+            <Label htmlFor="isVerified">Verified</Label>
+            <div>
               <Switch
                 id="isVerified"
                 checked={formData.isVerified || false}
@@ -150,15 +136,15 @@ export function EditUserForm({ user }: EditUserFormProps) {
             <p className="text-sm text-destructive text-center">{error}</p>
           )}
         </div>
-        <DialogFooter>
+        <SheetFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? 'Saving...' : 'Save Changes'}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

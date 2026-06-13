@@ -46,7 +46,12 @@ export function CreateBusinessForm() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { file: profileImage, previewUrl: profilePreview, handleChange: handleProfileChange, reset: resetProfile } = useImageUpload();
+  const {
+    file: profileImage,
+    previewUrl: profilePreview,
+    handleChange: handleProfileChange,
+    reset: resetProfile
+  } = useImageUpload();
 
   const { data: businessTypesData } = useQuery({
     queryKey: ['business-types'],
@@ -63,15 +68,21 @@ export function CreateBusinessForm() {
   const businessTypes = businessTypesData?.data || [];
   const users = usersData?.data || [];
 
-  const { loading, error, setError, handleCreate } = useEntityForm<Business, CreateBusinessDto>({
+  const { loading, error, setError, handleCreate } = useEntityForm<
+    Business,
+    CreateBusinessDto
+  >({
     createEntity: createBusiness,
     uploadImage: uploadBusinessProfileImage,
     queryKey: 'business',
     successMessage: 'Business created successfully',
-    imageUploadErrorMessage: 'Business created, but profile image upload failed. You can add a profile image by editing it.'
+    imageUploadErrorMessage:
+      'Business created, but profile image upload failed. You can add a profile image by editing it.'
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
     if (errors[id]) {
@@ -117,7 +128,11 @@ export function CreateBusinessForm() {
   };
 
   const handleSubmit = async () => {
-    const result = await handleCreate(formData as CreateBusinessDto, profileImage, validate);
+    const result = await handleCreate(
+      formData as CreateBusinessDto,
+      profileImage,
+      validate
+    );
     if (result) {
       resetForm();
       setOpen(false);
@@ -125,10 +140,13 @@ export function CreateBusinessForm() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      setOpen(isOpen);
-      if (!isOpen) resetForm();
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) resetForm();
+      }}
+    >
       <DialogTrigger asChild>
         <AddItemButton title="Create Business" />
       </DialogTrigger>
@@ -140,63 +158,67 @@ export function CreateBusinessForm() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="name">Name *</Label>
-            <div className="col-span-3 space-y-1">
+            <div className="space-y-1">
               <Input
                 id="name"
                 placeholder="e.g., Easy Moby"
                 value={formData.name}
                 onChange={handleChange}
-                className={errors.name ? 'border-red-500' : ''}
+                className={errors.name ? 'border-border-error' : ''}
               />
               {errors.name && (
-                <p className="text-sm text-red-500">{errors.name}</p>
+                <p className="text-sm text-foreground-error">{errors.name}</p>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="email">Email *</Label>
-            <div className="col-span-3 space-y-1">
+            <div className="space-y-1">
               <Input
                 id="email"
                 type="email"
                 placeholder="business@example.com"
                 value={formData.email}
                 onChange={handleChange}
-                className={errors.email ? 'border-red-500' : ''}
+                className={errors.email ? 'border-border-error' : ''}
               />
               {errors.email && (
-                <p className="text-sm text-red-500">{errors.email}</p>
+                <p className="text-sm text-foreground-error">{errors.email}</p>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="phone">Phone</Label>
-            <div className="col-span-3 space-y-1">
+            <div className="space-y-1">
               <Input
                 id="phone"
                 placeholder="+1 (555) 123-4567"
                 value={formData.phone}
                 onChange={handleChange}
-                className={errors.phone ? 'border-red-500' : ''}
+                className={errors.phone ? 'border-border-error' : ''}
               />
               {errors.phone && (
-                <p className="text-sm text-red-500">{errors.phone}</p>
+                <p className="text-sm text-foreground-error">{errors.phone}</p>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="industryType">Industry Type *</Label>
-            <div className="col-span-3 space-y-1">
+            <div className="space-y-1">
               <Select
                 value={formData.industryType}
-                onValueChange={(value) => handleSelectChange('industryType', value)}
+                onValueChange={(value) =>
+                  handleSelectChange('industryType', value)
+                }
               >
-                <SelectTrigger className={errors.industryType ? 'border-red-500' : ''}>
+                <SelectTrigger
+                  className={errors.industryType ? 'border-border-error' : ''}
+                >
                   <SelectValue placeholder="Select industry type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -208,19 +230,23 @@ export function CreateBusinessForm() {
                 </SelectContent>
               </Select>
               {errors.industryType && (
-                <p className="text-sm text-red-500">{errors.industryType}</p>
+                <p className="text-sm text-foreground-error">
+                  {errors.industryType}
+                </p>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="owner">Owner *</Label>
-            <div className="col-span-3 space-y-1">
+            <div className="space-y-1">
               <Select
                 value={formData.owner}
                 onValueChange={(value) => handleSelectChange('owner', value)}
               >
-                <SelectTrigger className={errors.owner ? 'border-red-500' : ''}>
+                <SelectTrigger
+                  className={errors.owner ? 'border-border-error' : ''}
+                >
                   <SelectValue placeholder="Select business owner" />
                 </SelectTrigger>
                 <SelectContent>
@@ -232,40 +258,46 @@ export function CreateBusinessForm() {
                 </SelectContent>
               </Select>
               {errors.owner && (
-                <p className="text-sm text-red-500">{errors.owner}</p>
+                <p className="text-sm text-foreground-error">{errors.owner}</p>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="address">Address</Label>
-            <div className="col-span-3 space-y-1">
+            <div className="space-y-1">
               <Input
                 id="address"
                 placeholder="123 Main Street, City"
                 value={formData.address}
                 onChange={handleChange}
-                className={errors.address ? 'border-red-500' : ''}
+                className={errors.address ? 'border-border-error' : ''}
               />
               {errors.address && (
-                <p className="text-sm text-red-500">{errors.address}</p>
+                <p className="text-sm text-foreground-error">
+                  {errors.address}
+                </p>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-4 items-start gap-4">
-            <Label htmlFor="description" className="pt-2">Description</Label>
-            <div className="col-span-3 space-y-1">
+          <div className="grid gap-2">
+            <Label htmlFor="description" className="pt-2">
+              Description
+            </Label>
+            <div className="space-y-1">
               <Textarea
                 id="description"
                 placeholder="Brief description of the business..."
                 value={formData.description}
                 onChange={handleChange}
-                className={errors.description ? 'border-red-500' : ''}
+                className={errors.description ? 'border-border-error' : ''}
                 rows={3}
               />
               {errors.description && (
-                <p className="text-sm text-red-500">{errors.description}</p>
+                <p className="text-sm text-foreground-error">
+                  {errors.description}
+                </p>
               )}
             </div>
           </div>
@@ -278,7 +310,9 @@ export function CreateBusinessForm() {
             uploadLabel="Upload a profile image"
           />
 
-          {error && <p className="text-sm text-destructive text-center">{error}</p>}
+          {error && (
+            <p className="text-sm text-destructive text-center">{error}</p>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>

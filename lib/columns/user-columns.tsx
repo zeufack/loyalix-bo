@@ -1,7 +1,7 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Badge } from '../../components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { DataTableColumnHeader } from '../../components/data-table/data-table-column-header';
 import { User } from '../../types/user';
 import { copyToClipboard } from '../utils';
@@ -121,12 +121,7 @@ export const userColumns: ColumnDef<User>[] = [
         >
           {row.getValue('email')}
         </a>
-        {row.original.isVerified && (
-          <Badge variant="secondary" className="gap-1">
-            <Check className="h-3 w-3" />
-            Verified
-          </Badge>
-        )}
+        {row.original.isVerified && <StatusBadge status="verified" />}
       </div>
     ),
     filterFn: (row, id, value) => {
@@ -176,19 +171,7 @@ export const userColumns: ColumnDef<User>[] = [
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => (
-      <Badge variant={row.getValue('isActive') ? 'default' : 'destructive'}>
-        {row.getValue('isActive') ? (
-          <span className="flex items-center gap-1">
-            <Check className="h-3 w-3" />
-            Active
-          </span>
-        ) : (
-          <span className="flex items-center gap-1">
-            <X className="h-3 w-3" />
-            Inactive
-          </span>
-        )}
-      </Badge>
+      <StatusBadge status={row.getValue('isActive') ? 'active' : 'inactive'} />
     ),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));

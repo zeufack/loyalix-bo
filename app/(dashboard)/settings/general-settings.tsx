@@ -83,7 +83,10 @@ export function GeneralSettings() {
               type="number"
               value={settings.maxBusinessesPerUser}
               onChange={(e) =>
-                setSettings({ ...settings, maxBusinessesPerUser: e.target.value })
+                setSettings({
+                  ...settings,
+                  maxBusinessesPerUser: e.target.value
+                })
               }
             />
             <p className="text-xs text-muted-foreground">
@@ -97,7 +100,10 @@ export function GeneralSettings() {
               type="number"
               value={settings.defaultPointsExpiry}
               onChange={(e) =>
-                setSettings({ ...settings, defaultPointsExpiry: e.target.value })
+                setSettings({
+                  ...settings,
+                  defaultPointsExpiry: e.target.value
+                })
               }
             />
             <p className="text-xs text-muted-foreground">

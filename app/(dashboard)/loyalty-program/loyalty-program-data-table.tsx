@@ -1,7 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { ColumnFiltersState, SortingState, PaginationState } from '@tanstack/react-table';
+import {
+  ColumnFiltersState,
+  SortingState,
+  PaginationState
+} from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { getLoyaltyPrograms } from '../../api/loyalty-program';
 import { useTable } from '../../../hooks/useCustomerTable';
@@ -9,14 +13,12 @@ import { loyaltyProgramColumns } from '../../../lib/columns/loyalty-program-colu
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle
 } from '../../../components/ui/card';
 import { DataTableToolbar } from '../../../components/data-table/data-table-toolbar';
 import { DataTable } from '../../../components/data-table/data-table';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
-import { TableSkeleton } from '../../../components/ui/table-skeleton';
 
 export function LoyaltyProgramsDataTable() {
   const [pagination, setPagination] = useState<PaginationState>({
@@ -26,14 +28,20 @@ export function LoyaltyProgramsDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['loyalty-program', pagination.pageIndex, pagination.pageSize, sorting],
-    queryFn: () => getLoyaltyPrograms({
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
-      sortBy: sorting[0]?.id,
-      sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-    })
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: [
+      'loyalty-program',
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting
+    ],
+    queryFn: () =>
+      getLoyaltyPrograms({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        sortBy: sorting[0]?.id,
+        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
+      })
   });
 
   const table = useTable({
@@ -48,25 +56,10 @@ export function LoyaltyProgramsDataTable() {
     manualFiltering: true
   });
 
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-red-500">
-            Error loading loyalty programs: {error.message}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Loyalty Programs</CardTitle>
-        <CardDescription>
-          Manage your loyalty programs and view their activity.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -76,12 +69,19 @@ export function LoyaltyProgramsDataTable() {
             searchColumn="name"
             searchPlaceholder="Search programs..."
           />
-          {isLoading ? (
-            <TableSkeleton columns={5} rows={5} />
-          ) : (
-            <DataTable table={table} columns={loyaltyProgramColumns} />
-          )}
-          <DataTablePagination table={table} totalItems={data?.total} />
+          <DataTable
+            table={table}
+            columns={loyaltyProgramColumns}
+            isLoading={isLoading}
+            error={error}
+            onRetry={() => refetch()}
+          />
+          <DataTablePagination
+            table={table}
+            totalItems={data?.total}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
       </CardContent>
     </Card>

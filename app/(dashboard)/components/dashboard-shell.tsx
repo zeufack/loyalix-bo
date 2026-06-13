@@ -7,7 +7,7 @@ import {
   SidebarTrigger
 } from '@/components/ui/sidebar';
 import { AppSidebar } from './app-sidebar';
-import { MobileNav } from './mobile-nav';
+import { HeaderBreadcrumbs } from './header-breadcrumbs';
 import { GlobalSearch } from '@/components/global-search';
 
 interface DashboardShellProps {
@@ -25,10 +25,10 @@ export function DashboardShell({
     <SidebarProvider defaultOpen={defaultOpen}>
       <AppSidebar />
       <SidebarInset>
-        <header className="sticky top-0 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4 lg:h-[60px] lg:px-6">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4 lg:h-[60px] lg:px-6">
           <SidebarTrigger className="-ml-1" />
           <div className="h-4 w-px bg-border" />
-          <MobileNav />
+          <HeaderBreadcrumbs />
           <div className="ml-auto flex items-center gap-4">
             <GlobalSearch />
             {headerActions}

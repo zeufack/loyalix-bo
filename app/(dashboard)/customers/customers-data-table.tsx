@@ -2,21 +2,18 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCustomers } from '@/app/api/customer';
-import { PaginationState, ColumnFiltersState, SortingState } from '@tanstack/react-table';
+import {
+  PaginationState,
+  ColumnFiltersState,
+  SortingState
+} from '@tanstack/react-table';
 import { customerColumns } from '@/lib/columns/customer-columns';
 import { DataTable } from '@/components/data-table/data-table';
 import { useTable } from '@/hooks/useCustomerTable';
 import { DataTablePagination } from '@/components/data-table/data-table-pagination';
 import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
-import { TableSkeleton } from '@/components/ui/table-skeleton';
 
 export function CustomersDataTable() {
   const [pagination, setPagination] = useState<PaginationState>({
@@ -26,14 +23,15 @@ export function CustomersDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['customers', pagination.pageIndex, pagination.pageSize, sorting],
-    queryFn: () => getCustomers({
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
-      sortBy: sorting[0]?.id,
-      sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-    })
+    queryFn: () =>
+      getCustomers({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        sortBy: sorting[0]?.id,
+        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
+      })
   });
 
   const table = useTable({
@@ -48,25 +46,10 @@ export function CustomersDataTable() {
     manualFiltering: true
   });
 
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-red-500">
-            Error loading customers: {error.message}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Customers</CardTitle>
-        <CardDescription>
-          Manage your customers and view their activity.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -76,12 +59,19 @@ export function CustomersDataTable() {
             searchColumn="name"
             searchPlaceholder="Search customers..."
           />
-          {isLoading ? (
-            <TableSkeleton columns={5} rows={5} />
-          ) : (
-            <DataTable table={table} columns={customerColumns} />
-          )}
-          <DataTablePagination table={table} totalItems={data?.total} />
+          <DataTable
+            table={table}
+            columns={customerColumns}
+            isLoading={isLoading}
+            error={error}
+            onRetry={() => refetch()}
+          />
+          <DataTablePagination
+            table={table}
+            totalItems={data?.total}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
       </CardContent>
     </Card>

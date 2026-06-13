@@ -2,13 +2,13 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 import { Customer } from '@/types/customer';
@@ -24,53 +24,50 @@ export function ViewCustomerForm({ customer }: ViewCustomerFormProps) {
   const [open, setOpen] = useState(false);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
           <Eye className="mr-2 h-4 w-4" />
           View Details
         </DropdownMenuItem>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Customer Details</DialogTitle>
-          <DialogDescription>
+      </SheetTrigger>
+      <SheetContent className="overflow-y-auto sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle>Customer Details</SheetTitle>
+          <SheetDescription>
             View customer information linked to their user account.
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right text-muted-foreground">Email</Label>
-            <div className="col-span-3 font-medium">
-              {customer.user?.email || 'N/A'}
-            </div>
+          <div className="grid gap-2">
+            <Label className="text-muted-foreground">Email</Label>
+            <div className="font-medium">{customer.user?.email || 'N/A'}</div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right text-muted-foreground">Name</Label>
-            <div className="col-span-3 font-medium">
+          <div className="grid gap-2">
+            <Label className="text-muted-foreground">Name</Label>
+            <div className="font-medium">
               {customer.user?.firstName || ''} {customer.user?.lastName || ''}
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right text-muted-foreground">Status</Label>
-            <div className="col-span-3">
-              <Badge variant={customer.user?.isVerified ? 'default' : 'secondary'}>
+          <div className="grid gap-2">
+            <Label className="text-muted-foreground">Status</Label>
+            <div>
+              <Badge
+                variant={customer.user?.isVerified ? 'default' : 'secondary'}
+              >
                 {customer.user?.isVerified ? 'Verified' : 'Unverified'}
               </Badge>
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right text-muted-foreground">Joined</Label>
-            <div className="col-span-3">
-              {new Date(customer.createdAt).toLocaleDateString()}
-            </div>
+          <div className="grid gap-2">
+            <Label className="text-muted-foreground">Joined</Label>
+            <div>{new Date(customer.createdAt).toLocaleDateString()}</div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
 
 // Keep backward compatibility
 export { ViewCustomerForm as EditCustomerForm };
-

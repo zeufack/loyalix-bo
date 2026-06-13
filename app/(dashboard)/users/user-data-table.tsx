@@ -5,7 +5,6 @@ import { DataTableToolbar } from '../../../components/data-table/data-table-tool
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle
 } from '../../../components/ui/card';
@@ -21,8 +20,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getUsers, deleteUser } from '../../api/user';
 import { DataTable } from '../../../components/data-table/data-table';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
-import { DataTableBulkActions, BulkAction } from '@/components/data-table/data-table-bulk-actions';
-import { TableSkeleton } from '../../../components/ui/table-skeleton';
+import {
+  DataTableBulkActions,
+  BulkAction
+} from '@/components/data-table/data-table-bulk-actions';
 import { User } from '@/types/user';
 import { Trash2, Ban, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -37,14 +38,15 @@ export default function UserDataTable() {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const queryClient = useQueryClient();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['users', pagination.pageIndex, pagination.pageSize, sorting],
-    queryFn: () => getUsers({
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
-      sortBy: sorting[0]?.id,
-      sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-    })
+    queryFn: () =>
+      getUsers({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        sortBy: sorting[0]?.id,
+        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
+      })
   });
 
   const table = useTable({
@@ -71,12 +73,15 @@ export default function UserDataTable() {
       variant: 'destructive',
       requireConfirmation: true,
       confirmTitle: 'Delete selected users?',
-      confirmDescription: 'This action cannot be undone. All selected users will be permanently deleted.',
+      confirmDescription:
+        'This action cannot be undone. All selected users will be permanently deleted.',
       onClick: async (selectedUsers) => {
         const results = await Promise.allSettled(
           selectedUsers.map((user) => deleteUser(user.id))
         );
-        const succeeded = results.filter((r) => r.status === 'fulfilled').length;
+        const succeeded = results.filter(
+          (r) => r.status === 'fulfilled'
+        ).length;
         const failed = results.filter((r) => r.status === 'rejected').length;
 
         if (succeeded > 0) {
@@ -94,25 +99,10 @@ export default function UserDataTable() {
     setRowSelection({});
   };
 
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-red-500">
-            Error loading users: {error.message}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Users</CardTitle>
-        <CardDescription>
-          Manage users and view their activity.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -127,12 +117,20 @@ export default function UserDataTable() {
             searchColumn="email"
             searchPlaceholder="Search users..."
           />
-          {isLoading ? (
-            <TableSkeleton columns={6} rows={5} />
-          ) : (
-            <DataTable table={table} columns={userColumns} />
-          )}
-          <DataTablePagination table={table} totalItems={data?.total} />
+          <DataTable
+            table={table}
+            columns={userColumns}
+            isLoading={isLoading}
+            error={error}
+            onRetry={() => refetch()}
+            emptyMessage="No users yet."
+          />
+          <DataTablePagination
+            table={table}
+            totalItems={data?.total}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
       </CardContent>
     </Card>

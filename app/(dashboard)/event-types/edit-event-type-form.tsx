@@ -2,14 +2,14 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -33,14 +33,17 @@ export function EditEventTypeForm({ eventType }: EditEventTypeFormProps) {
     description: ''
   });
 
-  const { 
-    file: iconFile, 
-    previewUrl: iconPreview, 
-    handleChange: handleIconChange, 
-    setPreviewUrl 
+  const {
+    file: iconFile,
+    previewUrl: iconPreview,
+    handleChange: handleIconChange,
+    setPreviewUrl
   } = useImageUpload(eventType.icon?.url);
 
-  const { loading, error, setError, handleUpdate } = useEntityForm<EventType, Partial<EventType>>({
+  const { loading, error, setError, handleUpdate } = useEntityForm<
+    EventType,
+    Partial<EventType>
+  >({
     createEntity: async () => eventType,
     updateEntity: updateEventType,
     uploadImage: uploadEventTypeIcon,
@@ -58,7 +61,9 @@ export function EditEventTypeForm({ eventType }: EditEventTypeFormProps) {
     }
   }, [eventType, setPreviewUrl]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
@@ -71,9 +76,9 @@ export function EditEventTypeForm({ eventType }: EditEventTypeFormProps) {
 
   const handleSubmit = async () => {
     const result = await handleUpdate(
-      eventType.id, 
-      { name: formData.name, description: formData.description }, 
-      iconFile, 
+      eventType.id,
+      { name: formData.name, description: formData.description },
+      iconFile,
       validate
     );
     if (result) {
@@ -82,35 +87,27 @@ export function EditEventTypeForm({ eventType }: EditEventTypeFormProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
           <Pencil className="mr-2 h-4 w-4" />
           Edit
         </DropdownMenuItem>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit Event Type</DialogTitle>
-          <DialogDescription>
-            Update the event type details.
-          </DialogDescription>
-        </DialogHeader>
+      </SheetTrigger>
+      <SheetContent className="overflow-y-auto sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle>Edit Event Type</SheetTitle>
+          <SheetDescription>Update the event type details.</SheetDescription>
+        </SheetHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">Name</Label>
-            <Input
-              id="name"
-              className="col-span-3"
-              value={formData.name}
-              onChange={handleChange}
-            />
+          <div className="grid gap-2">
+            <Label htmlFor="name">Name</Label>
+            <Input id="name" value={formData.name} onChange={handleChange} />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">Description</Label>
+          <div className="grid gap-2">
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              className="col-span-3"
               value={formData.description || ''}
               onChange={handleChange}
             />
@@ -122,15 +119,19 @@ export function EditEventTypeForm({ eventType }: EditEventTypeFormProps) {
             disabled={loading}
             uploadLabel="Upload an icon"
           />
-          {error && <p className="text-sm text-destructive text-center">{error}</p>}
+          {error && (
+            <p className="text-sm text-destructive text-center">{error}</p>
+          )}
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+        <SheetFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? 'Saving...' : 'Save Changes'}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

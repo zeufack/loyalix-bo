@@ -52,17 +52,16 @@ export function CreatePermissionForm() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
             <Input
               id="name"
               type="text"
-              className="col-span-3"
               value={formData.name}
               onChange={handleChange}
             />
           </div>
-          {error && <p className="text-red-500">{error}</p>}
+          {error && <p className="text-foreground-error">{error}</p>}
         </div>
         <DialogFooter>
           <Button onClick={handleSubmit} disabled={loading}>

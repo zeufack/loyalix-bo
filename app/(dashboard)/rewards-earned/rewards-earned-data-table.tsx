@@ -1,23 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { ColumnFiltersState, SortingState, PaginationState } from '@tanstack/react-table';
+import {
+  ColumnFiltersState,
+  SortingState,
+  PaginationState
+} from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { DateRange } from 'react-day-picker';
 import { getRewardsEarned } from '@/app/api/rewards-earned';
 import { useTable } from '@/hooks/useCustomerTable';
 import { rewardsEarnedColumns } from '@/lib/columns/rewards-earned-columns';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTablePagination } from '@/components/data-table/data-table-pagination';
-import { TableSkeleton } from '@/components/ui/table-skeleton';
 import { Clock, CheckCircle, Gift, XCircle } from 'lucide-react';
 
 const statusOptions = [
@@ -36,8 +33,14 @@ export function RewardsEarnedDataTable() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['rewards-earned', pagination.pageIndex, pagination.pageSize, sorting, dateRange],
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: [
+      'rewards-earned',
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting,
+      dateRange
+    ],
     queryFn: () =>
       getRewardsEarned({
         page: pagination.pageIndex + 1,
@@ -61,25 +64,10 @@ export function RewardsEarnedDataTable() {
     manualFiltering: true
   });
 
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-red-500">
-            Error loading rewards: {error.message}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Rewards Earned</CardTitle>
-        <CardDescription>
-          Track customer rewards earned and redemptions across all loyalty programs.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -93,12 +81,19 @@ export function RewardsEarnedDataTable() {
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
           />
-          {isLoading ? (
-            <TableSkeleton columns={5} rows={5} />
-          ) : (
-            <DataTable table={table} columns={rewardsEarnedColumns} />
-          )}
-          <DataTablePagination table={table} totalItems={data?.total} />
+          <DataTable
+            table={table}
+            columns={rewardsEarnedColumns}
+            isLoading={isLoading}
+            error={error}
+            onRetry={() => refetch()}
+          />
+          <DataTablePagination
+            table={table}
+            totalItems={data?.total}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
       </CardContent>
     </Card>

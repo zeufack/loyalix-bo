@@ -116,11 +116,9 @@ export function CreateCustomerForm() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="userId" className="text-right">
-              User
-            </Label>
-            <div className="col-span-3 space-y-1">
+          <div className="grid gap-2">
+            <Label htmlFor="userId">User</Label>
+            <div className="space-y-1">
               <Select
                 value={formData.userId}
                 onValueChange={(value) => {
@@ -129,7 +127,7 @@ export function CreateCustomerForm() {
                 }}
               >
                 <SelectTrigger
-                  className={errors.userId ? 'border-red-500' : ''}
+                  className={errors.userId ? 'border-border-error' : ''}
                 >
                   <SelectValue placeholder="Select a user" />
                 </SelectTrigger>
@@ -142,47 +140,45 @@ export function CreateCustomerForm() {
                 </SelectContent>
               </Select>
               {errors.userId && (
-                <p className="text-sm text-red-500">{errors.userId}</p>
+                <p className="text-sm text-foreground-error">{errors.userId}</p>
               )}
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="firstName" className="text-right">
-              First Name
-            </Label>
-            <div className="col-span-3 space-y-1">
+          <div className="grid gap-2">
+            <Label htmlFor="firstName">First Name</Label>
+            <div className="space-y-1">
               <Input
                 id="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                className={errors.firstName ? 'border-red-500' : ''}
+                className={errors.firstName ? 'border-border-error' : ''}
               />
               {errors.firstName && (
-                <p className="text-sm text-red-500">{errors.firstName}</p>
+                <p className="text-sm text-foreground-error">
+                  {errors.firstName}
+                </p>
               )}
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="lastName" className="text-right">
-              Last Name
-            </Label>
-            <div className="col-span-3 space-y-1">
+          <div className="grid gap-2">
+            <Label htmlFor="lastName">Last Name</Label>
+            <div className="space-y-1">
               <Input
                 id="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                className={errors.lastName ? 'border-red-500' : ''}
+                className={errors.lastName ? 'border-border-error' : ''}
               />
               {errors.lastName && (
-                <p className="text-sm text-red-500">{errors.lastName}</p>
+                <p className="text-sm text-foreground-error">
+                  {errors.lastName}
+                </p>
               )}
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="phoneNumber" className="text-right">
-              Phone
-            </Label>
-            <div className="col-span-3 space-y-1">
+          <div className="grid gap-2">
+            <Label htmlFor="phoneNumber">Phone</Label>
+            <div className="space-y-1">
               <Input
                 id="phoneNumber"
                 value={formData.phoneNumber || ''}

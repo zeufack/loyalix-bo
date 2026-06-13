@@ -1,8 +1,6 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RolesDataTable } from './roles-data-table';
-import ExportButton from '@/components/ui/export-btn';
 import { CreateRoleForm } from './create-role-form';
 
 export default async function RolesPage() {
@@ -13,19 +11,11 @@ export default async function RolesPage() {
   }
 
   return (
-    <Tabs defaultValue="all">
-      <div className="flex items-center">
-        <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-        </TabsList>
-        <div className="ml-auto flex items-center gap-2">
-          <ExportButton />
-          <CreateRoleForm />
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-end gap-2">
+        <CreateRoleForm />
       </div>
-      <TabsContent value="all">
-        <RolesDataTable />
-      </TabsContent>
-    </Tabs>
+      <RolesDataTable />
+    </div>
   );
 }

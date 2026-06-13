@@ -5,18 +5,20 @@ import { DataTableToolbar } from '../../../components/data-table/data-table-tool
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle
 } from '../../../components/ui/card';
 import { useTable } from '../../../hooks/useCustomerTable';
 import { permissionColumns } from '../../../lib/columns/permission-columns';
-import { PaginationState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
+import {
+  PaginationState,
+  SortingState,
+  ColumnFiltersState
+} from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { getPermissions } from '../../api/permission';
 import { DataTable } from '../../../components/data-table/data-table';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
-import { TableSkeleton } from '../../../components/ui/table-skeleton';
 
 export default function PermissionsDataTable() {
   const [pagination, setPagination] = useState<PaginationState>({
@@ -26,14 +28,20 @@ export default function PermissionsDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['permissions', pagination.pageIndex, pagination.pageSize, sorting],
-    queryFn: () => getPermissions({
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
-      sortBy: sorting[0]?.id,
-      sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-    })
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: [
+      'permissions',
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting
+    ],
+    queryFn: () =>
+      getPermissions({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        sortBy: sorting[0]?.id,
+        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
+      })
   });
 
   const table = useTable({
@@ -48,25 +56,10 @@ export default function PermissionsDataTable() {
     manualFiltering: true
   });
 
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-red-500">
-            Error loading permissions: {error.message}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Permissions</CardTitle>
-        <CardDescription>
-          Manage permissions and access control.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -76,12 +69,19 @@ export default function PermissionsDataTable() {
             searchColumn="name"
             searchPlaceholder="Search permissions..."
           />
-          {isLoading ? (
-            <TableSkeleton columns={5} rows={5} />
-          ) : (
-            <DataTable table={table} columns={permissionColumns} />
-          )}
-          <DataTablePagination table={table} totalItems={data?.total} />
+          <DataTable
+            table={table}
+            columns={permissionColumns}
+            isLoading={isLoading}
+            error={error}
+            onRetry={() => refetch()}
+          />
+          <DataTablePagination
+            table={table}
+            totalItems={data?.total}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
       </CardContent>
     </Card>

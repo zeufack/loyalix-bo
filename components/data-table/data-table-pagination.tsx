@@ -17,14 +17,22 @@ import {
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
   totalItems?: number;
+  isLoading?: boolean;
+  error?: Error | null;
 }
 
 export function DataTablePagination<TData>({
   table,
-  totalItems
+  totalItems,
+  isLoading,
+  error
 }: Readonly<DataTablePaginationProps<TData>>) {
   const selectedCount = table.getFilteredSelectedRowModel().rows.length;
   const displayTotal = totalItems ?? table.getFilteredRowModel().rows.length;
+
+  // No data to paginate while loading or failed — showing "0 rows, page 1
+  // of 1" here would contradict the table state above.
+  if (isLoading || error) return null;
 
   return (
     <div className="flex flex-col gap-2 px-2 sm:flex-row sm:items-center sm:justify-between">

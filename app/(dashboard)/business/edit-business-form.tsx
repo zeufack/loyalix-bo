@@ -2,13 +2,13 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle
+} from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,7 +27,11 @@ interface EditBusinessFormProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function EditBusinessForm({ business, open, onOpenChange }: EditBusinessFormProps) {
+export function EditBusinessForm({
+  business,
+  open,
+  onOpenChange
+}: EditBusinessFormProps) {
   const [formData, setFormData] = useState<UpdateBusinessDto>({
     name: '',
     email: '',
@@ -37,14 +41,17 @@ export function EditBusinessForm({ business, open, onOpenChange }: EditBusinessF
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { 
-    file: profileImage, 
-    previewUrl: profilePreview, 
-    handleChange: handleProfileChange, 
-    setPreviewUrl 
+  const {
+    file: profileImage,
+    previewUrl: profilePreview,
+    handleChange: handleProfileChange,
+    setPreviewUrl
   } = useImageUpload(business.profileImage?.url);
 
-  const { loading, error, setError, handleUpdate } = useEntityForm<Business, UpdateBusinessDto>({
+  const { loading, error, setError, handleUpdate } = useEntityForm<
+    Business,
+    UpdateBusinessDto
+  >({
     createEntity: async () => business,
     updateEntity: updateBusiness,
     uploadImage: uploadBusinessProfileImage,
@@ -67,7 +74,9 @@ export function EditBusinessForm({ business, open, onOpenChange }: EditBusinessF
     }
   }, [business, open, setPreviewUrl, setError]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
     if (errors[id]) {
@@ -91,91 +100,102 @@ export function EditBusinessForm({ business, open, onOpenChange }: EditBusinessF
   };
 
   const handleSubmit = async () => {
-    const result = await handleUpdate(business.id, formData, profileImage, validate);
+    const result = await handleUpdate(
+      business.id,
+      formData,
+      profileImage,
+      validate
+    );
     if (result) {
       onOpenChange(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Business</DialogTitle>
-          <DialogDescription>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="overflow-y-auto sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle>Edit Business</SheetTitle>
+          <SheetDescription>
             Update the business details below.
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
-            <div className="col-span-3 space-y-1">
+            <div className="space-y-1">
               <Input
                 id="name"
                 value={formData.name}
                 onChange={handleChange}
-                className={errors.name ? 'border-red-500' : ''}
+                className={errors.name ? 'border-border-error' : ''}
               />
               {errors.name && (
-                <p className="text-sm text-red-500">{errors.name}</p>
+                <p className="text-sm text-foreground-error">{errors.name}</p>
               )}
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <div className="col-span-3 space-y-1">
+            <div className="space-y-1">
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={errors.email ? 'border-red-500' : ''}
+                className={errors.email ? 'border-border-error' : ''}
               />
               {errors.email && (
-                <p className="text-sm text-red-500">{errors.email}</p>
+                <p className="text-sm text-foreground-error">{errors.email}</p>
               )}
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="phone">Phone</Label>
-            <div className="col-span-3 space-y-1">
+            <div className="space-y-1">
               <Input
                 id="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className={errors.phone ? 'border-red-500' : ''}
+                className={errors.phone ? 'border-border-error' : ''}
               />
               {errors.phone && (
-                <p className="text-sm text-red-500">{errors.phone}</p>
+                <p className="text-sm text-foreground-error">{errors.phone}</p>
               )}
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="address">Address</Label>
-            <div className="col-span-3 space-y-1">
+            <div className="space-y-1">
               <Input
                 id="address"
                 value={formData.address || ''}
                 onChange={handleChange}
-                className={errors.address ? 'border-red-500' : ''}
+                className={errors.address ? 'border-border-error' : ''}
               />
               {errors.address && (
-                <p className="text-sm text-red-500">{errors.address}</p>
+                <p className="text-sm text-foreground-error">
+                  {errors.address}
+                </p>
               )}
             </div>
           </div>
-          <div className="grid grid-cols-4 items-start gap-4">
-            <Label htmlFor="description" className="pt-2">Description</Label>
-            <div className="col-span-3 space-y-1">
+          <div className="grid gap-2">
+            <Label htmlFor="description" className="pt-2">
+              Description
+            </Label>
+            <div className="space-y-1">
               <Textarea
                 id="description"
                 value={formData.description || ''}
                 onChange={handleChange}
-                className={errors.description ? 'border-red-500' : ''}
+                className={errors.description ? 'border-border-error' : ''}
                 rows={3}
               />
               {errors.description && (
-                <p className="text-sm text-red-500">{errors.description}</p>
+                <p className="text-sm text-foreground-error">
+                  {errors.description}
+                </p>
               )}
             </div>
           </div>
@@ -186,17 +206,19 @@ export function EditBusinessForm({ business, open, onOpenChange }: EditBusinessF
             disabled={loading}
             uploadLabel="Upload a profile image"
           />
-          {error && <p className="text-sm text-destructive text-center">{error}</p>}
+          {error && (
+            <p className="text-sm text-destructive text-center">{error}</p>
+          )}
         </div>
-        <DialogFooter>
+        <SheetFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? 'Updating...' : 'Update'}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

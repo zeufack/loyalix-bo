@@ -8,15 +8,12 @@ import { rewardColumns } from '@/lib/columns/reward-columns';
 import { useTable } from '@/hooks/useCustomerTable';
 import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
 import { DataTablePagination } from '@/components/data-table/data-table-pagination';
-import { TableSkeleton } from '@/components/ui/table-skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
-import { ColumnFiltersState, SortingState, PaginationState } from '@tanstack/react-table';
+  ColumnFiltersState,
+  SortingState,
+  PaginationState
+} from '@tanstack/react-table';
 
 export function RewardsDataTable() {
   const [pagination, setPagination] = useState<PaginationState>({
@@ -26,14 +23,15 @@ export function RewardsDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['rewards', pagination.pageIndex, pagination.pageSize, sorting],
-    queryFn: () => getRewards({
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
-      sortBy: sorting[0]?.id,
-      sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-    })
+    queryFn: () =>
+      getRewards({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        sortBy: sorting[0]?.id,
+        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
+      })
   });
 
   const table = useTable({
@@ -48,25 +46,10 @@ export function RewardsDataTable() {
     manualFiltering: true
   });
 
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-red-500">
-            Error loading rewards: {error.message}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Rewards</CardTitle>
-        <CardDescription>
-          Manage rewards earned by customers.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -76,12 +59,19 @@ export function RewardsDataTable() {
             searchColumn="name"
             searchPlaceholder="Search rewards..."
           />
-          {isLoading ? (
-            <TableSkeleton columns={5} rows={5} />
-          ) : (
-            <DataTable table={table} columns={rewardColumns} />
-          )}
-          <DataTablePagination table={table} totalItems={data?.total} />
+          <DataTable
+            table={table}
+            columns={rewardColumns}
+            isLoading={isLoading}
+            error={error}
+            onRetry={() => refetch()}
+          />
+          <DataTablePagination
+            table={table}
+            totalItems={data?.total}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
       </CardContent>
     </Card>

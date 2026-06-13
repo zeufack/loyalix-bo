@@ -28,17 +28,28 @@ export function CreateEventTypeForm() {
     description: ''
   });
 
-  const { file: iconFile, previewUrl: iconPreview, handleChange: handleIconChange, reset: resetIcon } = useImageUpload();
+  const {
+    file: iconFile,
+    previewUrl: iconPreview,
+    handleChange: handleIconChange,
+    reset: resetIcon
+  } = useImageUpload();
 
-  const { loading, error, setError, handleCreate } = useEntityForm<EventType, typeof formData>({
+  const { loading, error, setError, handleCreate } = useEntityForm<
+    EventType,
+    typeof formData
+  >({
     createEntity: createEventType,
     uploadImage: uploadEventTypeIcon,
     queryKey: 'event-types',
     successMessage: 'Event type created successfully',
-    imageUploadErrorMessage: 'Event type created, but icon upload failed. You can add an icon by editing it.'
+    imageUploadErrorMessage:
+      'Event type created, but icon upload failed. You can add an icon by editing it.'
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
@@ -64,10 +75,13 @@ export function CreateEventTypeForm() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      setOpen(isOpen);
-      if (!isOpen) resetForm();
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) resetForm();
+      }}
+    >
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -77,27 +91,23 @@ export function CreateEventTypeForm() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create Event Type</DialogTitle>
-          <DialogDescription>
-            Add a new event type category.
-          </DialogDescription>
+          <DialogDescription>Add a new event type category.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">Name</Label>
+          <div className="grid gap-2">
+            <Label htmlFor="name">Name</Label>
             <Input
               id="name"
               placeholder="e.g., Purchase"
-              className="col-span-3"
               value={formData.name}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">Description</Label>
+          <div className="grid gap-2">
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               placeholder="Optional description..."
-              className="col-span-3"
               value={formData.description}
               onChange={handleChange}
             />
@@ -109,10 +119,14 @@ export function CreateEventTypeForm() {
             disabled={loading}
             uploadLabel="Upload an icon"
           />
-          {error && <p className="text-sm text-destructive text-center">{error}</p>}
+          {error && (
+            <p className="text-sm text-destructive text-center">{error}</p>
+          )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? 'Creating...' : 'Create'}
           </Button>

@@ -58,7 +58,7 @@ export interface ApiError {
  * User-friendly messages for each error category
  */
 const ERROR_MESSAGES: Record<ErrorCategory, string> = {
-  [ErrorCategory.NETWORK]: 'Unable to connect. Please check your internet connection.',
+  [ErrorCategory.NETWORK]: 'Unable to reach the server. Please try again in a moment.',
   [ErrorCategory.AUTH]: 'Your session has expired. Please login again.',
   [ErrorCategory.VALIDATION]: 'Please check your input and try again.',
   [ErrorCategory.NOT_FOUND]: 'The requested resource was not found.',

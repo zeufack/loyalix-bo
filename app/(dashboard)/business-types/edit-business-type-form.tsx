@@ -2,14 +2,14 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,11 +38,11 @@ export function EditBusinessTypeForm({
     description: ''
   });
 
-  const { 
-    file: iconFile, 
-    previewUrl: iconPreview, 
-    handleChange: handleIconChange, 
-    setPreviewUrl 
+  const {
+    file: iconFile,
+    previewUrl: iconPreview,
+    handleChange: handleIconChange,
+    setPreviewUrl
   } = useImageUpload(businessType.icon?.url);
 
   const { loading, error, setError, handleUpdate } = useEntityForm({
@@ -78,9 +78,9 @@ export function EditBusinessTypeForm({
 
   const handleSubmit = async () => {
     const result = await handleUpdate(
-      businessType.id, 
-      { name: formData.name, description: formData.description }, 
-      iconFile, 
+      businessType.id,
+      { name: formData.name, description: formData.description },
+      iconFile,
       validate
     );
     if (result) {
@@ -89,39 +89,29 @@ export function EditBusinessTypeForm({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
           <Pencil className="mr-2 h-4 w-4" />
           Edit
         </DropdownMenuItem>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit Business Type</DialogTitle>
-          <DialogDescription>
+      </SheetTrigger>
+      <SheetContent className="overflow-y-auto sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle>Edit Business Type</SheetTitle>
+          <SheetDescription>
             Update the business type details.
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input
-              id="name"
-              className="col-span-3"
-              value={formData.name}
-              onChange={handleChange}
-            />
+          <div className="grid gap-2">
+            <Label htmlFor="name">Name</Label>
+            <Input id="name" value={formData.name} onChange={handleChange} />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">
-              Description
-            </Label>
+          <div className="grid gap-2">
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              className="col-span-3"
               value={formData.description || ''}
               onChange={handleChange}
             />
@@ -137,15 +127,15 @@ export function EditBusinessTypeForm({
             <p className="text-sm text-destructive text-center">{error}</p>
           )}
         </div>
-        <DialogFooter>
+        <SheetFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? 'Saving...' : 'Save Changes'}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 import { Business } from '../../../types/business';
-import { ColumnFiltersState, SortingState, PaginationState } from '@tanstack/react-table';
+import {
+  ColumnFiltersState,
+  SortingState,
+  PaginationState
+} from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { getBusinesses } from '../../api/business';
 import { useTable } from '../../../hooks/useCustomerTable';
@@ -10,14 +14,12 @@ import { businessColumns } from '../../../lib/columns/business-columns';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle
 } from '../../../components/ui/card';
 import { DataTableToolbar } from '../../../components/data-table/data-table-toolbar';
 import { DataTable } from '../../../components/data-table/data-table';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
-import { TableSkeleton } from '../../../components/ui/table-skeleton';
 
 export default function BusinessDataTable() {
   const [pagination, setPagination] = useState<PaginationState>({
@@ -27,14 +29,15 @@ export default function BusinessDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['business', pagination.pageIndex, pagination.pageSize, sorting],
-    queryFn: () => getBusinesses({
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
-      sortBy: sorting[0]?.id,
-      sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-    })
+    queryFn: () =>
+      getBusinesses({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        sortBy: sorting[0]?.id,
+        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
+      })
   });
 
   const table = useTable({
@@ -49,25 +52,10 @@ export default function BusinessDataTable() {
     manualFiltering: true
   });
 
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-red-500">
-            Error loading businesses: {error.message}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Businesses</CardTitle>
-        <CardDescription>
-          Manage businesses and view their activity.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -77,12 +65,19 @@ export default function BusinessDataTable() {
             searchColumn="name"
             searchPlaceholder="Search businesses..."
           />
-          {isLoading ? (
-            <TableSkeleton columns={5} rows={5} />
-          ) : (
-            <DataTable table={table} columns={businessColumns} />
-          )}
-          <DataTablePagination table={table} totalItems={data?.total} />
+          <DataTable
+            table={table}
+            columns={businessColumns}
+            isLoading={isLoading}
+            error={error}
+            onRetry={() => refetch()}
+          />
+          <DataTablePagination
+            table={table}
+            totalItems={data?.total}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
       </CardContent>
     </Card>

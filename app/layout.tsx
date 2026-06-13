@@ -1,12 +1,11 @@
 import './globals.css';
 
-import { Poppins, Crimson_Text, Fira_Code } from 'next/font/google';
+import { Geist, Geist_Mono, Crimson_Text } from 'next/font/google';
 import { QueryProvider } from './providers';
 import { Toaster } from 'sonner';
 
-const poppins = Poppins({
+const geist = Geist({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
   variable: '--font-sans',
   display: 'swap'
 });
@@ -18,9 +17,8 @@ const crimsonText = Crimson_Text({
   display: 'swap'
 });
 
-const firaCode = Fira_Code({
+const geistMono = Geist_Mono({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
   variable: '--font-mono',
   display: 'swap'
 });
@@ -38,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${poppins.variable} ${crimsonText.variable} ${firaCode.variable} font-sans antialiased`}
+        className={`${geist.variable} ${crimsonText.variable} ${geistMono.variable} font-sans antialiased`}
       >
         <QueryProvider>{children}</QueryProvider>
         <Toaster richColors position="top-right" />

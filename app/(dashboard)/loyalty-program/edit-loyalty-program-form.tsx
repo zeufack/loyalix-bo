@@ -2,14 +2,14 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -17,7 +17,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { FormImageField } from '@/components/ui/form-image-field';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useEffect, useState } from 'react';
-import { updateLoyaltyProgram, uploadLoyaltyProgramCoverImage } from '@/app/api/loyalty-program';
+import {
+  updateLoyaltyProgram,
+  uploadLoyaltyProgramCoverImage
+} from '@/app/api/loyalty-program';
 import { LoyaltyProgram } from '@/types/loyalty-program';
 import { Pencil } from 'lucide-react';
 import { useImageUpload } from '@/hooks/use-image-upload';
@@ -28,22 +31,29 @@ interface EditLoyaltyProgramFormProps {
   loyaltyProgram: LoyaltyProgram;
 }
 
-export function EditLoyaltyProgramForm({ loyaltyProgram }: EditLoyaltyProgramFormProps) {
+export function EditLoyaltyProgramForm({
+  loyaltyProgram
+}: EditLoyaltyProgramFormProps) {
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState<UpdateLoyaltyProgramDto & { description?: string }>({
+  const [formData, setFormData] = useState<
+    UpdateLoyaltyProgramDto & { description?: string }
+  >({
     name: '',
     description: '',
     isActive: true
   });
 
-  const { 
-    file: coverFile, 
-    previewUrl: coverPreview, 
-    handleChange: handleCoverChange, 
-    setPreviewUrl 
+  const {
+    file: coverFile,
+    previewUrl: coverPreview,
+    handleChange: handleCoverChange,
+    setPreviewUrl
   } = useImageUpload(loyaltyProgram.coverImage?.url);
 
-  const { loading, error, setError, handleUpdate } = useEntityForm<LoyaltyProgram, UpdateLoyaltyProgramDto>({
+  const { loading, error, setError, handleUpdate } = useEntityForm<
+    LoyaltyProgram,
+    UpdateLoyaltyProgramDto
+  >({
     createEntity: async () => loyaltyProgram,
     updateEntity: updateLoyaltyProgram,
     uploadImage: uploadLoyaltyProgramCoverImage,
@@ -62,7 +72,9 @@ export function EditLoyaltyProgramForm({ loyaltyProgram }: EditLoyaltyProgramFor
     }
   }, [loyaltyProgram, setPreviewUrl]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
@@ -76,9 +88,9 @@ export function EditLoyaltyProgramForm({ loyaltyProgram }: EditLoyaltyProgramFor
   const handleSubmit = async () => {
     const { description, ...submitData } = formData;
     const result = await handleUpdate(
-      loyaltyProgram.id, 
-      submitData, 
-      coverFile, 
+      loyaltyProgram.id,
+      submitData,
+      coverFile,
       validate
     );
     if (result) {
@@ -87,46 +99,48 @@ export function EditLoyaltyProgramForm({ loyaltyProgram }: EditLoyaltyProgramFor
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
           <Pencil className="mr-2 h-4 w-4" />
           Edit
         </DropdownMenuItem>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit Loyalty Program</DialogTitle>
-          <DialogDescription>
+      </SheetTrigger>
+      <SheetContent className="overflow-y-auto sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle>Edit Loyalty Program</SheetTitle>
+          <SheetDescription>
             Update the loyalty program details.
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">Name</Label>
+          <div className="grid gap-2">
+            <Label htmlFor="name">Name</Label>
             <Input
               id="name"
-              className="col-span-3"
               value={formData.name || ''}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-start gap-4">
-            <Label htmlFor="description" className="text-right pt-2">Description</Label>
+          <div className="grid gap-2">
+            <Label htmlFor="description" className="pt-2">
+              Description
+            </Label>
             <Textarea
               id="description"
-              className="col-span-3"
               value={formData.description || ''}
               onChange={handleChange}
               rows={3}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="isActive" className="text-right">Active</Label>
+          <div className="grid gap-2">
+            <Label htmlFor="isActive">Active</Label>
             <Switch
               id="isActive"
               checked={formData.isActive || false}
-              onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, isActive: checked })
+              }
             />
           </div>
           <FormImageField
@@ -136,17 +150,19 @@ export function EditLoyaltyProgramForm({ loyaltyProgram }: EditLoyaltyProgramFor
             disabled={loading}
             uploadLabel="Upload a cover image"
           />
-          {error && <p className="text-sm text-destructive text-center">{error}</p>}
+          {error && (
+            <p className="text-sm text-destructive text-center">{error}</p>
+          )}
         </div>
-        <DialogFooter>
+        <SheetFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? 'Saving...' : 'Save Changes'}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

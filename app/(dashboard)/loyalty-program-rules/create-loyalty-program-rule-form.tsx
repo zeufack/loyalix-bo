@@ -57,54 +57,49 @@ export function CreateLoyaltyProgramRuleForm() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="ruleName">Rule Name</Label>
             <Input
               id="ruleName"
-              className="col-span-3"
               value={formData.ruleName}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="ruleType">Rule Type</Label>
             <Input
               id="ruleType"
-              className="col-span-3"
               value={formData.ruleType}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="points">Points</Label>
             <Input
               id="points"
               type="number"
-              className="col-span-3"
               value={formData.points}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="purchaseAmount">Purchase Amount</Label>
             <Input
               id="purchaseAmount"
               type="number"
-              className="col-span-3"
               value={formData.purchaseAmount}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-2">
             <Label htmlFor="loyaltyProgramId">Loyalty Program ID</Label>
             <Input
               id="loyaltyProgramId"
-              className="col-span-3"
               value={formData.loyaltyProgramId}
               onChange={handleChange}
             />
           </div>
-          {error && <p className="text-red-500">{error}</p>}
+          {error && <p className="text-foreground-error">{error}</p>}
         </div>
         <DialogFooter>
           <Button onClick={handleSubmit} disabled={loading}>
@@ -115,4 +110,3 @@ export function CreateLoyaltyProgramRuleForm() {
     </Dialog>
   );
 }
-

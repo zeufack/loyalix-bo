@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 import { LoyaltyProgramRule } from '../../../types/loyalty-program-rule';
-import { ColumnFiltersState, SortingState, PaginationState } from '@tanstack/react-table';
+import {
+  ColumnFiltersState,
+  SortingState,
+  PaginationState
+} from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { getLoyaltyProgramRules } from '../../api/loyalty-program-rule';
 import { useTable } from '../../../hooks/useCustomerTable';
@@ -10,7 +14,6 @@ import { loyaltyProgramRuleColumns } from '../../../lib/columns/loyalty-program-
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle
 } from '../../../components/ui/card';
@@ -32,7 +35,7 @@ export function LoyaltyProgramRulesDataTable({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['loyalty-program-rules', pagination, sorting],
     queryFn: () =>
       getLoyaltyProgramRules({
@@ -54,25 +57,11 @@ export function LoyaltyProgramRulesDataTable({
     manualSorting: true,
     manualFiltering: true
   });
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-red-500">
-            Error loading customers: {error.message}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Loyalty Program Rules</CardTitle>
-        <CardDescription>
-          Manage your loyalty program rules and view their activity.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -80,8 +69,19 @@ export function LoyaltyProgramRulesDataTable({
             table={table}
             exportFilename="loyalty-program-rules"
           />
-          <DataTable table={table} columns={loyaltyProgramRuleColumns} />
-          <DataTablePagination table={table} />
+          <DataTable
+            table={table}
+            columns={loyaltyProgramRuleColumns}
+            isLoading={isLoading}
+            error={error}
+            onRetry={() => refetch()}
+          />
+          <DataTablePagination
+            table={table}
+            totalItems={data?.total}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
       </CardContent>
     </Card>

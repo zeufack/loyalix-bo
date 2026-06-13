@@ -32,16 +32,22 @@ export function CreateBusinessTypeForm() {
     name: '',
     description: ''
   });
-  
-  const { file: iconFile, previewUrl: iconPreview, handleChange: handleIconChange, reset: resetIcon } = useImageUpload();
+
+  const {
+    file: iconFile,
+    previewUrl: iconPreview,
+    handleChange: handleIconChange,
+    reset: resetIcon
+  } = useImageUpload();
   const queryClient = useQueryClient();
-  
+
   const { loading, error, setError, handleCreate } = useEntityForm({
     createEntity: createBusinessType,
     uploadImage: uploadBusinessTypeIcon,
     queryKey: 'business-types',
     successMessage: 'Business type created successfully',
-    imageUploadErrorMessage: 'Business type created, but icon upload failed. You can add an icon by editing it.'
+    imageUploadErrorMessage:
+      'Business type created, but icon upload failed. You can add an icon by editing it.'
   });
 
   const handleChange = (
@@ -94,26 +100,20 @@ export function CreateBusinessTypeForm() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
+          <div className="grid gap-2">
+            <Label htmlFor="name">Name</Label>
             <Input
               id="name"
               placeholder="e.g., Restaurant"
-              className="col-span-3"
               value={formData.name}
               onChange={handleChange}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">
-              Description
-            </Label>
+          <div className="grid gap-2">
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               placeholder="Optional description..."
-              className="col-span-3"
               value={formData.description || ''}
               onChange={handleChange}
             />
