@@ -3,7 +3,7 @@ import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
 import type {
   SubscriptionPlanDto,
@@ -13,7 +13,7 @@ import type {
   CreateBusinessSubscriptionDto,
   UpgradeSubscriptionDto,
   InvoiceDto,
-  PlanFeatures,
+  PlanFeatures
 } from '@loyal-ix/loyalix-shared-types';
 
 // Re-export shared types for use by dashboard components
@@ -25,14 +25,16 @@ export type {
   CreateBusinessSubscriptionDto,
   UpgradeSubscriptionDto,
   InvoiceDto,
-  PlanFeatures,
+  PlanFeatures
 };
 
 // ──────────────────────────────────────────
 // Subscription Plans (Admin)
 // ──────────────────────────────────────────
 
-export const getSubscriptionPlans = async (): Promise<SubscriptionPlanDto[]> => {
+export const getSubscriptionPlans = async (): Promise<
+  SubscriptionPlanDto[]
+> => {
   const response = await http.get<SubscriptionPlanDto[]>('/subscription-plans');
   return response.data;
 };
@@ -40,7 +42,10 @@ export const getSubscriptionPlans = async (): Promise<SubscriptionPlanDto[]> => 
 export const createSubscriptionPlan = async (
   data: CreateSubscriptionPlanDto
 ): Promise<SubscriptionPlanDto> => {
-  const response = await http.post<SubscriptionPlanDto>('/subscription-plans', data);
+  const response = await http.post<SubscriptionPlanDto>(
+    '/subscription-plans',
+    data
+  );
   return response.data;
 };
 
@@ -48,7 +53,10 @@ export const updateSubscriptionPlan = async (
   id: string,
   data: UpdateSubscriptionPlanDto
 ): Promise<SubscriptionPlanDto> => {
-  const response = await http.patch<SubscriptionPlanDto>(`/subscription-plans/${id}`, data);
+  const response = await http.patch<SubscriptionPlanDto>(
+    `/subscription-plans/${id}`,
+    data
+  );
   return response.data;
 };
 

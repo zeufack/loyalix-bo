@@ -4,7 +4,7 @@ import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
 
 export const getCustomerProgress = async (

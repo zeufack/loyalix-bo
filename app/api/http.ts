@@ -1,4 +1,8 @@
-import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  AxiosError,
+  AxiosRequestConfig,
+  InternalAxiosRequestConfig
+} from 'axios';
 import { getSession, signOut } from 'next-auth/react';
 import { ErrorCategory, parseApiError } from '@/lib/api-error';
 
@@ -17,8 +21,8 @@ const HTTP_CONFIG = {
   baseURL: process.env.NEXT_PUBLIC_NESTJS_API_URL,
   timeout: 30000, // 30 seconds
   headers: {
-    'Content-Type': 'application/json',
-  },
+    'Content-Type': 'application/json'
+  }
 };
 
 /**
@@ -27,7 +31,7 @@ const HTTP_CONFIG = {
 const RETRY_CONFIG = {
   maxRetries: 2,
   retryDelay: 1000, // 1 second base delay
-  retryableStatuses: [408, 429, 500, 502, 503, 504],
+  retryableStatuses: [408, 429, 500, 502, 503, 504]
 };
 
 /**
@@ -86,7 +90,7 @@ function shouldRetry(error: AxiosError, config: RetryConfig): boolean {
  * Sleep utility for retry delay
  */
 function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // Request interceptor - attach JWT token
@@ -120,7 +124,10 @@ http.interceptors.response.use(
     const parsedError = parseApiError(error);
 
     // Handle authentication errors - sign out user
-    if (parsedError.category === ErrorCategory.AUTH && error.response?.status === 401) {
+    if (
+      parsedError.category === ErrorCategory.AUTH &&
+      error.response?.status === 401
+    ) {
       // Avoid redirect loops
       if (!config._retry) {
         config._retry = true;
@@ -165,7 +172,7 @@ export function withTimeout<T>(
     request,
     new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error('Request timeout')), timeoutMs)
-    ),
+    )
   ]);
 }
 

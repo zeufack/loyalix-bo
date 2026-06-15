@@ -3,7 +3,7 @@ import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
 
 export interface Notification {
@@ -21,9 +21,12 @@ export const getNotifications = async (
   params: PaginationParams & { status?: 'read' | 'unread' } = {}
 ): Promise<PaginatedResponse<Notification>> => {
   const { page = 1, limit = 10, sortBy, sortOrder, status } = params;
-  const response = await http.get<BackendPaginatedResponse<Notification>>('/notifications/me', {
-    params: { page, limit, sortBy, sortOrder, status },
-  });
+  const response = await http.get<BackendPaginatedResponse<Notification>>(
+    '/notifications/me',
+    {
+      params: { page, limit, sortBy, sortOrder, status }
+    }
+  );
   return transformPaginatedResponse(response.data);
 };
 
@@ -43,11 +46,17 @@ export const markAsRead = async (id: string): Promise<Notification> => {
 };
 
 export const markAllAsRead = async (): Promise<{ updated: number }> => {
-  const response = await http.patch<{ updated: number }>('/notifications/me/read-all');
+  const response = await http.patch<{ updated: number }>(
+    '/notifications/me/read-all'
+  );
   return response.data;
 };
 
-export const deleteNotification = async (id: string): Promise<{ message: string }> => {
-  const response = await http.delete<{ message: string }>(`/notifications/${id}`);
+export const deleteNotification = async (
+  id: string
+): Promise<{ message: string }> => {
+  const response = await http.delete<{ message: string }>(
+    `/notifications/${id}`
+  );
   return response.data;
 };

@@ -12,8 +12,12 @@ export interface StaffMember {
   lastActive?: Date;
 }
 
-export const getBusinessStaff = async (businessId: string): Promise<StaffMember[]> => {
-  const response = await http.get<StaffMember[]>(`/business/${businessId}/staff`);
+export const getBusinessStaff = async (
+  businessId: string
+): Promise<StaffMember[]> => {
+  const response = await http.get<StaffMember[]>(
+    `/business/${businessId}/staff`
+  );
   return response.data;
 };
 
@@ -21,7 +25,10 @@ export const inviteStaff = async (
   businessId: string,
   data: { email: string; isOwner?: boolean }
 ): Promise<StaffMember> => {
-  const response = await http.post<StaffMember>(`/business/${businessId}/staff`, data);
+  const response = await http.post<StaffMember>(
+    `/business/${businessId}/staff`,
+    data
+  );
   return response.data;
 };
 

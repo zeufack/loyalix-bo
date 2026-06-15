@@ -3,7 +3,7 @@ import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
 
 export interface AuditLog {
@@ -39,9 +39,12 @@ export const getAuditLogs = async (
   params: PaginationParams & AuditLogFilters = {}
 ): Promise<PaginatedResponse<AuditLog>> => {
   const { page = 1, limit = 50, sortBy, sortOrder, ...filters } = params;
-  const response = await http.get<BackendPaginatedResponse<AuditLog>>('/audit-logs', {
-    params: { page, limit, sortBy, sortOrder, ...filters },
-  });
+  const response = await http.get<BackendPaginatedResponse<AuditLog>>(
+    '/audit-logs',
+    {
+      params: { page, limit, sortBy, sortOrder, ...filters }
+    }
+  );
   return transformPaginatedResponse(response.data);
 };
 

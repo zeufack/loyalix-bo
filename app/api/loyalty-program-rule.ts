@@ -4,18 +4,17 @@ import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
 
 export const getLoyaltyProgramRules = async (
   params: PaginationParams = {}
 ): Promise<PaginatedResponse<LoyaltyProgramRule>> => {
   const { page = 1, limit = 10, sortBy, sortOrder } = params;
-  const response =
-    await http.get<BackendPaginatedResponse<LoyaltyProgramRule>>(
-      '/loyalty-program-rule',
-      { params: { page, limit, sortBy, sortOrder } }
-    );
+  const response = await http.get<BackendPaginatedResponse<LoyaltyProgramRule>>(
+    '/loyalty-program-rule',
+    { params: { page, limit, sortBy, sortOrder } }
+  );
   return transformPaginatedResponse(response.data);
 };
 

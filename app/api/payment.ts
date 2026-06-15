@@ -3,7 +3,7 @@ import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
 
 export interface Payment {
@@ -28,12 +28,19 @@ export interface Payment {
 }
 
 export const getPayments = async (
-  params: PaginationParams & { status?: string; dateFrom?: string; dateTo?: string } = {}
+  params: PaginationParams & {
+    status?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  } = {}
 ): Promise<PaginatedResponse<Payment>> => {
   const { page = 1, limit = 10, sortBy, sortOrder, ...filters } = params;
-  const response = await http.get<BackendPaginatedResponse<Payment>>('/payments', {
-    params: { page, limit, sortBy, sortOrder, ...filters },
-  });
+  const response = await http.get<BackendPaginatedResponse<Payment>>(
+    '/payments',
+    {
+      params: { page, limit, sortBy, sortOrder, ...filters }
+    }
+  );
   return transformPaginatedResponse(response.data);
 };
 

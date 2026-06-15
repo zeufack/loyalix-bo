@@ -1,13 +1,13 @@
 import { http } from './http';
 import {
   CustomerEnrollment,
-  CreateCustomerEnrollmentDto,
+  CreateCustomerEnrollmentDto
 } from '@/types/customer-enrollment';
 import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
 
 export const getCustomerEnrollments = async (
