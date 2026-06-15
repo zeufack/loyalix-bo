@@ -4,9 +4,8 @@ import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
-
 export const getActivities = async (
   params: PaginationParams = {}
 ): Promise<PaginatedResponse<Activity>> => {
@@ -14,6 +13,17 @@ export const getActivities = async (
   const response = await http.get<BackendPaginatedResponse<Activity>>(
     '/activities',
     { params: { page, limit, sortBy, sortOrder } }
+  );
+  return transformPaginatedResponse(response.data);
+};
+
+export const searchActivities = async (
+  params: PaginationParams
+): Promise<PaginatedResponse<Activity>> => {
+  const { page = 1, limit = 10, sortBy, sortOrder, q } = params;
+  const response = await http.get<BackendPaginatedResponse<Activity>>(
+    '/activities/search',
+    { params: { q, page, limit, sortBy, sortOrder } }
   );
   return transformPaginatedResponse(response.data);
 };

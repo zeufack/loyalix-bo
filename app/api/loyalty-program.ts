@@ -4,9 +4,12 @@ import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
-import type { CreateLoyaltyProgramDto, UpdateLoyaltyProgramDto } from '@loyal-ix/loyalix-shared-types';
+import type {
+  CreateLoyaltyProgramDto,
+  UpdateLoyaltyProgramDto
+} from '@loyal-ix/loyalix-shared-types';
 
 export const getLoyaltyPrograms = async (
   params: PaginationParams = {}
@@ -19,7 +22,20 @@ export const getLoyaltyPrograms = async (
   return transformPaginatedResponse(response.data);
 };
 
-export const getLoyaltyProgram = async (id: string): Promise<LoyaltyProgram> => {
+export const searchLoyaltyPrograms = async (
+  params: PaginationParams
+): Promise<PaginatedResponse<LoyaltyProgram>> => {
+  const { page = 1, limit = 10, sortBy, sortOrder, q } = params;
+  const response = await http.get<BackendPaginatedResponse<LoyaltyProgram>>(
+    '/loyalty-program/search',
+    { params: { q, page, limit, sortBy, sortOrder } }
+  );
+  return transformPaginatedResponse(response.data);
+};
+
+export const getLoyaltyProgram = async (
+  id: string
+): Promise<LoyaltyProgram> => {
   const response = await http.get<LoyaltyProgram>(`/loyalty-program/${id}`);
   return response.data;
 };

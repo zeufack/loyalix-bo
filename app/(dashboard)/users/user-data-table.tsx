@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DataTableToolbar } from '../../../components/data-table/data-table-toolbar';
 import {
   Card,
@@ -17,7 +17,8 @@ import {
   RowSelectionState
 } from '@tanstack/react-table';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getUsers, deleteUser } from '../../api/user';
+import { getUsers, searchUsers, deleteUser } from '../../api/user';
+import { useDebounce } from '@/hooks/useDebounce';
 import { DataTable } from '../../../components/data-table/data-table';
 import { DataTablePagination } from '../../../components/data-table/data-table-pagination';
 import {
@@ -36,17 +37,36 @@ export default function UserDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
   const queryClient = useQueryClient();
 
+  // The backend search endpoint requires `q` to be at least 2 characters; send
+  // it only when valid, otherwise fall back to the plain list endpoint.
+  const trimmed = debouncedSearch.trim();
+  const q = trimmed.length >= 2 ? trimmed : undefined;
+
+  useEffect(() => {
+    setPagination((p) => ({ ...p, pageIndex: 0 }));
+  }, [q]);
+
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['users', pagination.pageIndex, pagination.pageSize, sorting],
-    queryFn: () =>
-      getUsers({
+    queryKey: [
+      'users',
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting,
+      q ?? ''
+    ],
+    queryFn: () => {
+      const params = {
         page: pagination.pageIndex + 1,
         limit: pagination.pageSize,
         sortBy: sorting[0]?.id,
-        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-      })
+        sortOrder: (sorting[0]?.desc ? 'desc' : 'asc') as 'asc' | 'desc'
+      };
+      return q ? searchUsers({ ...params, q }) : getUsers(params);
+    }
   });
 
   const table = useTable({
@@ -114,7 +134,8 @@ export default function UserDataTable() {
           <DataTableToolbar
             table={table}
             exportFilename="users"
-            searchColumn="email"
+            searchValue={search}
+            onSearchChange={setSearch}
             searchPlaceholder="Search users..."
           />
           <DataTable

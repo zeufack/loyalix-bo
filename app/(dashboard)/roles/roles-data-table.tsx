@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
 import {
   ColumnFiltersState,
   SortingState,
   PaginationState
 } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
-import { getRoles } from '@/app/api/role';
+import { getRoles, searchRoles } from '@/app/api/role';
 import { useTable } from '@/hooks/useCustomerTable';
 import { roleColumns } from '@/lib/columns/role-columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,15 +24,35 @@ export function RolesDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
+
+  // The backend search endpoint requires `q` to be at least 2 characters; send
+  // it only when valid, otherwise fall back to the plain list endpoint.
+  const trimmed = debouncedSearch.trim();
+  const q = trimmed.length >= 2 ? trimmed : undefined;
+
+  useEffect(() => {
+    setPagination((p) => ({ ...p, pageIndex: 0 }));
+  }, [q]);
+
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['roles', pagination.pageIndex, pagination.pageSize, sorting],
-    queryFn: () =>
-      getRoles({
+    queryKey: [
+      'roles',
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting,
+      q ?? ''
+    ],
+    queryFn: () => {
+      const params = {
         page: pagination.pageIndex + 1,
         limit: pagination.pageSize,
         sortBy: sorting[0]?.id,
-        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-      })
+        sortOrder: (sorting[0]?.desc ? 'desc' : 'asc') as 'asc' | 'desc'
+      };
+      return q ? searchRoles({ ...params, q }) : getRoles(params);
+    }
   });
 
   const table = useTable({
@@ -56,7 +77,8 @@ export function RolesDataTable() {
           <DataTableToolbar
             table={table}
             exportFilename="roles"
-            searchColumn="name"
+            searchValue={search}
+            onSearchChange={setSearch}
             searchPlaceholder="Search roles..."
           />
           <DataTable

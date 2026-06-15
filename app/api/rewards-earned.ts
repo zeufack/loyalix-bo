@@ -4,9 +4,8 @@ import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
-
 interface RewardsEarnedParams extends PaginationParams {
   startDate?: string;
   endDate?: string;
@@ -23,11 +22,22 @@ export const getRewardsEarned = async (
     sortOrder,
     startDate,
     endDate,
-    status,
+    status
   } = params;
   const response = await http.get<BackendPaginatedResponse<RewardEarned>>(
     '/rewards-earned',
     { params: { page, limit, sortBy, sortOrder, startDate, endDate, status } }
+  );
+  return transformPaginatedResponse(response.data);
+};
+
+export const searchRewardsEarned = async (
+  params: PaginationParams
+): Promise<PaginatedResponse<RewardEarned>> => {
+  const { page = 1, limit = 10, sortBy, sortOrder, q } = params;
+  const response = await http.get<BackendPaginatedResponse<RewardEarned>>(
+    '/rewards-earned/search',
+    { params: { q, page, limit, sortBy, sortOrder } }
   );
   return transformPaginatedResponse(response.data);
 };
@@ -60,14 +70,18 @@ export const deleteRewardEarned = async (id: string): Promise<void> => {
 };
 
 export const redeemReward = async (id: string): Promise<RewardEarned> => {
-  const response = await http.post<RewardEarned>(`/rewards-earned/${id}/redeem`);
+  const response = await http.post<RewardEarned>(
+    `/rewards-earned/${id}/redeem`
+  );
   return response.data;
 };
 
 export const verifyRedemptionCode = async (
   code: string
 ): Promise<RewardEarned> => {
-  const response = await http.get<RewardEarned>(`/rewards-earned/verify/${code}`);
+  const response = await http.get<RewardEarned>(
+    `/rewards-earned/verify/${code}`
+  );
   return response.data;
 };
 

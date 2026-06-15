@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 import { DataTable } from '@/components/data-table/data-table';
-import { getRewards } from '@/app/api/reward';
+import { getRewards, searchRewards } from '@/app/api/reward';
 import { rewardColumns } from '@/lib/columns/reward-columns';
 import { useTable } from '@/hooks/useCustomerTable';
 import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
@@ -23,15 +24,35 @@ export function RewardsDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
+
+  // The backend search endpoint requires `q` to be at least 2 characters; send
+  // it only when valid, otherwise fall back to the plain list endpoint.
+  const trimmed = debouncedSearch.trim();
+  const q = trimmed.length >= 2 ? trimmed : undefined;
+
+  useEffect(() => {
+    setPagination((p) => ({ ...p, pageIndex: 0 }));
+  }, [q]);
+
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['rewards', pagination.pageIndex, pagination.pageSize, sorting],
-    queryFn: () =>
-      getRewards({
+    queryKey: [
+      'rewards',
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting,
+      q ?? ''
+    ],
+    queryFn: () => {
+      const params = {
         page: pagination.pageIndex + 1,
         limit: pagination.pageSize,
         sortBy: sorting[0]?.id,
-        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-      })
+        sortOrder: (sorting[0]?.desc ? 'desc' : 'asc') as 'asc' | 'desc'
+      };
+      return q ? searchRewards({ ...params, q }) : getRewards(params);
+    }
   });
 
   const table = useTable({
@@ -56,7 +77,8 @@ export function RewardsDataTable() {
           <DataTableToolbar
             table={table}
             exportFilename="rewards"
-            searchColumn="name"
+            searchValue={search}
+            onSearchChange={setSearch}
             searchPlaceholder="Search rewards..."
           />
           <DataTable

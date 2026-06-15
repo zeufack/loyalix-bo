@@ -4,16 +4,20 @@ import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
-import type { CreateUserDto, UpdateUserDto } from '@loyal-ix/loyalix-shared-types';
+import type {
+  CreateUserDto,
+  UpdateUserDto
+} from '@loyal-ix/loyalix-shared-types';
 
 export const getUsers = async (
   params: PaginationParams = {}
 ): Promise<PaginatedResponse<User>> => {
   const { page = 1, limit = 10, sortBy, sortOrder } = params;
+
   const response = await http.get<BackendPaginatedResponse<User>>('/users', {
-    params: { page, limit, sortBy, sortOrder },
+    params: { page, limit, sortBy, sortOrder }
   });
   return transformPaginatedResponse(response.data);
 };
@@ -43,4 +47,17 @@ export const deleteUser = async (id: string): Promise<void> => {
 export const getTotalUsers = async (): Promise<number> => {
   const response = await http.get<number>('/users/count');
   return response.data;
+};
+
+export const searchUsers = async (
+  pagination: PaginationParams
+): Promise<PaginatedResponse<User>> => {
+  const { page = 1, limit = 10, sortBy, sortOrder, q } = pagination;
+  const response = await http.get<BackendPaginatedResponse<User>>(
+    '/users/search',
+    {
+      params: { q, page, limit, sortBy, sortOrder }
+    }
+  );
+  return transformPaginatedResponse(response.data);
 };

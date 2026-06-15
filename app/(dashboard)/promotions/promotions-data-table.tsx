@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 import { DataTable } from '@/components/data-table/data-table';
-import { getPromotions } from '@/app/api/promotion';
+import { getPromotions, searchPromotions } from '@/app/api/promotion';
 import { promotionColumns } from '@/lib/columns/promotion-columns';
 import { useTable } from '@/hooks/useCustomerTable';
 import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
@@ -23,20 +24,35 @@ export function PromotionsDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
+
+  // The backend search endpoint requires `q` to be at least 2 characters; send
+  // it only when valid, otherwise fall back to the plain list endpoint.
+  const trimmed = debouncedSearch.trim();
+  const q = trimmed.length >= 2 ? trimmed : undefined;
+
+  useEffect(() => {
+    setPagination((p) => ({ ...p, pageIndex: 0 }));
+  }, [q]);
+
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [
       'promotions',
       pagination.pageIndex,
       pagination.pageSize,
-      sorting
+      sorting,
+      q ?? ''
     ],
-    queryFn: () =>
-      getPromotions({
+    queryFn: () => {
+      const params = {
         page: pagination.pageIndex + 1,
         limit: pagination.pageSize,
         sortBy: sorting[0]?.id,
-        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-      })
+        sortOrder: (sorting[0]?.desc ? 'desc' : 'asc') as 'asc' | 'desc'
+      };
+      return q ? searchPromotions({ ...params, q }) : getPromotions(params);
+    }
   });
 
   const table = useTable({
@@ -61,7 +77,8 @@ export function PromotionsDataTable() {
           <DataTableToolbar
             table={table}
             exportFilename="promotions"
-            searchColumn="name"
+            searchValue={search}
+            onSearchChange={setSearch}
             searchPlaceholder="Search promotions..."
           />
           <DataTable

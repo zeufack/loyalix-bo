@@ -26,6 +26,10 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   searchColumn?: string;
   searchPlaceholder?: string;
+  // Controlled (server-side) search. When provided, the search input is driven
+  // by these instead of a TanStack column filter.
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
   exportFilename?: string;
   allData?: TData[];
   showExport?: boolean;
@@ -47,6 +51,8 @@ export function DataTableToolbar<TData>({
   table,
   searchColumn,
   searchPlaceholder = 'Search...',
+  searchValue,
+  onSearchChange,
   exportFilename = 'data',
   allData,
   showExport = true,
@@ -57,7 +63,8 @@ export function DataTableToolbar<TData>({
   onDateRangeChange,
   filterableColumns = []
 }: Readonly<DataTableToolbarProps<TData>>) {
-  const isFiltered = table.getState().columnFilters.length > 0 || dateRange?.from;
+  const isFiltered =
+    table.getState().columnFilters.length > 0 || dateRange?.from;
   const column = searchColumn ? table.getColumn(searchColumn) : null;
   const statusCol = statusColumn ? table.getColumn(statusColumn) : null;
 
@@ -77,13 +84,21 @@ export function DataTableToolbar<TData>({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         {/* Search and filters */}
         <div className="flex flex-wrap items-center gap-2">
-          {showSearch && column && (
+          {showSearch && (onSearchChange || column) && (
             <div className="relative w-full sm:w-auto">
               <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder={searchPlaceholder}
-                value={(column.getFilterValue() as string) ?? ''}
-                onChange={(event) => column.setFilterValue(event.target.value)}
+                value={
+                  onSearchChange
+                    ? (searchValue ?? '')
+                    : ((column?.getFilterValue() as string) ?? '')
+                }
+                onChange={(event) =>
+                  onSearchChange
+                    ? onSearchChange(event.target.value)
+                    : column?.setFilterValue(event.target.value)
+                }
                 className="h-8 w-full pl-8 sm:w-[150px] lg:w-[250px]"
               />
             </div>
@@ -143,7 +158,10 @@ export function DataTableToolbar<TData>({
         {/* Actions */}
         <div className="flex items-center justify-end gap-2">
           {activeFilterCount > 0 && (
-            <Badge variant="secondary" className="hidden sm:inline-flex rounded-sm px-1.5">
+            <Badge
+              variant="secondary"
+              className="hidden sm:inline-flex rounded-sm px-1.5"
+            >
               {activeFilterCount} active
             </Badge>
           )}

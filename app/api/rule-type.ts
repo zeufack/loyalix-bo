@@ -4,9 +4,8 @@ import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
-
 export const getRuleTypes = async (
   params: PaginationParams = {}
 ): Promise<PaginatedResponse<RuleType>> => {
@@ -14,6 +13,17 @@ export const getRuleTypes = async (
   const response = await http.get<BackendPaginatedResponse<RuleType>>(
     '/rule-types',
     { params: { page, limit, sortBy, sortOrder } }
+  );
+  return transformPaginatedResponse(response.data);
+};
+
+export const searchRuleTypes = async (
+  params: PaginationParams
+): Promise<PaginatedResponse<RuleType>> => {
+  const { page = 1, limit = 10, sortBy, sortOrder, q } = params;
+  const response = await http.get<BackendPaginatedResponse<RuleType>>(
+    '/rule-types/search',
+    { params: { q, page, limit, sortBy, sortOrder } }
   );
   return transformPaginatedResponse(response.data);
 };

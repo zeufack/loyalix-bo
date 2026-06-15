@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
 import { Business } from '../../../types/business';
 import {
   ColumnFiltersState,
@@ -8,7 +9,7 @@ import {
   PaginationState
 } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
-import { getBusinesses } from '../../api/business';
+import { getBusinesses, searchBusinesses } from '../../api/business';
 import { useTable } from '../../../hooks/useCustomerTable';
 import { businessColumns } from '../../../lib/columns/business-columns';
 import {
@@ -29,15 +30,35 @@ export default function BusinessDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
+
+  // The backend search endpoint requires `q` to be at least 2 characters; send
+  // it only when valid, otherwise fall back to the plain list endpoint.
+  const trimmed = debouncedSearch.trim();
+  const q = trimmed.length >= 2 ? trimmed : undefined;
+
+  useEffect(() => {
+    setPagination((p) => ({ ...p, pageIndex: 0 }));
+  }, [q]);
+
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['business', pagination.pageIndex, pagination.pageSize, sorting],
-    queryFn: () =>
-      getBusinesses({
+    queryKey: [
+      'business',
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting,
+      q ?? ''
+    ],
+    queryFn: () => {
+      const params = {
         page: pagination.pageIndex + 1,
         limit: pagination.pageSize,
         sortBy: sorting[0]?.id,
-        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-      })
+        sortOrder: (sorting[0]?.desc ? 'desc' : 'asc') as 'asc' | 'desc'
+      };
+      return q ? searchBusinesses({ ...params, q }) : getBusinesses(params);
+    }
   });
 
   const table = useTable({
@@ -62,7 +83,8 @@ export default function BusinessDataTable() {
           <DataTableToolbar
             table={table}
             exportFilename="businesses"
-            searchColumn="name"
+            searchValue={search}
+            onSearchChange={setSearch}
             searchPlaceholder="Search businesses..."
           />
           <DataTable

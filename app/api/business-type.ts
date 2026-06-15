@@ -10,7 +10,6 @@ import {
   BackendPaginatedResponse,
   transformPaginatedResponse
 } from './types';
-
 export const getBusinessTypes = async (
   params: PaginationParams = {}
 ): Promise<PaginatedResponse<BusinessType>> => {
@@ -18,6 +17,17 @@ export const getBusinessTypes = async (
   const response = await http.get<BackendPaginatedResponse<BusinessType>>(
     '/business-types',
     { params: { page, limit, sortBy, sortOrder } }
+  );
+  return transformPaginatedResponse(response.data);
+};
+
+export const searchBusinessTypes = async (
+  params: PaginationParams
+): Promise<PaginatedResponse<BusinessType>> => {
+  const { page = 1, limit = 100, sortBy, sortOrder, q } = params;
+  const response = await http.get<BackendPaginatedResponse<BusinessType>>(
+    '/business-types/search',
+    { params: { q, page, limit, sortBy, sortOrder } }
   );
   return transformPaginatedResponse(response.data);
 };

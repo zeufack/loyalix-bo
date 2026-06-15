@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ColumnFiltersState,
   SortingState,
@@ -8,7 +8,11 @@ import {
 } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { DateRange } from 'react-day-picker';
-import { getRewardsEarned } from '@/app/api/rewards-earned';
+import {
+  getRewardsEarned,
+  searchRewardsEarned
+} from '@/app/api/rewards-earned';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useTable } from '@/hooks/useCustomerTable';
 import { rewardsEarnedColumns } from '@/lib/columns/rewards-earned-columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,6 +36,18 @@ export function RewardsEarnedDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
+
+  // The backend search endpoint requires `q` to be at least 2 characters; send
+  // it only when valid, otherwise fall back to the plain list endpoint (which
+  // carries the date-range filter — the search endpoint does not).
+  const trimmed = debouncedSearch.trim();
+  const q = trimmed.length >= 2 ? trimmed : undefined;
+
+  useEffect(() => {
+    setPagination((p) => ({ ...p, pageIndex: 0 }));
+  }, [q]);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [
@@ -39,17 +55,24 @@ export function RewardsEarnedDataTable() {
       pagination.pageIndex,
       pagination.pageSize,
       sorting,
-      dateRange
+      dateRange,
+      q ?? ''
     ],
-    queryFn: () =>
-      getRewardsEarned({
+    queryFn: () => {
+      const base = {
         page: pagination.pageIndex + 1,
         limit: pagination.pageSize,
         sortBy: sorting[0]?.id,
-        sortOrder: sorting[0]?.desc ? 'desc' : 'asc',
-        startDate: dateRange?.from?.toISOString(),
-        endDate: dateRange?.to?.toISOString()
-      })
+        sortOrder: (sorting[0]?.desc ? 'desc' : 'asc') as 'asc' | 'desc'
+      };
+      return q
+        ? searchRewardsEarned({ ...base, q })
+        : getRewardsEarned({
+            ...base,
+            startDate: dateRange?.from?.toISOString(),
+            endDate: dateRange?.to?.toISOString()
+          });
+    }
   });
 
   const table = useTable({
@@ -74,7 +97,8 @@ export function RewardsEarnedDataTable() {
           <DataTableToolbar
             table={table}
             exportFilename="rewards-earned"
-            searchColumn="redemptionCode"
+            searchValue={search}
+            onSearchChange={setSearch}
             searchPlaceholder="Search by code..."
             statusColumn="status"
             statusOptions={statusOptions}

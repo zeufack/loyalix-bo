@@ -11,6 +11,7 @@ export interface PaginationParams {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  q?: string;
 }
 
 /**
@@ -55,7 +56,7 @@ export function transformPaginatedResponse<T>(
     total: response.meta.total,
     page: response.meta.page,
     limit: response.meta.limit,
-    totalPages: response.meta.totalPages,
+    totalPages: response.meta.totalPages
   };
 }
 

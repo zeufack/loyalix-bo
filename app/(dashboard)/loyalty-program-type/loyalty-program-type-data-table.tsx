@@ -66,8 +66,7 @@ export function LoyaltyProgramTypesDataTable() {
           <DataTableToolbar
             table={table}
             exportFilename="loyalty-program-types"
-            searchColumn="name"
-            searchPlaceholder="Search types..."
+            showSearch={false}
           />
           <DataTable
             table={table}

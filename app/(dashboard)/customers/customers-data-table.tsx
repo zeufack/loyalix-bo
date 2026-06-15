@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getCustomers } from '@/app/api/customer';
+import { getCustomers, searchCustomers } from '@/app/api/customer';
 import {
   PaginationState,
   ColumnFiltersState,
@@ -23,15 +24,35 @@ export function CustomersDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
+
+  // The backend search endpoint requires `q` to be at least 2 characters; send
+  // it only when valid, otherwise fall back to the plain list endpoint.
+  const trimmed = debouncedSearch.trim();
+  const q = trimmed.length >= 2 ? trimmed : undefined;
+
+  useEffect(() => {
+    setPagination((p) => ({ ...p, pageIndex: 0 }));
+  }, [q]);
+
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['customers', pagination.pageIndex, pagination.pageSize, sorting],
-    queryFn: () =>
-      getCustomers({
+    queryKey: [
+      'customers',
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting,
+      q ?? ''
+    ],
+    queryFn: () => {
+      const params = {
         page: pagination.pageIndex + 1,
         limit: pagination.pageSize,
         sortBy: sorting[0]?.id,
-        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-      })
+        sortOrder: (sorting[0]?.desc ? 'desc' : 'asc') as 'asc' | 'desc'
+      };
+      return q ? searchCustomers({ ...params, q }) : getCustomers(params);
+    }
   });
 
   const table = useTable({
@@ -56,7 +77,8 @@ export function CustomersDataTable() {
           <DataTableToolbar
             table={table}
             exportFilename="customers"
-            searchColumn="name"
+            searchValue={search}
+            onSearchChange={setSearch}
             searchPlaceholder="Search customers..."
           />
           <DataTable

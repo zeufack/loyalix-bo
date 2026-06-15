@@ -4,16 +4,26 @@ import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
-
 export const getRoles = async (
   params: PaginationParams = {}
 ): Promise<PaginatedResponse<Role>> => {
   const { page = 1, limit = 10, sortBy, sortOrder } = params;
   const response = await http.get<BackendPaginatedResponse<Role>>('/role', {
-    params: { page, limit, sortBy, sortOrder },
+    params: { page, limit, sortBy, sortOrder }
   });
+  return transformPaginatedResponse(response.data);
+};
+
+export const searchRoles = async (
+  params: PaginationParams
+): Promise<PaginatedResponse<Role>> => {
+  const { page = 1, limit = 10, sortBy, sortOrder, q } = params;
+  const response = await http.get<BackendPaginatedResponse<Role>>(
+    '/role/search',
+    { params: { q, page, limit, sortBy, sortOrder } }
+  );
   return transformPaginatedResponse(response.data);
 };
 

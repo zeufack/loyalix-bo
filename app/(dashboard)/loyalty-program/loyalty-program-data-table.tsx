@@ -1,13 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
 import {
   ColumnFiltersState,
   SortingState,
   PaginationState
 } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
-import { getLoyaltyPrograms } from '../../api/loyalty-program';
+import {
+  getLoyaltyPrograms,
+  searchLoyaltyPrograms
+} from '../../api/loyalty-program';
 import { useTable } from '../../../hooks/useCustomerTable';
 import { loyaltyProgramColumns } from '../../../lib/columns/loyalty-program-columns';
 import {
@@ -28,20 +32,37 @@ export function LoyaltyProgramsDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
+
+  // The backend search endpoint requires `q` to be at least 2 characters; send
+  // it only when valid, otherwise fall back to the plain list endpoint.
+  const trimmed = debouncedSearch.trim();
+  const q = trimmed.length >= 2 ? trimmed : undefined;
+
+  useEffect(() => {
+    setPagination((p) => ({ ...p, pageIndex: 0 }));
+  }, [q]);
+
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [
       'loyalty-program',
       pagination.pageIndex,
       pagination.pageSize,
-      sorting
+      sorting,
+      q ?? ''
     ],
-    queryFn: () =>
-      getLoyaltyPrograms({
+    queryFn: () => {
+      const params = {
         page: pagination.pageIndex + 1,
         limit: pagination.pageSize,
         sortBy: sorting[0]?.id,
-        sortOrder: sorting[0]?.desc ? 'desc' : 'asc'
-      })
+        sortOrder: (sorting[0]?.desc ? 'desc' : 'asc') as 'asc' | 'desc'
+      };
+      return q
+        ? searchLoyaltyPrograms({ ...params, q })
+        : getLoyaltyPrograms(params);
+    }
   });
 
   const table = useTable({
@@ -66,7 +87,8 @@ export function LoyaltyProgramsDataTable() {
           <DataTableToolbar
             table={table}
             exportFilename="loyalty-programs"
-            searchColumn="name"
+            searchValue={search}
+            onSearchChange={setSearch}
             searchPlaceholder="Search programs..."
           />
           <DataTable

@@ -4,9 +4,12 @@ import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
-import type { CreateBusinessDto, UpdateBusinessDto } from '@loyal-ix/loyalix-shared-types';
+import type {
+  CreateBusinessDto,
+  UpdateBusinessDto
+} from '@loyal-ix/loyalix-shared-types';
 
 export const getBusinesses = async (
   params: PaginationParams = {}
@@ -15,6 +18,17 @@ export const getBusinesses = async (
   const response = await http.get<BackendPaginatedResponse<Business>>(
     '/business',
     { params: { page, limit, sortBy, sortOrder } }
+  );
+  return transformPaginatedResponse(response.data);
+};
+
+export const searchBusinesses = async (
+  params: PaginationParams
+): Promise<PaginatedResponse<Business>> => {
+  const { page = 1, limit = 10, sortBy, sortOrder, q } = params;
+  const response = await http.get<BackendPaginatedResponse<Business>>(
+    '/business/search',
+    { params: { q, page, limit, sortBy, sortOrder } }
   );
   return transformPaginatedResponse(response.data);
 };

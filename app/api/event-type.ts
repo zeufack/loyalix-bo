@@ -4,9 +4,8 @@ import {
   PaginationParams,
   PaginatedResponse,
   BackendPaginatedResponse,
-  transformPaginatedResponse,
+  transformPaginatedResponse
 } from './types';
-
 export const getEventTypes = async (
   params: PaginationParams = {}
 ): Promise<PaginatedResponse<EventType>> => {
@@ -14,6 +13,17 @@ export const getEventTypes = async (
   const response = await http.get<BackendPaginatedResponse<EventType>>(
     '/event-types',
     { params: { page, limit, sortBy, sortOrder } }
+  );
+  return transformPaginatedResponse(response.data);
+};
+
+export const searchEventTypes = async (
+  params: PaginationParams
+): Promise<PaginatedResponse<EventType>> => {
+  const { page = 1, limit = 10, sortBy, sortOrder, q } = params;
+  const response = await http.get<BackendPaginatedResponse<EventType>>(
+    '/event-types/search',
+    { params: { q, page, limit, sortBy, sortOrder } }
   );
   return transformPaginatedResponse(response.data);
 };
