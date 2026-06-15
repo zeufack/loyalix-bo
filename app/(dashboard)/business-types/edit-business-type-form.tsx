@@ -99,9 +99,7 @@ export function EditBusinessTypeForm({
       <SheetContent className="overflow-y-auto sm:max-w-md">
         <SheetHeader>
           <SheetTitle>Edit Business Type</SheetTitle>
-          <SheetDescription>
-            Update the business type details.
-          </SheetDescription>
+          <SheetDescription>Update the business type details.</SheetDescription>
         </SheetHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">

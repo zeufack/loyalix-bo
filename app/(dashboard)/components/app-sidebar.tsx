@@ -58,19 +58,12 @@ function NavSection({
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              tooltip={group.label}
-              isActive={hasActiveItem}
-            >
+            <SidebarMenuButton tooltip={group.label} isActive={hasActiveItem}>
               <Icon className="size-4" />
               <span>{group.label}</span>
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            side="right"
-            align="start"
-            className="min-w-48"
-          >
+          <DropdownMenuContent side="right" align="start" className="min-w-48">
             <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
             {items.map((item) => (
               <DropdownMenuItem key={item.href} asChild>
