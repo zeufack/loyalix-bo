@@ -4,9 +4,17 @@ import { SessionProvider as NextAuthSessionProvider } from 'next-auth/react';
 import { useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { toast } from 'sonner';
+import { setCachedAccessToken } from '@/lib/auth-token';
 
 function SessionExpirationHandler({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
+
+  // Mirror the access token into the module-level cache so the axios
+  // interceptor can attach it synchronously, without a getSession() fetch
+  // per request. Updates whenever NextAuth refreshes the token.
+  useEffect(() => {
+    setCachedAccessToken(session?.accessToken);
+  }, [session?.accessToken]);
 
   useEffect(() => {
     if (session?.error === 'RefreshAccessTokenError') {

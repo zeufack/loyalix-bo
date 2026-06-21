@@ -12,7 +12,7 @@ import {
   DropdownMenuLabel
 } from './dropdown-menu';
 import { Table } from '@tanstack/react-table';
-import { exportTable, ExportFormat } from '@/lib/export/export-utils';
+import type { ExportFormat } from '@/lib/export/export-utils';
 import { toast } from 'sonner';
 
 interface ExportButtonProps<T> {
@@ -44,6 +44,10 @@ export default function ExportButton<T>({
     try {
       const timestamp = new Date().toISOString().split('T')[0];
       const exportFilename = `${filename}-${timestamp}`;
+
+      // Lazily load the export utils (and their heavy xlsx/papaparse deps) only
+      // when the user actually exports, keeping them out of the initial bundle.
+      const { exportTable } = await import('@/lib/export/export-utils');
 
       exportTable(table, format, {
         filename: exportFilename,

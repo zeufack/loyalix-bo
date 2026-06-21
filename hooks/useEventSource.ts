@@ -37,7 +37,7 @@ export function useEventSource(options: UseEventSourceOptions = {}) {
     onOpen,
     onError,
     reconnectDelay = 5000,
-    maxReconnectAttempts = 10,
+    maxReconnectAttempts = 10
   } = options;
 
   const { data: session } = useSession();
@@ -45,6 +45,18 @@ export function useEventSource(options: UseEventSourceOptions = {}) {
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+
+  // Keep the callbacks in refs so `connect` has a stable identity. Otherwise
+  // inline callbacks (new identity each render) would churn the effect below
+  // and trigger redundant reconnects.
+  const onEventRef = useRef(onEvent);
+  const onOpenRef = useRef(onOpen);
+  const onErrorRef = useRef(onError);
+  useEffect(() => {
+    onEventRef.current = onEvent;
+    onOpenRef.current = onOpen;
+    onErrorRef.current = onError;
+  });
 
   const connect = useCallback(async () => {
     if (!session?.accessToken) return;
@@ -66,12 +78,21 @@ export function useEventSource(options: UseEventSourceOptions = {}) {
         headers: {
           Authorization: `Bearer ${session.accessToken}`,
           Accept: 'text/event-stream',
-          'Cache-Control': 'no-cache',
+          'Cache-Control': 'no-cache'
         },
-        signal: abortController.signal,
+        signal: abortController.signal
       });
 
       if (!response.ok) {
+        // Auth/permission failures are not transient — surface the error but
+        // do NOT schedule a reconnect (avoids a 401/403 retry storm).
+        if (response.status === 401 || response.status === 403) {
+          setIsConnected(false);
+          onErrorRef.current?.(
+            new Error(`SSE connection failed: ${response.status}`)
+          );
+          return;
+        }
         throw new Error(`SSE connection failed: ${response.status}`);
       }
 
@@ -81,7 +102,7 @@ export function useEventSource(options: UseEventSourceOptions = {}) {
 
       setIsConnected(true);
       reconnectAttemptsRef.current = 0;
-      onOpen?.();
+      onOpenRef.current?.();
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -106,7 +127,7 @@ export function useEventSource(options: UseEventSourceOptions = {}) {
             if (data) {
               try {
                 const event: SseEvent = JSON.parse(data);
-                onEvent?.(event);
+                onEventRef.current?.(event);
               } catch {
                 // Skip malformed events
                 console.warn('Failed to parse SSE event:', data);
@@ -122,7 +143,7 @@ export function useEventSource(options: UseEventSourceOptions = {}) {
       }
 
       setIsConnected(false);
-      onError?.(error as Error);
+      onErrorRef.current?.(error as Error);
 
       // Attempt reconnection
       if (reconnectAttemptsRef.current < maxReconnectAttempts) {
@@ -138,14 +159,7 @@ export function useEventSource(options: UseEventSourceOptions = {}) {
         }, delay);
       }
     }
-  }, [
-    session?.accessToken,
-    onEvent,
-    onOpen,
-    onError,
-    reconnectDelay,
-    maxReconnectAttempts,
-  ]);
+  }, [session?.accessToken, reconnectDelay, maxReconnectAttempts]);
 
   useEffect(() => {
     if (enabled && session?.accessToken) {
@@ -176,6 +190,6 @@ export function useEventSource(options: UseEventSourceOptions = {}) {
   return {
     isConnected,
     disconnect,
-    reconnect: connect,
+    reconnect: connect
   };
 }

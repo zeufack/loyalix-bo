@@ -5,6 +5,7 @@ import axios, {
 } from 'axios';
 import { getSession, signOut } from 'next-auth/react';
 import { ErrorCategory, parseApiError } from '@/lib/api-error';
+import { getCachedAccessToken, setCachedAccessToken } from '@/lib/auth-token';
 
 /**
  * Extended request config with retry metadata
@@ -97,9 +98,17 @@ function sleep(ms: number): Promise<void> {
 http.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     try {
-      const session = await getSession();
-      if (session?.accessToken) {
-        config.headers.Authorization = `Bearer ${session.accessToken}`;
+      // Read the token synchronously from the cache that the SessionProvider
+      // keeps in sync. Only on a cold start (first request before the provider
+      // has synced) do we fall back to a one-off getSession() network call.
+      let token = getCachedAccessToken();
+      if (!token) {
+        const session = await getSession();
+        token = session?.accessToken;
+        setCachedAccessToken(token);
+      }
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
       }
     } catch (error) {
       // Log but don't fail the request
@@ -131,6 +140,8 @@ http.interceptors.response.use(
       // Avoid redirect loops
       if (!config._retry) {
         config._retry = true;
+        // The cached token is no longer valid — drop it so it isn't reused.
+        setCachedAccessToken(undefined);
         try {
           await signOut({ redirect: true, callbackUrl: '/login' });
         } catch {

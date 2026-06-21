@@ -1,5 +1,5 @@
 import { DashboardStats, CatalogGlance } from './components/dashboard-stats';
-import { AnalyticsCharts } from './components/analytics-charts';
+import { AnalyticsCharts } from './components/analytics-charts-lazy';
 import { RecentActivity } from './components/recent-activity';
 
 export default async function DashboardPage() {

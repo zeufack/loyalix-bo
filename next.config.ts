@@ -1,4 +1,7 @@
 export default {
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'recharts', 'date-fns']
+  },
   images: {
     remotePatterns: [
       {
