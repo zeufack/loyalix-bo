@@ -26,6 +26,7 @@ import {
   Image,
   UsersRound,
   Timer,
+  LayoutTemplate,
   type LucideIcon
 } from 'lucide-react';
 
@@ -66,6 +67,11 @@ export const navGroups: NavGroup[] = [
     items: [
       { href: '/loyalty-program', label: 'Programs', icon: Sprout },
       { href: '/loyalty-program-rules', label: 'Rules', icon: ScrollText },
+      {
+        href: '/loyalty-program-templates',
+        label: 'Templates',
+        icon: LayoutTemplate
+      },
       { href: '/promotions', label: 'Promotions', icon: Tag },
       { href: '/rewards', label: 'Rewards', icon: Medal },
       { href: '/rewards-earned', label: 'Rewards Earned', icon: Trophy }
