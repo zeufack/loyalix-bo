@@ -51,6 +51,11 @@ export interface PaginatedResponse<T> {
 export function transformPaginatedResponse<T>(
   response: BackendPaginatedResponse<T>
 ): PaginatedResponse<T> {
+  if (!response || !Array.isArray(response.items) || !response.meta) {
+    throw new Error(
+      'Unexpected API response shape: expected paginated payload { items, meta }'
+    );
+  }
   return {
     data: response.items,
     total: response.meta.total,
