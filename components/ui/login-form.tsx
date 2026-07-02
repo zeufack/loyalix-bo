@@ -46,7 +46,13 @@ export function LoginForm({
         if (res?.error) {
             setError("Invalid email or password.");
         } else if (res?.ok) {
+            // router.push alone can replay a stale Router Cache entry from
+            // before login (e.g. "/" was prefetched while unauthenticated
+            // and cached the middleware's redirect-to-login response).
+            // refresh() invalidates that cache so the destination route is
+            // re-evaluated against the server with the new session cookie.
             router.push(callbackUrl);
+            router.refresh();
         }
     };
 
