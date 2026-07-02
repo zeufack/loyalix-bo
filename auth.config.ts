@@ -30,7 +30,8 @@ export const authConfig = {
             throw new Error(responseBody.message || 'Authentication failed');
           }
 
-          const { accessToken, refreshToken, accessTokenExpiresIn, user } = responseBody;
+          const { accessToken, refreshToken, accessTokenExpiresIn, user } =
+            responseBody;
           return {
             id: user.id,
             email: user.email,
@@ -59,22 +60,21 @@ export const authConfig = {
         };
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
-        // Use dynamic expiration from backend (in seconds), fallback to 15 min
-        const expiresInSeconds = (user as { accessTokenExpiresIn?: number }).accessTokenExpiresIn || 900;
+        const expiresInSeconds =
+          (user as { accessTokenExpiresIn?: number }).accessTokenExpiresIn ||
+          900;
         token.accessTokenExpires = Date.now() + expiresInSeconds * 1000;
       }
 
-      // Return previous token if the access token has not expired yet
-      if (Date.now() < (token.accessTokenExpires as number)) {
+      const expiresAt = token.accessTokenExpires as number | undefined;
+      if (expiresAt && Date.now() < expiresAt - REFRESH_BUFFER_MS) {
         return token;
       }
 
-      // Access token has expired, try to refresh it
       return await refreshAccessToken(token);
     },
     async session({ session, token }) {
       session.accessToken = token.accessToken;
-      session.refreshToken = token.refreshToken;
       session.user = token.user;
       session.error = token.error;
       session.accessTokenExpires = token.accessTokenExpires;
@@ -83,8 +83,6 @@ export const authConfig = {
   },
   events: {
     async signOut(message) {
-      // Call backend logout endpoint to revoke refresh token
-      // In JWT strategy, message contains the token
       if ('token' in message && message.token?.refreshToken) {
         try {
           await fetch(`${process.env.NESTJS_API_URL}/auth/logout`, {
@@ -109,58 +107,71 @@ export const authConfig = {
   secret: process.env.NEXTAUTH_SECRET
 } satisfies NextAuthConfig;
 
-// Token refresh function
-async function refreshAccessToken(token: {
+const REFRESH_BUFFER_MS = 60 * 1000;
+
+type RefreshableToken = {
   refreshToken?: string;
   accessToken?: string;
   accessTokenExpires?: number;
   user?: unknown;
   error?: string;
-}) {
-  if (!token.refreshToken) {
+};
+
+const inflightRefreshes = new Map<string, Promise<RefreshableToken>>();
+
+async function refreshAccessToken(
+  token: RefreshableToken
+): Promise<RefreshableToken> {
+  const { refreshToken } = token;
+  if (!refreshToken) {
     return { ...token, error: 'RefreshAccessTokenError' };
   }
 
+  let inflight = inflightRefreshes.get(refreshToken);
+  if (!inflight) {
+    inflight = requestRefreshedTokens(token, refreshToken).finally(() => {
+      inflightRefreshes.delete(refreshToken);
+    });
+    inflightRefreshes.set(refreshToken, inflight);
+  }
+  return inflight;
+}
+
+async function requestRefreshedTokens(
+  token: RefreshableToken,
+  refreshToken: string
+): Promise<RefreshableToken> {
   try {
     const response = await fetch(
       `${process.env.NESTJS_API_URL}/auth/refresh-token`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token.refreshToken}`
-        },
-        body: JSON.stringify({
-          refreshToken: token.refreshToken
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken })
       }
     );
 
-    const responseBody = await response.json();
-
     if (!response.ok) {
-      if (response.status === 401) {
+      if (response.status === 401 || response.status === 403) {
+        console.error('Refresh token rejected by backend, session expired');
         return { ...token, error: 'RefreshAccessTokenError' };
       }
-      throw responseBody;
+      console.error(`Token refresh failed transiently: ${response.status}`);
+      return { ...token, error: undefined };
     }
 
-    const refreshedTokens = responseBody;
-    // Use dynamic expiration from backend (in seconds), fallback to 15 min
+    const refreshedTokens = await response.json();
     const expiresInSeconds = refreshedTokens.accessTokenExpiresIn || 900;
 
     return {
       ...token,
       accessToken: refreshedTokens.accessToken,
       accessTokenExpires: Date.now() + expiresInSeconds * 1000,
-      refreshToken: refreshedTokens.refreshToken ?? token.refreshToken,
+      refreshToken: refreshedTokens.refreshToken ?? refreshToken,
       error: undefined
     };
   } catch (error) {
     console.error('Error refreshing access token:', error);
-    return {
-      ...token,
-      error: 'RefreshAccessTokenError'
-    };
+    return { ...token, error: undefined };
   }
 }

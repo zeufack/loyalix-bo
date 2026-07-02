@@ -11,10 +11,11 @@ declare module 'next-auth' {
     refreshToken: string;
   }
 
+  // The refresh token intentionally never appears on the client-visible
+  // Session — it lives only in the server-side JWT cookie.
   interface Session extends DefaultSession {
     user?: User;
     accessToken?: string;
-    refreshToken?: string;
     accessTokenExpires?: number;
     error?: 'RefreshAccessTokenError' | string;
   }
