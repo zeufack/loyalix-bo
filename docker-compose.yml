@@ -1,0 +1,38 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Inlined into the client bundle at build time — must be a build arg,
+        # not a runtime environment var (see Dockerfile builder stage).
+        NEXT_PUBLIC_NESTJS_API_URL: ${NEXT_PUBLIC_NESTJS_API_URL:-https://loyal-ix.com/api/v1}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      # NextAuth sits behind Traefik — trust the proxy and use the public URL.
+      AUTH_TRUST_HOST: "true"
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://bo-dev.loyal-ix.com}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      # Server-side calls (route handlers, server actions, auth.config.ts).
+      # Read at request time — safe to set/override at runtime, unlike the
+      # NEXT_PUBLIC_ build arg above.
+      NESTJS_API_URL: ${NESTJS_API_URL:-https://loyal-ix.com/api/v1}
+    networks:
+      - dokploy-network
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=dokploy-network
+      - traefik.http.routers.${STACK_NAME:-loyalix-bo-dev}.rule=Host(`${APP_HOST:-bo-dev.loyal-ix.com}`)
+      - traefik.http.routers.${STACK_NAME:-loyalix-bo-dev}.entrypoints=websecure
+      - traefik.http.routers.${STACK_NAME:-loyalix-bo-dev}.tls.certresolver=${CERT_RESOLVER:-letsencrypt}
+      - traefik.http.services.${STACK_NAME:-loyalix-bo-dev}.loadbalancer.server.port=3000
+      # HTTP -> HTTPS redirect for this host
+      - traefik.http.routers.${STACK_NAME:-loyalix-bo-dev}-insecure.rule=Host(`${APP_HOST:-bo-dev.loyal-ix.com}`)
+      - traefik.http.routers.${STACK_NAME:-loyalix-bo-dev}-insecure.entrypoints=web
+      - traefik.http.routers.${STACK_NAME:-loyalix-bo-dev}-insecure.middlewares=${STACK_NAME:-loyalix-bo-dev}-redirect
+      - traefik.http.middlewares.${STACK_NAME:-loyalix-bo-dev}-redirect.redirectscheme.scheme=https
+
+networks:
+  dokploy-network:
+    external: true
