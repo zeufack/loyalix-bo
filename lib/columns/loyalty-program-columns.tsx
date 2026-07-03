@@ -26,13 +26,19 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { ImageIcon, MoreHorizontal } from 'lucide-react';
+import { Copy, ImageIcon, MoreHorizontal } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getApiErrorMessage } from '@/lib/api-error';
+import { copyToClipboard } from '@/lib/utils';
 
 const ActionsCell = ({ loyaltyProgram }: { loyaltyProgram: LoyaltyProgram }) => {
   const queryClient = useQueryClient();
+
+  const handleCopyId = () => {
+    copyToClipboard(loyaltyProgram.id);
+    toast.success('Loyalty program ID copied to clipboard');
+  };
 
   const handleDelete = async () => {
     try {
@@ -55,6 +61,11 @@ const ActionsCell = ({ loyaltyProgram }: { loyaltyProgram: LoyaltyProgram }) => 
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem onClick={handleCopyId}>
+            <Copy className="mr-2 h-4 w-4" />
+            Copy ID
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <EditLoyaltyProgramForm loyaltyProgram={loyaltyProgram} />
           <DropdownMenuSeparator />
           <AlertDialogTrigger asChild>

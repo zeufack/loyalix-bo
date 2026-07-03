@@ -29,24 +29,28 @@ export const loyaltyProgramRuleColumns: ColumnDef<LoyaltyProgramRule>[] = [
     header: 'ID'
   },
   {
-    accessorKey: 'ruleName',
-    header: 'Rule Name'
+    id: 'program',
+    header: 'Program',
+    cell: ({ row }) => row.original.program?.name ?? '-'
   },
   {
-    accessorKey: 'ruleType',
-    header: 'Rule Type'
+    id: 'ruleType',
+    header: 'Rule Type',
+    cell: ({ row }) => row.original.ruleType?.name ?? '-'
   },
   {
-    accessorKey: 'points',
-    header: 'Points'
+    id: 'reward',
+    header: 'Reward',
+    cell: ({ row }) => row.original.reward?.name ?? '-'
   },
   {
-    accessorKey: 'purchaseAmount',
-    header: 'Purchase Amount'
+    accessorKey: 'thresholdValue',
+    header: 'Threshold'
   },
   {
-    accessorKey: 'loyaltyProgramId',
-    header: 'Loyalty Program ID'
+    id: 'isActive',
+    header: 'Active',
+    cell: ({ row }) => (row.original.isActive ? 'Yes' : 'No')
   },
   {
     id: 'actions',

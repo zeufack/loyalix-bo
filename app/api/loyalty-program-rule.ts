@@ -1,5 +1,9 @@
 import { http } from './http';
-import { LoyaltyProgramRule } from '@/types/loyalty-program-rule';
+import {
+  LoyaltyProgramRule,
+  CreateLoyaltyProgramRulePayload,
+  UpdateLoyaltyProgramRulePayload
+} from '@/types/loyalty-program-rule';
 import {
   PaginationParams,
   PaginatedResponse,
@@ -12,7 +16,7 @@ export const getLoyaltyProgramRules = async (
 ): Promise<PaginatedResponse<LoyaltyProgramRule>> => {
   const { page = 1, limit = 10, sortBy, sortOrder } = params;
   const response = await http.get<BackendPaginatedResponse<LoyaltyProgramRule>>(
-    '/loyalty-program-rule',
+    '/program-rule',
     { params: { page, limit, sortBy, sortOrder } }
   );
   return transformPaginatedResponse(response.data);
@@ -22,16 +26,16 @@ export const getLoyaltyProgramRule = async (
   id: string
 ): Promise<LoyaltyProgramRule> => {
   const response = await http.get<LoyaltyProgramRule>(
-    `/loyalty-program-rule/${id}`
+    `/program-rule/${id}`
   );
   return response.data;
 };
 
 export const createLoyaltyProgramRule = async (
-  data: Partial<LoyaltyProgramRule>
+  data: CreateLoyaltyProgramRulePayload
 ): Promise<LoyaltyProgramRule> => {
   const response = await http.post<LoyaltyProgramRule>(
-    '/loyalty-program-rule',
+    '/program-rule',
     data
   );
   return response.data;
@@ -39,20 +43,20 @@ export const createLoyaltyProgramRule = async (
 
 export const updateLoyaltyProgramRule = async (
   id: string,
-  data: Partial<LoyaltyProgramRule>
+  data: UpdateLoyaltyProgramRulePayload
 ): Promise<LoyaltyProgramRule> => {
   const response = await http.patch<LoyaltyProgramRule>(
-    `/loyalty-program-rule/${id}`,
+    `/program-rule/${id}`,
     data
   );
   return response.data;
 };
 
 export const deleteLoyaltyProgramRule = async (id: string): Promise<void> => {
-  await http.delete(`/loyalty-program-rule/${id}`);
+  await http.delete(`/program-rule/${id}`);
 };
 
 export const getTotalLoyaltyProgramRules = async (): Promise<number> => {
-  const response = await http.get<number>('/loyalty-program-rule/count');
+  const response = await http.get<number>('/program-rule/count');
   return response.data;
 };

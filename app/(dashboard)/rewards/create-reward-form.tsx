@@ -2,7 +2,13 @@
 
 import AddItemButton from '@/components/ui/add-item-btn';
 import { useState } from 'react';
-import { createReward } from '../../api/reward';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { createReward } from '@/app/api/reward';
+import { getBusinesses } from '@/app/api/business';
+import { getRewardTypes } from '@/app/api/reward-type';
+import { getApiErrorMessage } from '@/lib/api-error';
+import { RewardValue, RewardValueType } from '@/types/reward';
 import {
   Dialog,
   DialogContent,
@@ -11,40 +17,118 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter
-} from '../../../components/ui/dialog';
-import { Label } from '../../../components/ui/label';
-import { Input } from '../../../components/ui/input';
-import { Button } from '../../../components/ui/button';
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+
+const VALUE_TYPES: { value: RewardValueType; label: string }[] = [
+  { value: 'free_item', label: 'Free item' },
+  { value: 'discount', label: 'Discount' },
+  { value: 'gift_card', label: 'Gift card' },
+  { value: 'points', label: 'Points' }
+];
+
+const toNum = (v: string): number | undefined =>
+  v.trim() === '' ? undefined : Number(v);
 
 export function CreateRewardForm() {
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    pointsRequired: 0,
-    businessId: ''
-  });
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+  const [businessId, setBusinessId] = useState('');
+  const [rewardTypeId, setRewardTypeId] = useState('');
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [isActive, setIsActive] = useState(true);
+
+  const [valueType, setValueType] = useState<RewardValueType | ''>('');
+  const [itemCode, setItemCode] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [discountPercent, setDiscountPercent] = useState('');
+  const [discountAmount, setDiscountAmount] = useState('');
+  const [pointsValue, setPointsValue] = useState('');
+
+  const { data: businesses } = useQuery({
+    queryKey: ['business', 'all'],
+    queryFn: () => getBusinesses({ page: 1, limit: 100 })
+  });
+  const { data: rewardTypes } = useQuery({
+    queryKey: ['reward-type', 'all'],
+    queryFn: () => getRewardTypes({ page: 1, limit: 100 })
+  });
+
+  const resetForm = () => {
+    setBusinessId('');
+    setRewardTypeId('');
+    setName('');
+    setDescription('');
+    setIsActive(true);
+    setValueType('');
+    setItemCode('');
+    setQuantity('');
+    setDiscountPercent('');
+    setDiscountAmount('');
+    setPointsValue('');
+  };
+
+  const buildValue = (type: RewardValueType): RewardValue => {
+    switch (type) {
+      case 'free_item':
+        return { type, itemCode: itemCode || undefined, quantity: toNum(quantity) };
+      case 'discount':
+        return {
+          type,
+          discountPercent: toNum(discountPercent),
+          discountAmount: toNum(discountAmount)
+        };
+      case 'gift_card':
+        return { type, discountAmount: toNum(discountAmount) };
+      case 'points':
+        return { type, pointsValue: toNum(pointsValue) };
+    }
   };
 
   const handleSubmit = async () => {
-    setLoading(true);
     setError(null);
+    if (!businessId || !name.trim() || !valueType) {
+      setError('Business, name and value type are required.');
+      return;
+    }
+    setLoading(true);
     try {
-      await createReward(formData);
-      // Optionally, you can close the dialog and refresh the reward list here.
+      await createReward({
+        businessId,
+        rewardTypeId: rewardTypeId || undefined,
+        name: name.trim(),
+        description: description.trim() || undefined,
+        value: buildValue(valueType),
+        isActive
+      });
+      queryClient.invalidateQueries({ queryKey: ['rewards'] });
+      toast.success('Reward created successfully');
+      resetForm();
+      setOpen(false);
     } catch (error) {
-      setError('Failed to create reward.');
+      setError(getApiErrorMessage(error));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <AddItemButton title="Create Reward" />
       </DialogTrigger>
@@ -57,37 +141,158 @@ export function CreateRewardForm() {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Name</Label>
-            <Input id="name" value={formData.name} onChange={handleChange} />
+            <Label htmlFor="businessId">Business</Label>
+            <Select value={businessId} onValueChange={setBusinessId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a business" />
+              </SelectTrigger>
+              <SelectContent>
+                {businesses?.data?.map((business) => (
+                  <SelectItem key={business.id} value={business.id}>
+                    {business.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="rewardTypeId">Reward Type</Label>
+            <Select value={rewardTypeId} onValueChange={setRewardTypeId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a reward type (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {rewardTypes?.data?.map((rewardType) => (
+                  <SelectItem key={rewardType.id} value={rewardType.id}>
+                    {rewardType.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
-            <Input
+            <Textarea
               id="description"
-              value={formData.description}
-              onChange={handleChange}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
           </div>
+
           <div className="grid gap-2">
-            <Label htmlFor="pointsRequired">Points Required</Label>
-            <Input
-              id="pointsRequired"
-              type="number"
-              value={formData.pointsRequired}
-              onChange={handleChange}
-            />
+            <Label htmlFor="valueType">Value Type</Label>
+            <Select
+              value={valueType}
+              onValueChange={(v) => setValueType(v as RewardValueType)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a value type" />
+              </SelectTrigger>
+              <SelectContent>
+                {VALUE_TYPES.map((t) => (
+                  <SelectItem key={t.value} value={t.value}>
+                    {t.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="businessId">Business ID</Label>
-            <Input
-              id="businessId"
-              value={formData.businessId}
-              onChange={handleChange}
+
+          {valueType === 'free_item' && (
+            <>
+              <div className="grid gap-2">
+                <Label htmlFor="itemCode">Item Code</Label>
+                <Input
+                  id="itemCode"
+                  value={itemCode}
+                  onChange={(e) => setItemCode(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="quantity">Quantity</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                />
+              </div>
+            </>
+          )}
+
+          {valueType === 'discount' && (
+            <>
+              <div className="grid gap-2">
+                <Label htmlFor="discountPercent">Discount Percent</Label>
+                <Input
+                  id="discountPercent"
+                  type="number"
+                  value={discountPercent}
+                  onChange={(e) => setDiscountPercent(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="discountAmount">Discount Amount</Label>
+                <Input
+                  id="discountAmount"
+                  type="number"
+                  value={discountAmount}
+                  onChange={(e) => setDiscountAmount(e.target.value)}
+                />
+              </div>
+            </>
+          )}
+
+          {valueType === 'gift_card' && (
+            <div className="grid gap-2">
+              <Label htmlFor="discountAmount">Amount</Label>
+              <Input
+                id="discountAmount"
+                type="number"
+                value={discountAmount}
+                onChange={(e) => setDiscountAmount(e.target.value)}
+              />
+            </div>
+          )}
+
+          {valueType === 'points' && (
+            <div className="grid gap-2">
+              <Label htmlFor="pointsValue">Points Value</Label>
+              <Input
+                id="pointsValue"
+                type="number"
+                value={pointsValue}
+                onChange={(e) => setPointsValue(e.target.value)}
+              />
+            </div>
+          )}
+
+          <div className="flex items-center gap-2">
+            <Switch
+              id="isActive"
+              checked={isActive}
+              onCheckedChange={setIsActive}
             />
+            <Label htmlFor="isActive">Active</Label>
           </div>
-          {error && <p className="text-foreground-error">{error}</p>}
+
+          {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
         <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? 'Creating...' : 'Create'}
           </Button>
