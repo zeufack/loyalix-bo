@@ -40,6 +40,7 @@ export function EditLoyaltyProgramForm({
   >({
     name: '',
     description: '',
+    rewardValidityDays: null,
     isActive: true
   });
 
@@ -66,6 +67,7 @@ export function EditLoyaltyProgramForm({
       setFormData({
         name: loyaltyProgram.name,
         description: loyaltyProgram.description || '',
+        rewardValidityDays: loyaltyProgram.rewardValidityDays ?? null,
         isActive: loyaltyProgram.isActive
       });
       setPreviewUrl(loyaltyProgram.coverImage?.url || null);
@@ -82,14 +84,20 @@ export function EditLoyaltyProgramForm({
     if (!formData.name?.trim()) {
       return 'Name is required';
     }
+    if (
+      formData.rewardValidityDays != null &&
+      (!Number.isInteger(formData.rewardValidityDays) ||
+        formData.rewardValidityDays <= 0)
+    ) {
+      return 'Reward validity must be a positive number of days';
+    }
     return null;
   };
 
   const handleSubmit = async () => {
-    const { description, ...submitData } = formData;
     const result = await handleUpdate(
       loyaltyProgram.id,
-      submitData,
+      formData,
       coverFile,
       validate
     );
@@ -132,6 +140,26 @@ export function EditLoyaltyProgramForm({
               onChange={handleChange}
               rows={3}
             />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="rewardValidityDays">Reward Validity (days)</Label>
+            <Input
+              id="rewardValidityDays"
+              type="number"
+              min={1}
+              placeholder="Never expires"
+              value={formData.rewardValidityDays ?? ''}
+              onChange={(e) => {
+                const value = e.target.value;
+                setFormData({
+                  ...formData,
+                  rewardValidityDays: value === '' ? null : Number(value)
+                });
+              }}
+            />
+            <p className="text-xs text-muted-foreground">
+              Leave blank for rewards that never expire.
+            </p>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="isActive">Active</Label>

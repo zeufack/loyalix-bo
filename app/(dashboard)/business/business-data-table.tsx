@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
-import { Business } from '../../../types/business';
 import {
   ColumnFiltersState,
   SortingState,

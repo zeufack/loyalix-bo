@@ -40,6 +40,12 @@ const createLoyaltyProgramSchema = z.object({
   businessId: z.string().min(1, 'Please select a business'),
   name: z.string().min(2, 'Name must be at least 2 characters'),
   description: z.string().optional(),
+  rewardValidityDays: z
+    .number()
+    .int()
+    .positive('Reward validity must be a positive number of days')
+    .nullable()
+    .optional(),
   isActive: z.boolean().optional()
 });
 
@@ -51,6 +57,7 @@ export function CreateLoyaltyProgramForm() {
     businessId: '',
     name: '',
     description: '',
+    rewardValidityDays: null,
     isActive: true
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -93,7 +100,13 @@ export function CreateLoyaltyProgramForm() {
   };
 
   const resetForm = () => {
-    setFormData({ businessId: '', name: '', description: '', isActive: true });
+    setFormData({
+      businessId: '',
+      name: '',
+      description: '',
+      rewardValidityDays: null,
+      isActive: true
+    });
     resetCover();
     setErrors({});
     setError(null);
@@ -115,8 +128,7 @@ export function CreateLoyaltyProgramForm() {
   };
 
   const handleSubmit = async () => {
-    const { description, ...submitData } = formData;
-    const result = await handleCreate(submitData, coverFile, validate);
+    const result = await handleCreate(formData, coverFile, validate);
     if (result) {
       resetForm();
       setOpen(false);
@@ -200,6 +212,40 @@ export function CreateLoyaltyProgramForm() {
                 onChange={handleChange}
                 rows={3}
               />
+            </div>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="rewardValidityDays">Reward Validity (days)</Label>
+            <div className="space-y-1">
+              <Input
+                id="rewardValidityDays"
+                type="number"
+                min={1}
+                placeholder="Never expires"
+                value={formData.rewardValidityDays ?? ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData({
+                    ...formData,
+                    rewardValidityDays: value === '' ? null : Number(value)
+                  });
+                  if (errors.rewardValidityDays) {
+                    setErrors({ ...errors, rewardValidityDays: '' });
+                  }
+                }}
+                className={
+                  errors.rewardValidityDays ? 'border-border-error' : ''
+                }
+              />
+              {errors.rewardValidityDays ? (
+                <p className="text-sm text-foreground-error">
+                  {errors.rewardValidityDays}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Leave blank for rewards that never expire.
+                </p>
+              )}
             </div>
           </div>
           <div className="grid gap-2">

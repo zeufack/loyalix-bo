@@ -1,5 +1,9 @@
 import { http } from './http';
-import { Reward } from '@/types/reward';
+import {
+  Reward,
+  CreateRewardPayload,
+  UpdateRewardPayload
+} from '@/types/reward';
 import {
   PaginationParams,
   PaginatedResponse,
@@ -33,14 +37,16 @@ export const getReward = async (id: string): Promise<Reward> => {
   return response.data;
 };
 
-export const createReward = async (data: Partial<Reward>): Promise<Reward> => {
+export const createReward = async (
+  data: CreateRewardPayload
+): Promise<Reward> => {
   const response = await http.post<Reward>('/rewards', data);
   return response.data;
 };
 
 export const updateReward = async (
   id: string,
-  data: Partial<Reward>
+  data: UpdateRewardPayload
 ): Promise<Reward> => {
   const response = await http.patch<Reward>(`/rewards/${id}`, data);
   return response.data;

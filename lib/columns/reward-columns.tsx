@@ -34,15 +34,28 @@ export const rewardColumns: ColumnDef<Reward>[] = [
   },
   {
     accessorKey: 'description',
-    header: 'Description'
+    header: 'Description',
+    cell: ({ row }) => row.original.description || '-'
   },
   {
-    accessorKey: 'pointsRequired',
-    header: 'Points Required'
+    id: 'valueType',
+    header: 'Value Type',
+    cell: ({ row }) => row.original.value?.type ?? '-'
   },
   {
-    accessorKey: 'businessId',
-    header: 'Business ID'
+    id: 'business',
+    header: 'Business',
+    cell: ({ row }) => row.original.business?.name ?? '-'
+  },
+  {
+    id: 'rewardType',
+    header: 'Reward Type',
+    cell: ({ row }) => row.original.rewardType?.name ?? '-'
+  },
+  {
+    id: 'isActive',
+    header: 'Active',
+    cell: ({ row }) => (row.original.isActive ? 'Yes' : 'No')
   },
   {
     id: 'actions',

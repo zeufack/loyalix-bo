@@ -10,10 +10,23 @@ import {
   SheetTitle,
   SheetTrigger
 } from '@/components/ui/sheet';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { updateLoyaltyProgramRule } from '@/app/api/loyalty-program-rule';
+import { getLoyaltyPrograms } from '@/app/api/loyalty-program';
+import { getRewards } from '@/app/api/reward';
+import { getRuleTypes } from '@/app/api/rule-type';
+import { getApiErrorMessage } from '@/lib/api-error';
 import { LoyaltyProgramRule } from '@/types/loyalty-program-rule';
 
 interface EditLoyaltyProgramRuleFormProps {
@@ -23,47 +36,69 @@ interface EditLoyaltyProgramRuleFormProps {
 export function EditLoyaltyProgramRuleForm({
   loyaltyProgramRule
 }: EditLoyaltyProgramRuleFormProps) {
-  const [formData, setFormData] = useState<Partial<LoyaltyProgramRule>>({
-    ruleName: '',
-    ruleType: '',
-    points: 0,
-    purchaseAmount: 0,
-    loyaltyProgramId: ''
-  });
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [programId, setProgramId] = useState('');
+  const [rewardId, setRewardId] = useState('');
+  const [ruleTypeId, setRuleTypeId] = useState('');
+  const [thresholdValue, setThresholdValue] = useState('');
+
+  const { data: programs } = useQuery({
+    queryKey: ['loyalty-program', 'all'],
+    queryFn: () => getLoyaltyPrograms({ page: 1, limit: 100 })
+  });
+  const { data: rewards } = useQuery({
+    queryKey: ['reward', 'all'],
+    queryFn: () => getRewards({ page: 1, limit: 100 })
+  });
+  const { data: ruleTypes } = useQuery({
+    queryKey: ['rule-type', 'all'],
+    queryFn: () => getRuleTypes({ page: 1, limit: 100 })
+  });
+
   useEffect(() => {
-    if (loyaltyProgramRule) {
-      setFormData({
-        ruleName: loyaltyProgramRule.ruleName,
-        ruleType: loyaltyProgramRule.ruleType,
-        points: loyaltyProgramRule.points,
-        purchaseAmount: loyaltyProgramRule.purchaseAmount,
-        loyaltyProgramId: loyaltyProgramRule.loyaltyProgramId
-      });
-    }
+    if (!loyaltyProgramRule) return;
+    setProgramId(loyaltyProgramRule.program?.id ?? '');
+    setRewardId(loyaltyProgramRule.reward?.id ?? '');
+    setRuleTypeId(loyaltyProgramRule.ruleType?.id ?? '');
+    setThresholdValue(
+      loyaltyProgramRule.thresholdValue === undefined ||
+        loyaltyProgramRule.thresholdValue === null
+        ? ''
+        : String(loyaltyProgramRule.thresholdValue)
+    );
   }, [loyaltyProgramRule]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
-  };
-
   const handleSubmit = async () => {
-    setLoading(true);
     setError(null);
+    if (!programId || !rewardId) {
+      setError('Program and reward are required.');
+      return;
+    }
+    setLoading(true);
     try {
-      await updateLoyaltyProgramRule(loyaltyProgramRule.id, formData);
-      // Optionally, you can close the dialog and refresh the loyalty program rule list here.
+      await updateLoyaltyProgramRule(loyaltyProgramRule.id, {
+        programId,
+        rewardId,
+        ruleTypeId: ruleTypeId || undefined,
+        thresholdValue:
+          thresholdValue.trim() === '' ? undefined : Number(thresholdValue)
+      });
+      queryClient.invalidateQueries({ queryKey: ['loyalty-program-rules'] });
+      toast.success('Loyalty program rule updated successfully');
+      setOpen(false);
     } catch (error) {
-      setError('Failed to update loyalty program rule.');
+      setError(getApiErrorMessage(error));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
           <span className="sr-only">Open menu</span>
@@ -94,48 +129,64 @@ export function EditLoyaltyProgramRuleForm({
         </SheetHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="ruleName">Rule Name</Label>
-            <Input
-              id="ruleName"
-              value={formData.ruleName}
-              onChange={handleChange}
-            />
+            <Label htmlFor="programId">Loyalty Program</Label>
+            <Select value={programId} onValueChange={setProgramId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a program" />
+              </SelectTrigger>
+              <SelectContent>
+                {programs?.data?.map((program) => (
+                  <SelectItem key={program.id} value={program.id}>
+                    {program.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
           <div className="grid gap-2">
-            <Label htmlFor="ruleType">Rule Type</Label>
-            <Input
-              id="ruleType"
-              value={formData.ruleType}
-              onChange={handleChange}
-            />
+            <Label htmlFor="rewardId">Reward</Label>
+            <Select value={rewardId} onValueChange={setRewardId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a reward" />
+              </SelectTrigger>
+              <SelectContent>
+                {rewards?.data?.map((reward) => (
+                  <SelectItem key={reward.id} value={reward.id}>
+                    {reward.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
           <div className="grid gap-2">
-            <Label htmlFor="points">Points</Label>
+            <Label htmlFor="ruleTypeId">Rule Type</Label>
+            <Select value={ruleTypeId} onValueChange={setRuleTypeId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a rule type (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {ruleTypes?.data?.map((ruleType) => (
+                  <SelectItem key={ruleType.id} value={ruleType.id}>
+                    {ruleType.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="thresholdValue">Threshold Value</Label>
             <Input
-              id="points"
+              id="thresholdValue"
               type="number"
-              value={formData.points ?? ''}
-              onChange={handleChange}
+              value={thresholdValue}
+              onChange={(e) => setThresholdValue(e.target.value)}
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="purchaseAmount">Purchase Amount</Label>
-            <Input
-              id="purchaseAmount"
-              type="number"
-              value={formData.purchaseAmount ?? ''}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="loyaltyProgramId">Loyalty Program ID</Label>
-            <Input
-              id="loyaltyProgramId"
-              value={formData.loyaltyProgramId}
-              onChange={handleChange}
-            />
-          </div>
-          {error && <p className="text-foreground-error">{error}</p>}
+
+          {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
         <SheetFooter>
           <Button onClick={handleSubmit} disabled={loading}>
