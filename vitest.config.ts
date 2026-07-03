@@ -15,6 +15,6 @@ export default defineConfig({
   oxc: {
     // tsconfig.json sets jsx: "preserve" for Next.js's own SWC transform —
     // Vite's oxc transform needs to do its own JSX transform instead.
-    jsx: 'automatic'
+    jsx: { runtime: 'automatic' }
   }
 });

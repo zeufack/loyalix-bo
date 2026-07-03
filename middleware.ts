@@ -13,6 +13,16 @@ export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
+  // Defense-in-depth: the matcher below is meant to exclude static assets
+  // already, but its exact compiled semantics have drifted across Next.js
+  // versions before (a hand-rolled negative-lookahead pattern silently
+  // stopped excluding public/*.png under Next 16, redirecting unauthenticated
+  // asset requests to /login). A plain extension check here doesn't depend on
+  // matcher-compilation internals, so it can't regress the same way again.
+  if (/\.[\w]+$/.test(nextUrl.pathname)) {
+    return;
+  }
+
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
@@ -42,8 +52,12 @@ export default auth((req) => {
   }
 });
 
-// Optionally, don't invoke Middleware on some paths
+// Match everything except static assets (Next.js's own canonical exclusion
+// pattern — the negative-lookahead-in-a-path-segment idiom this used to use
+// stopped reliably excluding public/*.png under Next.js 16; the in-function
+// extension check above is the real backstop, this is just to avoid running
+// the auth() wrapper at all for asset requests).
 export const config = {
-  matcher: ['/((?!.+\.[\w]+$|_next).*)', '/', '/(api|trpc)(.*)']
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)']
 };
 
