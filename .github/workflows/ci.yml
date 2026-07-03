@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+
+  smoke:
+    runs-on: ubuntu-latest
+    needs: unit
+    env:
+      BO_BASE_URL: https://bo-dev.loyal-ix.com
+      TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+      TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: e2e/pnpm-lock.yaml
+      - name: Install e2e dependencies
+        working-directory: e2e
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright Chromium
+        working-directory: e2e
+        run: pnpm exec playwright install --with-deps chromium
+      # Dokploy's deploy is triggered by the same push and doesn't emit a
+      # GitHub Actions-visible completion event, so this can't guarantee
+      # the NEW build is live yet -- only that the app is responding. Best
+      # available signal without standing up Dokploy webhook integration.
+      - name: Wait for bo-dev.loyal-ix.com to respond
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf -o /dev/null "$BO_BASE_URL/login"; then
+              echo "App is responding"
+              exit 0
+            fi
+            echo "Waiting for $BO_BASE_URL... ($i/30)"
+            sleep 10
+          done
+          echo "Timed out waiting for $BO_BASE_URL"
+          exit 1
+      - name: Run smoke tests
+        working-directory: e2e
+        run: pnpm exec playwright test tests/smoke/ --project=chromium
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
+          retention-days: 7
